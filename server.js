@@ -5,12 +5,9 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { 
-    cors: { origin: "*" } 
-});
+const io = new Server(server, { cors: { origin: "*" } });
 
-// ЭТО ИСПРАВЛЯЕТ ОШИБКУ "Cannot GET /"
-// Сервер теперь понимает, что нужно отправить index.html пользователю
+// Раздаем статические файлы (index.html)
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
@@ -25,32 +22,37 @@ let gameState = {
     isGameRunning: false
 };
 
-const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600'];
+const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
 
 io.on('connection', (socket) => {
-    console.log('Новое подключение:', socket.id);
+    console.log('User connected:', socket.id);
 
+    // Обработка ставки
     socket.on('place_bet', (userData) => {
         if (gameState.isGameRunning) return;
 
-        // Проверяем, не сделал ли игрок ставку уже (чтобы не дублировать)
-        if (gameState.players.find(p => p.id === socket.id)) return;
+        // Находим, есть ли уже этот игрок
+        let player = gameState.players.find(p => p.id === socket.id);
+        
+        if (!player) {
+            const playerColor = COLORS[gameState.players.length % COLORS.length];
+            player = {
+                id: socket.id,
+                name: userData.name,
+                username: userData.username,
+                avatar: userData.avatar,
+                amount: 0,
+                color: playerColor,
+                chance: 0
+            };
+            gameState.players.push(player);
+        }
 
-        const playerColor = COLORS[gameState.players.length % COLORS.length];
-        const newPlayer = {
-            id: socket.id,
-            name: userData.name,
-            username: userData.username,
-            avatar: userData.avatar,
-            amount: userData.amount,
-            color: playerColor,
-            chance: 0
-        };
-
-        gameState.players.push(newPlayer);
+        // Увеличиваем ставку
+        player.amount += userData.amount;
         calculateGameState();
 
-        // Начинаем таймер, если зашло 2 и более игрока
+        // Если игроков 2 или больше и таймер еще не идет — запускаем
         if (gameState.players.length >= 2 && !gameState.timer) {
             startCountdown();
         }
@@ -59,7 +61,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        // Опционально: удаление игрока при выходе, но для ставок лучше оставить до конца игры
+        // Игроки остаются в списке до конца раунда, чтобы не ломать логику банка
     });
 });
 
@@ -90,7 +92,7 @@ function resolveWinner() {
 
     const random = Math.random() * 100;
     let currentRange = 0;
-    let winner = gameState.players[0];
+    let winner = gameState.players[gameState.players.length - 1];
 
     for (const p of gameState.players) {
         currentRange += parseFloat(p.chance);
@@ -102,6 +104,7 @@ function resolveWinner() {
 
     io.emit('game_result', winner);
 
+    // Сброс через 5 секунд после объявления победителя
     setTimeout(() => {
         gameState = {
             players: [],
@@ -117,10 +120,10 @@ function resolveWinner() {
 function updateAll() {
     io.emit('update_arena', {
         players: gameState.players,
-        totalBank: gameState.totalBank
+        totalBank: gameState.totalBank,
+        hasStarted: gameState.timer !== null
     });
 }
 
-// На Render порт выдается автоматически через process.env.PORT
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
+server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
