@@ -10,70 +10,82 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(express.static(__dirname));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-let gameState = {
-    players: [],
-    totalBank: 0,
-    timer: null,
-    countdown: 15,
-    status: 'waiting' 
-};
+// Состояние игры (чистые данные)
+let players = [];
+let totalBank = 0;
+let gameStatus = 'waiting'; // waiting, counting, playing
+let countdown = 15;
+let serverTimer = null; // ТАЙМЕР ВЫНЕСЕН ОТДЕЛЬНО
 
 const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
 
 io.on('connection', (socket) => {
-    socket.emit('init_state', gameState);
+    // Синхронизация при входе
+    socket.emit('update_arena', { players, totalBank, status: gameStatus, countdown });
 
     socket.on('place_bet', (data) => {
-        if (gameState.status === 'playing') return;
+        if (gameStatus === 'playing') return;
 
-        let player = gameState.players.find(p => p.username === data.username);
+        let player = players.find(p => p.username === data.username);
         if (player) {
             player.amount += data.amount;
         } else {
+            const playerColor = COLORS[players.length % COLORS.length];
             player = {
                 id: socket.id,
                 name: data.name,
                 username: data.username,
                 avatar: data.avatar,
                 amount: data.amount,
-                color: COLORS[gameState.players.length % COLORS.length]
+                color: playerColor,
+                chance: 0
             };
-            gameState.players.push(player);
+            players.push(player);
         }
 
         calculateChances();
-        if (gameState.players.length >= 2 && gameState.status === 'waiting') startCountdown();
-        io.emit('update_arena', gameState);
+        
+        if (players.length >= 2 && gameStatus === 'waiting') {
+            startCountdown();
+        }
+        
+        broadcastState();
     });
 });
 
 function calculateChances() {
-    gameState.totalBank = gameState.players.reduce((sum, p) => sum + p.amount, 0);
-    gameState.players.forEach(p => {
-        p.chance = ((p.amount / gameState.totalBank) * 100).toFixed(1);
+    totalBank = players.reduce((sum, p) => sum + p.amount, 0);
+    players.forEach(p => {
+        p.chance = ((p.amount / totalBank) * 100).toFixed(1);
     });
 }
 
 function startCountdown() {
-    gameState.status = 'counting';
-    gameState.countdown = 15;
-    gameState.timer = setInterval(() => {
-        gameState.countdown--;
-        io.emit('timer_tick', gameState.countdown);
-        if (gameState.countdown <= 0) {
-            clearInterval(gameState.timer);
+    gameStatus = 'counting';
+    countdown = 15;
+    
+    if (serverTimer) clearInterval(serverTimer);
+    
+    serverTimer = setInterval(() => {
+        countdown--;
+        io.emit('timer_tick', countdown);
+
+        if (countdown <= 0) {
+            clearInterval(serverTimer);
+            serverTimer = null;
             startGame();
         }
     }, 1000);
 }
 
 function startGame() {
-    gameState.status = 'playing';
+    gameStatus = 'playing';
+    
     const random = Math.random() * 100;
     let currentRange = 0;
-    let winner = gameState.players[0];
+    let winner = players[0];
 
-    for (const p of gameState.players) {
+    for (const p of players) {
         currentRange += parseFloat(p.chance);
         if (random <= currentRange) {
             winner = p;
@@ -83,10 +95,19 @@ function startGame() {
 
     io.emit('start_game_animation', { winner });
 
+    // Сброс через 18 секунд (время на всю анимацию)
     setTimeout(() => {
-        gameState = { players: [], totalBank: 0, timer: null, countdown: 15, status: 'waiting' };
-        io.emit('update_arena', gameState);
+        players = [];
+        totalBank = 0;
+        gameStatus = 'waiting';
+        countdown = 15;
+        broadcastState();
     }, 18000);
+}
+
+function broadcastState() {
+    // Отправляем только нужные поля, БЕЗ таймера
+    io.emit('update_arena', { players, totalBank, status: gameStatus, countdown });
 }
 
 const PORT = process.env.PORT || 3000;
