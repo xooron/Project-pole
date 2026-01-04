@@ -10,17 +10,15 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(express.static(__dirname));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-// Состояние игры (чистые данные)
 let players = [];
 let totalBank = 0;
-let gameStatus = 'waiting'; // waiting, counting, playing
+let gameStatus = 'waiting'; 
 let countdown = 15;
-let serverTimer = null; // ТАЙМЕР ВЫНЕСЕН ОТДЕЛЬНО
+let serverTimer = null; 
 
 const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
 
 io.on('connection', (socket) => {
-    // Синхронизация при входе
     socket.emit('update_arena', { players, totalBank, status: gameStatus, countdown });
 
     socket.on('place_bet', (data) => {
@@ -44,11 +42,7 @@ io.on('connection', (socket) => {
         }
 
         calculateChances();
-        
-        if (players.length >= 2 && gameStatus === 'waiting') {
-            startCountdown();
-        }
-        
+        if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
         broadcastState();
     });
 });
@@ -63,13 +57,10 @@ function calculateChances() {
 function startCountdown() {
     gameStatus = 'counting';
     countdown = 15;
-    
     if (serverTimer) clearInterval(serverTimer);
-    
     serverTimer = setInterval(() => {
         countdown--;
         io.emit('timer_tick', countdown);
-
         if (countdown <= 0) {
             clearInterval(serverTimer);
             serverTimer = null;
@@ -80,7 +71,6 @@ function startCountdown() {
 
 function startGame() {
     gameStatus = 'playing';
-    
     const random = Math.random() * 100;
     let currentRange = 0;
     let winner = players[0];
@@ -95,7 +85,6 @@ function startGame() {
 
     io.emit('start_game_animation', { winner });
 
-    // Сброс через 18 секунд (время на всю анимацию)
     setTimeout(() => {
         players = [];
         totalBank = 0;
@@ -106,7 +95,6 @@ function startGame() {
 }
 
 function broadcastState() {
-    // Отправляем только нужные поля, БЕЗ таймера
     io.emit('update_arena', { players, totalBank, status: gameStatus, countdown });
 }
 
