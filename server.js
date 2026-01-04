@@ -2,15 +2,16 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// Настройка порта для Render
 const PORT = process.env.PORT || 3000;
 
+// Раздаем статические файлы из текущей папки
 app.use(express.static(__dirname));
 
-app.get('/', (req, res) => {
+// Главный маршрут
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Сервер запущен на порту ${PORT}`);
 });
