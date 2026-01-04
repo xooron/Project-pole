@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Football Arena Battle</title>
+    <title>Football Arena Online</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
@@ -19,270 +20,189 @@
             --text-dim: #94a398;
         }
 
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 800; text-transform: uppercase;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; }
 
         body {
             background-color: var(--pitch-dark);
-            background-image: radial-gradient(circle at top, rgba(0, 255, 102, 0.15) 0%, transparent 60%), linear-gradient(180deg, #0a140d 0%, #070a08 100%);
-            color: var(--text-white); height: 100vh; width: 100vw; overflow: hidden; display: flex; justify-content: center;
+            color: var(--text-white); height: 100vh; overflow: hidden;
+            display: flex; justify-content: center;
         }
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; display: flex; flex-direction: column; position: relative; }
 
-        .header { padding: 15px 20px; display: flex; justify-content: flex-end; z-index: 10; }
-        .balance-pill { background: rgba(0, 0, 0, 0.6); padding: 10px 16px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
-        .ton-logo { width: 20px; height: 20px; border-radius: 50%; }
+        /* HEADER */
+        .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
+        .balance-pill { background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+        .ton-logo { width: 18px; height: 18px; }
 
-        .main-scroll { flex: 1; padding: 0 20px; overflow-y: auto; padding-bottom: 120px; scrollbar-width: none; }
-        .main-scroll::-webkit-scrollbar { display: none; }
-
+        .main-scroll { flex: 1; padding: 0 20px; overflow-y: auto; padding-bottom: 120px; }
         .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ПРОФИЛЬ */
-        .profile-section { text-align: center; margin: 10px 0 20px; }
-        .avatar-frame { width: 90px; height: 90px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--neon-green); padding: 3px; background: rgba(0, 255, 102, 0.05); overflow: hidden; }
+        /* PROFILE (КАК В ПЕРВОМ ЗАПРОСЕ) */
+        .profile-section { text-align: center; margin: 20px 0; }
+        .avatar-frame { width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; border: 3px solid var(--neon-green); padding: 4px; overflow: hidden; background: #111; }
         .avatar-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .nick { font-size: 22px; }
-        .tag { font-size: 13px; color: var(--neon-green); opacity: 0.8; text-transform: lowercase; }
+        .nick { font-size: 24px; letter-spacing: -1px; }
+        .tag { font-size: 14px; color: var(--neon-green); opacity: 0.8; margin-top: 5px; text-transform: lowercase; }
 
-        /* АРЕНА И СТАДИОН */
-        .bank-display { text-align: center; background: rgba(0, 255, 102, 0.1); border: 1px dashed var(--neon-green); border-radius: 15px; padding: 10px; margin-bottom: 10px; }
-        .bank-display span { color: var(--neon-green); font-size: 20px; }
+        .stats-card { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-top: 15px; display: flex; justify-content: space-around; }
+        .stat-val { display: block; font-size: 18px; color: #fff; }
+        .stat-label { font-size: 10px; color: var(--text-dim); }
 
-        .stadium {
-            width: 100%; aspect-ratio: 1/1.2; background: #0c140e; border: 3px solid var(--border); border-radius: 15px;
-            position: relative; overflow: hidden;
-        }
-        .territory { position: absolute; width: 100%; height: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.1); }
-        .territory.enemy { top: 0; background: rgba(255, 0, 0, 0.03); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .territory.mine { bottom: 0; background: rgba(0, 255, 102, 0.03); }
+        /* ARENA */
+        .bank-info { text-align: center; margin-bottom: 10px; font-size: 14px; color: var(--neon-green); }
         
-        .center-circle { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 70px; height: 70px; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; 
+        .stadium {
+            width: 100%; aspect-ratio: 1/1.2; background: #0c140e; border: 4px solid #1a2e21; border-radius: 15px;
+            position: relative; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
         }
+        .line-center { position: absolute; top: 50%; width: 100%; height: 2px; background: rgba(255,255,255,0.05); }
+        .goal { position: absolute; width: 80px; height: 10px; background: var(--neon-green); left: 50%; transform: translateX(-50%); box-shadow: 0 0 15px var(--neon-green); }
+        .goal.top { top: 0; border-radius: 0 0 10px 10px; }
+        .goal.bottom { bottom: 0; border-radius: 10px 10px 0 0; }
 
         #ball {
-            position: absolute; width: 25px; height: 25px; background: #fff; border-radius: 50%;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px var(--neon-green); z-index: 5;
-            transition: top 0.1s linear, left 0.1s linear;
-            display: flex; align-items: center; justify-content: center; color: #000; font-size: 14px;
+            position: absolute; width: 22px; height: 22px; background: #fff; border-radius: 50%;
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px #fff; z-index: 10;
         }
 
-        .game-status { position: absolute; width: 100%; text-align: center; top: 45%; z-index: 10; color: var(--neon-green); font-size: 24px; text-shadow: 0 0 10px #000; pointer-events: none; }
+        .game-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.7); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; text-align: center;
+        }
 
-        /* ИНТЕРФЕЙС СТАВОК */
-        .card { background: var(--card-bg); border-radius: 20px; padding: 15px; border: 1px solid var(--border); margin-top: 15px; }
-        .bet-input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #fff; width: 100%; text-align: center; font-size: 18px; outline: none; margin-bottom: 10px; }
-        .btn-play { width: 100%; padding: 15px; background: var(--neon-green); color: #000; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; }
-        .btn-play:disabled { background: #333; color: #666; }
+        /* КНОПКИ */
+        .btn-play { width: 100%; padding: 18px; background: var(--neon-green); color: #000; border: none; border-radius: 15px; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        .btn-play:disabled { background: #222; color: #555; }
 
-        /* НАВИГАЦИЯ */
-        .nav-dock { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 65px; background: rgba(10, 15, 12, 0.98); backdrop-filter: blur(15px); border-radius: 30px; display: flex; align-items: center; justify-content: space-around; border: 1px solid var(--border); z-index: 1000; }
-        .nav-link { background: none; border: none; color: var(--text-dim); display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; }
-        .nav-link i { font-size: 18px; margin-bottom: 4px; }
-        .nav-link span { font-size: 9px; }
+        /* NAV */
+        .nav-dock { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 70px; background: rgba(10,15,12,0.95); border-radius: 35px; display: flex; align-items: center; border: 1px solid var(--border); }
+        .nav-link { flex: 1; text-align: center; color: var(--text-dim); text-decoration: none; font-size: 10px; display: flex; flex-direction: column; align-items: center; background: none; border: none; }
+        .nav-link i { font-size: 20px; margin-bottom: 4px; }
         .nav-link.active { color: var(--neon-green); }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <header class="header">
-            <div class="balance-pill">
-                <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" class="ton-logo">
-                <span id="user-balance">10.00</span>
+<div class="app-container">
+    <header class="header">
+        <div class="balance-pill">
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" class="ton-logo">
+            <span id="header-balance">0.00</span>
+        </div>
+    </header>
+
+    <main class="main-scroll">
+        <!-- ПРОФИЛЬ -->
+        <section id="profile" class="page active">
+            <div class="profile-section">
+                <div class="avatar-frame" id="user-avatar-container">
+                    <img src="" id="user-avatar">
+                </div>
+                <h1 class="nick" id="user-name">ИГРОК</h1>
+                <div class="tag" id="user-tag">@username</div>
             </div>
-        </header>
 
-        <main class="main-scroll">
-            <!-- ПРОФИЛЬ -->
-            <section id="profile" class="page active">
-                <div class="profile-section">
-                    <div class="avatar-frame" id="avatar-box">
-                        <img src="https://i.postimg.cc/9FmDZHX0/blue-crystal.png" id="user-pic">
-                    </div>
-                    <h1 class="nick" id="user-name">ИГРОК</h1>
-                    <div class="tag" id="user-tag">@username</div>
+            <div class="stats-card">
+                <div style="text-align: center;">
+                    <span class="stat-val">0.00</span>
+                    <span class="stat-label">БАЛАНС</span>
                 </div>
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; color: var(--text-dim); font-size: 12px;">
-                        <span>РЕФЕРАЛОВ: 0</span>
-                        <span>ИНВЕНТАРЬ: 0</span>
-                    </div>
+                <div style="text-align: center;">
+                    <span class="stat-val">0</span>
+                    <span class="stat-label">РЕФЕРАЛЫ</span>
                 </div>
-            </section>
+            </div>
+            
+            <button class="btn-play" style="background: none; border: 1px solid var(--border); color: #fff; margin-top: 20px;">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
+        </section>
 
-            <!-- АРЕНА -->
-            <section id="arena" class="page">
-                <div class="bank-display">ОБЩИЙ БАНК: <span id="total-bank">0.00</span> TON</div>
-                
-                <div class="stadium" id="stadium">
-                    <div class="territory enemy">ТЕРРИТОРИЯ ВРАГА</div>
-                    <div class="center-circle"></div>
-                    <div class="territory mine">ВАША ТЕРРИТОРИЯ</div>
-                    <div id="ball"><i class="fa-solid fa-futbol"></i></div>
-                    <div id="status-label" class="game-status"></div>
+        <!-- АРЕНА -->
+        <section id="arena" class="page">
+            <div class="bank-info">ОБЩИЙ БАНК: <span id="total-bank">0.00</span> TON</div>
+            
+            <div class="stadium" id="stadium">
+                <div class="goal top"></div>
+                <div class="line-center"></div>
+                <div id="ball"></div>
+                <div class="goal bottom"></div>
+
+                <div id="game-overlay" class="game-overlay" style="display: none;">
+                    <h2 id="status-text">ОЖИДАНИЕ ИГРОКА...</h2>
+                    <p id="timer-text"></p>
                 </div>
+            </div>
 
-                <div class="card">
-                    <input type="number" id="bet-amount" class="bet-input" value="1.0" min="0.1" step="0.1">
-                    <button id="start-btn" class="btn-play" onclick="initGame()">ВСТУПИТЬ В БОЙ</button>
-                </div>
-            </section>
-        </main>
+            <button id="find-match-btn" class="btn-play" onclick="startSearch()">НАЙТИ СОПЕРНИКА (1.0 TON)</button>
+        </section>
+    </main>
 
-        <nav class="nav-dock">
-            <button class="nav-link" onclick="tab('arena', this)"><i class="fa-solid fa-trophy"></i><span>АРЕНА</span></button>
-            <button class="nav-link active" onclick="tab('profile', this)"><i class="fa-solid fa-circle-user"></i><span>ПРОФИЛЬ</span></button>
-        </nav>
-    </div>
+    <nav class="nav-dock">
+        <button class="nav-link" onclick="tab('arena', this)"><i class="fa-solid fa-trophy"></i><span>АРЕНА</span></button>
+        <button class="nav-link active" onclick="tab('profile', this)"><i class="fa-solid fa-circle-user"></i><span>ПРОФИЛЬ</span></button>
+    </nav>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-        let balance = 10.0;
-        let isPlaying = false;
+    // Данные пользователя
+    const user = tg.initDataUnsafe.user || { first_name: "Игрок", username: "username", photo_url: "" };
+    document.getElementById('user-name').innerText = user.first_name.toUpperCase();
+    document.getElementById('user-tag').innerText = "@" + (user.username || "id" + user.id);
+    if(user.photo_url) document.getElementById('user-avatar').src = user.photo_url;
 
-        // Инициализация данных пользователя
-        function setupUser() {
-            if (tg.initDataUnsafe.user) {
-                const user = tg.initDataUnsafe.user;
-                document.getElementById('user-name').innerText = (user.first_name + (user.last_name ? ' ' + user.last_name : '')).toUpperCase();
-                document.getElementById('user-tag').innerText = user.username ? "@" + user.username : "@id" + user.id;
-                if (user.photo_url) document.getElementById('user-pic').src = user.photo_url;
+    // Подключение к серверу (Замени URL на свой после деплоя)
+    const socket = io('https://your-server-address.com'); 
+
+    let ball = { x: 50, y: 50, vx: 0.2, vy: 0.2 }; // Замедленный мяч
+    const ballEl = document.getElementById('ball');
+    const stadium = document.getElementById('stadium');
+
+    function tab(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function startSearch() {
+        document.getElementById('find-match-btn').disabled = true;
+        document.getElementById('game-overlay').style.display = 'flex';
+        socket.emit('find_match', { user: user.first_name });
+    }
+
+    // Синхронизация мяча от сервера
+    socket.on('game_update', (data) => {
+        // Сервер присылает координаты мяча
+        ballEl.style.left = data.ballX + '%';
+        ballEl.style.top = data.ballY + '%';
+        document.getElementById('total-bank').innerText = data.bank;
+    });
+
+    socket.on('match_found', (data) => {
+        document.getElementById('status-text').innerText = "СОПЕРНИК НАЙДЕН!";
+        let countdown = 5;
+        const timer = setInterval(() => {
+            document.getElementById('timer-text').innerText = "МАТЧ НАЧНЕТСЯ ЧЕРЕЗ " + countdown;
+            countdown--;
+            if(countdown < 0) {
+                clearInterval(timer);
+                document.getElementById('game-overlay').style.display = 'none';
             }
-            updateBalanceUI();
-        }
+        }, 1000);
+    });
 
-        function updateBalanceUI() {
-            document.getElementById('user-balance').innerText = balance.toFixed(2);
-        }
-
-        function tab(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            el.classList.add('active');
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        // ЛОГИКА ИГРЫ
-        function initGame() {
-            const betInput = document.getElementById('bet-amount');
-            const bet = parseFloat(betInput.value);
-
-            if (bet > balance) {
-                tg.showAlert("Недостаточно средств!");
-                return;
-            }
-
-            isPlaying = true;
-            balance -= bet;
-            updateBalanceUI();
-            
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('total-bank').innerText = (bet * 2).toFixed(2);
-            
-            startCountdown(bet);
-        }
-
-        function startCountdown(bet) {
-            let timeLeft = 10;
-            const label = document.getElementById('status-label');
-            
-            const timer = setInterval(() => {
-                label.innerText = timeLeft;
-                timeLeft--;
-                if (timeLeft < 0) {
-                    clearInterval(timer);
-                    label.innerText = "МЯЧ В ИГРЕ!";
-                    launchBall(bet);
-                }
-            }, 1000);
-        }
-
-        function launchBall(bet) {
-            const ball = document.getElementById('ball');
-            const stadium = document.getElementById('stadium');
-            const label = document.getElementById('status-label');
-            
-            let duration = 10000; // 10 секунд полета
-            let startTime = Date.now();
-            
-            const animate = () => {
-                let elapsed = Date.now() - startTime;
-                
-                if (elapsed < duration) {
-                    // Случайное движение
-                    let randomX = Math.random() * (stadium.clientWidth - 30);
-                    let randomY = Math.random() * (stadium.clientHeight - 30);
-                    
-                    ball.style.left = randomX + 'px';
-                    ball.style.top = randomY + 'px';
-                    
-                    setTimeout(() => requestAnimationFrame(animate), 150);
-                } else {
-                    stopBall(bet);
-                }
-            };
-            
-            requestAnimationFrame(animate);
-        }
-
-        function stopBall(bet) {
-            const ball = document.getElementById('ball');
-            const stadium = document.getElementById('stadium');
-            const label = document.getElementById('status-label');
-            
-            // Плавное финальное торможение
-            const finalX = Math.random() * (stadium.clientWidth - 30);
-            const finalY = Math.random() * (stadium.clientHeight - 30);
-            
-            ball.style.transition = "all 2s cubic-bezier(0.1, 0.5, 0.2, 1)";
-            ball.style.left = finalX + 'px';
-            ball.style.top = finalY + 'px';
-
-            setTimeout(() => {
-                const rect = ball.getBoundingClientRect();
-                const stadiumRect = stadium.getBoundingClientRect();
-                const relativeY = rect.top - stadiumRect.top;
-
-                // Если мяч в нижней половине (больше середины)
-                if (relativeY > stadium.clientHeight / 2) {
-                    const winAmount = bet * 2;
-                    balance += winAmount;
-                    label.innerText = "ПОБЕДА!";
-                    tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    label.innerText = "ПРОИГРЫШ";
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
-
-                updateBalanceUI();
-                document.getElementById('start-btn').disabled = false;
-                document.getElementById('total-bank').innerText = "0.00";
-                isPlaying = false;
-                
-                setTimeout(() => { 
-                    label.innerText = ""; 
-                    ball.style.transition = "top 0.1s linear, left 0.1s linear";
-                    ball.style.top = "50%";
-                    ball.style.left = "50%";
-                }, 3000);
-            }, 2000);
-        }
-
-        window.onload = setupUser;
-    </script>
+    socket.on('game_over', (winner) => {
+        document.getElementById('game-overlay').style.display = 'flex';
+        document.getElementById('status-text').innerText = winner === socket.id ? "ВЫ ВЫИГРАЛИ!" : "ВЫ ПРОИГРАЛИ";
+        document.getElementById('timer-text').innerText = "";
+        document.getElementById('find-match-btn').disabled = false;
+    });
+</script>
 </body>
 </html>
