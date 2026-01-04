@@ -15,7 +15,7 @@ let gameState = {
     totalBank: 0,
     timer: null,
     countdown: 15,
-    status: 'waiting' // waiting, counting, playing
+    status: 'waiting' 
 };
 
 const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
@@ -86,7 +86,7 @@ function startGame() {
     setTimeout(() => {
         gameState = { players: [], totalBank: 0, timer: null, countdown: 15, status: 'waiting' };
         io.emit('update_arena', gameState);
-    }, 18000); // 2с старт + 3с стрелка + 10с полет + 3с результат
+    }, 18000);
 }
 
 const PORT = process.env.PORT || 3000;
