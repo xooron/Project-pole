@@ -8,23 +8,19 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 let gameState = {
     players: [],
     totalBank: 0,
     timer: null,
-    countdown: 15, // Увеличил время для сбора ставок
-    status: 'waiting' // 'waiting', 'counting', 'playing'
+    countdown: 15,
+    status: 'waiting' // waiting, counting, playing
 };
 
 const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
 
 io.on('connection', (socket) => {
-    // Синхронизация при входе
     socket.emit('init_state', gameState);
 
     socket.on('place_bet', (data) => {
@@ -46,12 +42,8 @@ io.on('connection', (socket) => {
         }
 
         calculateChances();
-        
-        if (gameState.players.length >= 2 && gameState.status === 'waiting') {
-            startCountdown();
-        }
-        
-        updateAll();
+        if (gameState.players.length >= 2 && gameState.status === 'waiting') startCountdown();
+        io.emit('update_arena', gameState);
     });
 });
 
@@ -65,11 +57,9 @@ function calculateChances() {
 function startCountdown() {
     gameState.status = 'counting';
     gameState.countdown = 15;
-    
     gameState.timer = setInterval(() => {
         gameState.countdown--;
         io.emit('timer_tick', gameState.countdown);
-
         if (gameState.countdown <= 0) {
             clearInterval(gameState.timer);
             startGame();
@@ -79,8 +69,6 @@ function startCountdown() {
 
 function startGame() {
     gameState.status = 'playing';
-    
-    // Определяем победителя заранее по шансам
     const random = Math.random() * 100;
     let currentRange = 0;
     let winner = gameState.players[0];
@@ -95,15 +83,10 @@ function startGame() {
 
     io.emit('start_game_animation', { winner });
 
-    // Сброс через 20 секунд (анимация полета + показ результата)
     setTimeout(() => {
         gameState = { players: [], totalBank: 0, timer: null, countdown: 15, status: 'waiting' };
-        updateAll();
-    }, 20000);
-}
-
-function updateAll() {
-    io.emit('update_arena', gameState);
+        io.emit('update_arena', gameState);
+    }, 18000); // 2с старт + 3с стрелка + 10с полет + 3с результат
 }
 
 const PORT = process.env.PORT || 3000;
