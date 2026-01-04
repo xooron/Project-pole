@@ -7,7 +7,6 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// Раздаем статические файлы (index.html)
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
@@ -19,49 +18,46 @@ let gameState = {
     totalBank: 0,
     timer: null,
     countdown: 10,
-    isGameRunning: false
+    isGameRunning: false,
+    winner: null
 };
 
 const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
 
 io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+    // Отправляем текущее состояние при входе
+    socket.emit('update_arena', {
+        players: gameState.players,
+        totalBank: gameState.totalBank,
+        isGameRunning: gameState.isGameRunning
+    });
 
-    // Обработка ставки
     socket.on('place_bet', (userData) => {
         if (gameState.isGameRunning) return;
 
-        // Находим, есть ли уже этот игрок
-        let player = gameState.players.find(p => p.id === socket.id);
-        
-        if (!player) {
-            const playerColor = COLORS[gameState.players.length % COLORS.length];
-            player = {
-                id: socket.id,
-                name: userData.name,
-                username: userData.username,
-                avatar: userData.avatar,
-                amount: 0,
-                color: playerColor,
-                chance: 0
-            };
-            gameState.players.push(player);
-        }
+        // Проверка по username, чтобы нельзя было ставить дважды (даже после перезагрузки)
+        let existingPlayer = gameState.players.find(p => p.username === userData.username);
+        if (existingPlayer) return;
 
-        // Увеличиваем ставку
-        player.amount += userData.amount;
+        const playerColor = COLORS[gameState.players.length % COLORS.length];
+        const player = {
+            id: socket.id, // Текущий сокет
+            name: userData.name,
+            username: userData.username,
+            avatar: userData.avatar,
+            amount: userData.amount,
+            color: playerColor,
+            chance: 0
+        };
+        
+        gameState.players.push(player);
         calculateGameState();
 
-        // Если игроков 2 или больше и таймер еще не идет — запускаем
         if (gameState.players.length >= 2 && !gameState.timer) {
             startCountdown();
         }
 
         updateAll();
-    });
-
-    socket.on('disconnect', () => {
-        // Игроки остаются в списке до конца раунда, чтобы не ломать логику банка
     });
 });
 
@@ -102,26 +98,29 @@ function resolveWinner() {
         }
     }
 
-    io.emit('game_result', winner);
+    gameState.winner = winner;
+    // Отправляем победителя всем
+    io.emit('start_game_animation', { winner: winner });
 
-    // Сброс через 5 секунд после объявления победителя
+    // Сброс через 18 секунд (2с ожидание + 3с стрелка + 10с полет + 3с показ ника)
     setTimeout(() => {
         gameState = {
             players: [],
             totalBank: 0,
             timer: null,
             countdown: 10,
-            isGameRunning: false
+            isGameRunning: false,
+            winner: null
         };
         updateAll();
-    }, 5000);
+    }, 18000);
 }
 
 function updateAll() {
     io.emit('update_arena', {
         players: gameState.players,
         totalBank: gameState.totalBank,
-        hasStarted: gameState.timer !== null
+        isGameRunning: gameState.isGameRunning
     });
 }
 
