@@ -17,51 +17,45 @@ let gameState = {
     players: [],
     totalBank: 0,
     timer: null,
-    countdown: 10,
-    isGameRunning: false,
-    winner: null
+    countdown: 15, // Увеличил время для сбора ставок
+    status: 'waiting' // 'waiting', 'counting', 'playing'
 };
 
 const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
 
 io.on('connection', (socket) => {
-    // Отправляем текущее состояние при входе
-    socket.emit('update_arena', {
-        players: gameState.players,
-        totalBank: gameState.totalBank,
-        isGameRunning: gameState.isGameRunning
-    });
+    // Синхронизация при входе
+    socket.emit('init_state', gameState);
 
-    socket.on('place_bet', (userData) => {
-        if (gameState.isGameRunning) return;
+    socket.on('place_bet', (data) => {
+        if (gameState.status === 'playing') return;
 
-        // Проверка по username, чтобы нельзя было ставить дважды (даже после перезагрузки)
-        let existingPlayer = gameState.players.find(p => p.username === userData.username);
-        if (existingPlayer) return;
-
-        const playerColor = COLORS[gameState.players.length % COLORS.length];
-        const player = {
-            id: socket.id, // Текущий сокет
-            name: userData.name,
-            username: userData.username,
-            avatar: userData.avatar,
-            amount: userData.amount,
-            color: playerColor,
-            chance: 0
-        };
-        
-        gameState.players.push(player);
-        calculateGameState();
-
-        if (gameState.players.length >= 2 && !gameState.timer) {
-            startCountdown();
+        let player = gameState.players.find(p => p.username === data.username);
+        if (player) {
+            player.amount += data.amount;
+        } else {
+            player = {
+                id: socket.id,
+                name: data.name,
+                username: data.username,
+                avatar: data.avatar,
+                amount: data.amount,
+                color: COLORS[gameState.players.length % COLORS.length]
+            };
+            gameState.players.push(player);
         }
 
+        calculateChances();
+        
+        if (gameState.players.length >= 2 && gameState.status === 'waiting') {
+            startCountdown();
+        }
+        
         updateAll();
     });
 });
 
-function calculateGameState() {
+function calculateChances() {
     gameState.totalBank = gameState.players.reduce((sum, p) => sum + p.amount, 0);
     gameState.players.forEach(p => {
         p.chance = ((p.amount / gameState.totalBank) * 100).toFixed(1);
@@ -69,26 +63,27 @@ function calculateGameState() {
 }
 
 function startCountdown() {
-    gameState.countdown = 10;
+    gameState.status = 'counting';
+    gameState.countdown = 15;
+    
     gameState.timer = setInterval(() => {
         gameState.countdown--;
         io.emit('timer_tick', gameState.countdown);
 
         if (gameState.countdown <= 0) {
             clearInterval(gameState.timer);
-            gameState.timer = null;
-            resolveWinner();
+            startGame();
         }
     }, 1000);
 }
 
-function resolveWinner() {
-    if (gameState.players.length === 0) return;
-    gameState.isGameRunning = true;
-
+function startGame() {
+    gameState.status = 'playing';
+    
+    // Определяем победителя заранее по шансам
     const random = Math.random() * 100;
     let currentRange = 0;
-    let winner = gameState.players[gameState.players.length - 1];
+    let winner = gameState.players[0];
 
     for (const p of gameState.players) {
         currentRange += parseFloat(p.chance);
@@ -98,31 +93,18 @@ function resolveWinner() {
         }
     }
 
-    gameState.winner = winner;
-    // Отправляем победителя всем
-    io.emit('start_game_animation', { winner: winner });
+    io.emit('start_game_animation', { winner });
 
-    // Сброс через 18 секунд (2с ожидание + 3с стрелка + 10с полет + 3с показ ника)
+    // Сброс через 20 секунд (анимация полета + показ результата)
     setTimeout(() => {
-        gameState = {
-            players: [],
-            totalBank: 0,
-            timer: null,
-            countdown: 10,
-            isGameRunning: false,
-            winner: null
-        };
+        gameState = { players: [], totalBank: 0, timer: null, countdown: 15, status: 'waiting' };
         updateAll();
-    }, 18000);
+    }, 20000);
 }
 
 function updateAll() {
-    io.emit('update_arena', {
-        players: gameState.players,
-        totalBank: gameState.totalBank,
-        isGameRunning: gameState.isGameRunning
-    });
+    io.emit('update_arena', gameState);
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server started on ${PORT}`));
