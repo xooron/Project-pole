@@ -6,64 +6,100 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-let waitingPlayer = null;
-let rooms = {};
+let gameState = {
+    players: [],
+    totalBank: 0,
+    timer: null,
+    countdown: 10,
+    isGameRunning: false
+};
+
+const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600'];
 
 io.on('connection', (socket) => {
-    socket.on('find_match', (data) => {
-        if (waitingPlayer && waitingPlayer.id !== socket.id) {
-            // Создаем игру для двоих
-            const roomId = 'room_' + waitingPlayer.id;
-            socket.join(roomId);
-            waitingPlayer.join(roomId);
+    socket.on('place_bet', (userData) => {
+        if (gameState.isGameRunning) return;
 
-            rooms[roomId] = {
-                ballX: 50, ballY: 50,
-                vx: 0.3, vy: 0.4, // Медленная скорость
-                players: [waitingPlayer.id, socket.id],
-                bank: 2.0,
-                active: true
-            };
+        // Добавляем игрока
+        const playerColor = COLORS[gameState.players.length % COLORS.length];
+        const newPlayer = {
+            id: socket.id,
+            name: userData.name,
+            username: userData.username,
+            avatar: userData.avatar,
+            amount: userData.amount,
+            color: playerColor,
+            chance: 0
+        };
 
-            io.to(roomId).emit('match_found', { bank: 2.0 });
-            startGameLoop(roomId);
-            waitingPlayer = null;
-        } else {
-            waitingPlayer = socket;
+        gameState.players.push(newPlayer);
+        calculateGameState();
+
+        // Если 2 игрока и таймер не запущен — запускаем
+        if (gameState.players.length >= 2 && !gameState.timer) {
+            startCountdown();
         }
+
+        updateAll();
     });
 });
 
-function startGameLoop(roomId) {
-    const game = rooms[roomId];
-    let duration = 15000; // Игра длится 15 сек
-
-    const loop = setInterval(() => {
-        // Физика мяча с отскоками
-        game.ballX += game.vx;
-        game.ballY += game.vy;
-
-        // Отскок от левой/правой стенки
-        if (game.ballX <= 5 || game.ballX >= 95) game.vx *= -1;
-        
-        // Отскок от верха/низа (стенки стадиона)
-        if (game.ballY <= 5 || game.ballY >= 95) game.vy *= -1;
-
-        io.to(roomId).emit('game_update', {
-            ballX: game.ballX,
-            ballY: game.ballY,
-            bank: game.bank
-        });
-
-        duration -= 50;
-        if (duration <= 0) {
-            clearInterval(loop);
-            // Победитель тот, на чьей половине мяч (пример логики)
-            const winner = game.ballY > 50 ? game.players[1] : game.players[0];
-            io.to(roomId).emit('game_over', winner);
-            delete rooms[roomId];
-        }
-    }, 50);
+function calculateGameState() {
+    gameState.totalBank = gameState.players.reduce((sum, p) => sum + p.amount, 0);
+    gameState.players.forEach(p => {
+        p.chance = ((p.amount / gameState.totalBank) * 100).toFixed(1);
+    });
 }
 
-server.listen(3000, () => console.log('Server started on port 3000'));
+function startCountdown() {
+    gameState.countdown = 10;
+    gameState.timer = setInterval(() => {
+        gameState.countdown--;
+        io.emit('timer_tick', gameState.countdown);
+
+        if (gameState.countdown <= 0) {
+            clearInterval(gameState.timer);
+            resolveWinner();
+        }
+    }, 1000);
+}
+
+function resolveWinner() {
+    if (gameState.players.length === 0) return;
+
+    // Случайный выбор победителя с учетом шансов
+    const random = Math.random() * 100;
+    let currentRange = 0;
+    let winner = gameState.players[0];
+
+    for (const p of gameState.players) {
+        currentRange += parseFloat(p.chance);
+        if (random <= currentRange) {
+            winner = p;
+            break;
+        }
+    }
+
+    io.emit('game_result', winner);
+
+    // Сброс игры через 5 секунд
+    setTimeout(() => {
+        gameState = {
+            players: [],
+            totalBank: 0,
+            timer: null,
+            countdown: 10,
+            isGameRunning: false
+        };
+        updateAll();
+    }, 5000);
+}
+
+function updateAll() {
+    io.emit('update_arena', {
+        players: gameState.players,
+        totalBank: gameState.totalBank
+    });
+}
+
+server.listen(3000, () => console.log('Server running on port 3000'));
