@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Football Arena</title>
+    <title>Football Arena Online</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
     <style>
-        :root { --neon: #00ff66; --bg-dark: #000000; --panel: rgba(20, 25, 22, 0.9); --border: rgba(0, 255, 102, 0.2); }
+        :root { --neon: #00ff66; --bg: #000000; --panel: rgba(20, 25, 22, 0.9); --border: rgba(0, 255, 102, 0.2); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; }
         
         body { 
@@ -19,22 +21,15 @@
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
 
-        /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; z-index: 100; }
         .balance-pill { background: var(--panel); padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-weight: 800; box-shadow: 0 0 15px rgba(0,255,102,0.1); }
 
-        /* SCROLLABLE CONTENT */
-        .main-scroll { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 0 20px 120px; 
-            scroll-behavior: smooth;
-        }
+        .main-scroll { flex: 1; overflow-y: auto; padding: 0 20px 120px; scroll-behavior: smooth; }
         .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PROFILE SECTION (RESTORED) */
+        /* PROFILE */
         .profile-section { text-align: center; margin: 20px 0; }
         .avatar-frame { width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; border: 3px solid var(--neon); padding: 4px; overflow: hidden; background: #111; box-shadow: 0 0 20px rgba(0,255,102,0.2); }
         .avatar-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
@@ -47,14 +42,14 @@
 
         .btn-invite { width: 100%; padding: 18px; background: none; border: 1px solid var(--border); color: #fff; border-radius: 15px; font-size: 14px; margin-top: 20px; cursor: pointer; font-weight: 800; }
 
-        /* ARENA SECTION */
-        .top-info { text-align: center; margin-bottom: 15px; }
-        .bank-card { background: var(--panel); display: inline-block; padding: 10px 25px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 10px; }
-        .bank-card span { color: var(--neon); font-size: 20px; font-weight: 800; }
+        /* ARENA */
+        .arena-header { text-align: center; margin-bottom: 15px; }
+        .bank-box { background: var(--panel); display: inline-block; padding: 10px 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .bank-box span { color: var(--neon); font-size: 20px; font-weight: 800; }
         
-        .status-box { height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .status-area { height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #status-txt { font-size: 11px; color: #aaa; letter-spacing: 2px; }
-        #timer-box { font-size: 22px; color: var(--neon); font-weight: 800; }
+        #timer-box { font-size: 24px; color: var(--neon); font-weight: 800; }
 
         .stadium {
             width: 100%; aspect-ratio: 1/1.2; background: #050505; border: 2px solid #1a221e; border-radius: 24px;
@@ -66,18 +61,18 @@
         .t-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1px solid white; z-index: 5; }
 
         #ball { position: absolute; width: 22px; height: 22px; background: #fff; border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #000; box-shadow: 0 0 20px #fff; z-index: 100; display: none; }
-        #arrow { position: absolute; width: 35px; height: 4px; background: #fff; border-radius: 4px; left: 50%; top: 50%; transform-origin: 0% 50%; z-index: 90; display: none; box-shadow: 0 0 10px #fff; border: 1px solid #000; }
+        #arrow { position: absolute; width: 40px; height: 4px; background: #fff; border-radius: 4px; left: 50%; top: 50%; transform-origin: 0% 50%; z-index: 90; display: none; box-shadow: 0 0 10px #fff; border: 1px solid #000; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .bet-btn { background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 16px; font-weight: 800; cursor: pointer; }
-        .bet-btn:active { background: var(--neon); color: #000; }
+        .bet-btn { background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .bet-btn:active { background: var(--neon); color: #000; transform: scale(0.95); }
+        .bet-btn:disabled { opacity: 0.5; }
 
-        .players-scroll { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .players-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .player-card { background: var(--panel); border-radius: 15px; padding: 10px; display: flex; align-items: center; gap: 10px; border-left: 4px solid transparent; }
         .p-info b { font-size: 11px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; }
         .p-info span { font-size: 10px; color: var(--neon); }
 
-        /* NAVIGATION */
         .nav-dock { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(5,5,5,0.9); border-radius: 40px; display: flex; align-items: center; border: 1px solid var(--border); backdrop-filter: blur(15px); z-index: 1000; }
         .nav-link { flex: 1; text-align: center; color: #444; font-size: 10px; display: flex; flex-direction: column; align-items: center; background: none; border: none; font-weight: 800; cursor: pointer; }
         .nav-link i { font-size: 22px; margin-bottom: 4px; }
@@ -95,16 +90,12 @@
     </header>
 
     <main class="main-scroll">
-        <!-- СТРАНИЦА ПРОФИЛЯ -->
         <section id="profile-page" class="page active">
             <div class="profile-section">
-                <div class="avatar-frame">
-                    <img src="" id="u-ava">
-                </div>
+                <div class="avatar-frame"><img src="" id="u-ava"></div>
                 <h1 class="nick" id="u-nick">ИГРОК</h1>
                 <div class="tag" id="u-tag">@username</div>
             </div>
-
             <div class="stats-card">
                 <div style="text-align: center;">
                     <span class="stat-val" id="prof-bal">10.00</span>
@@ -115,15 +106,13 @@
                     <span class="stat-label">РЕФЕРАЛЫ</span>
                 </div>
             </div>
-            
             <button class="btn-invite">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
         </section>
 
-        <!-- СТРАНИЦА АРЕНЫ -->
         <section id="arena-page" class="page">
-            <div class="top-info">
-                <div class="bank-card">БАНК: <span id="total-bank">0.00</span> TON</div>
-                <div class="status-box">
+            <div class="arena-header">
+                <div class="bank-box">БАНК: <span id="total-bank">0.00</span> TON</div>
+                <div class="status-area">
                     <div id="status-txt">ОЖИДАНИЕ СТАВОК</div>
                     <div id="timer-box"></div>
                 </div>
@@ -140,7 +129,7 @@
                 <button class="bet-btn" onclick="makeBet(10)">10 TON</button>
             </div>
 
-            <div class="players-scroll" id="player-list"></div>
+            <div class="players-list" id="player-list"></div>
         </section>
     </main>
 
@@ -197,17 +186,18 @@
         if(state.status === 'waiting') {
             document.getElementById('status-txt').innerText = "ОЖИДАНИЕ СТАВОК";
             document.getElementById('timer-box').innerText = "";
+            document.querySelectorAll('.bet-btn').forEach(b => b.disabled = false);
+        } else if (state.status === 'playing') {
+            document.querySelectorAll('.bet-btn').forEach(b => b.disabled = true);
         }
 
         state.players.forEach(p => {
             const t = document.createElement('div');
-            t.className = 'territory';
-            t.id = 'zone-' + p.username;
+            t.className = 'territory'; t.id = 'zone-' + p.username;
             t.style.height = (p.amount / state.totalBank * 100) + '%';
             t.style.backgroundColor = p.color;
             t.innerHTML = `<img src="${p.avatar}" class="t-avatar">`;
             document.getElementById('stadium').appendChild(t);
-
             list.innerHTML += `<div class="player-card" style="border-left-color:${p.color}"><img src="${p.avatar}" style="width:24px;height:24px;border-radius:50%"><div class="p-info"><b>@${p.username}</b><span>${p.chance}%</span></div></div>`;
         });
     });
@@ -216,12 +206,10 @@
         const ball = document.getElementById('ball');
         const arrow = document.getElementById('arrow');
         const stadium = document.getElementById('stadium');
-        
         document.getElementById('status-txt').innerText = "МЯЧ В ИГРЕ";
         document.getElementById('timer-box').innerText = "";
         
-        ball.style.display = 'block';
-        ball.style.left = '50%'; ball.style.top = '50%';
+        ball.style.display = 'block'; ball.style.left = '50%'; ball.style.top = '50%';
         
         setTimeout(() => {
             arrow.style.display = 'block';
@@ -255,6 +243,7 @@
                             balance += parseFloat(document.getElementById('total-bank').innerText);
                             updateBal();
                         }
+                        setTimeout(() => { ball.style.display = 'none'; }, 2000);
                     }
                 }
                 frame();
