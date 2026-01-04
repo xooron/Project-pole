@@ -30,6 +30,7 @@
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; display: flex; flex-direction: column; position: relative; }
 
+        /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
         .ton-logo { width: 18px; height: 18px; }
@@ -51,41 +52,46 @@
         .stat-label { font-size: 10px; color: var(--text-dim); }
 
         /* ARENA */
-        .bank-info { text-align: center; margin-bottom: 10px; font-size: 14px; color: var(--neon-green); }
+        .bank-info { text-align: center; margin-bottom: 10px; font-size: 14px; color: var(--neon-green); font-weight: 800; }
         
         .stadium {
             width: 100%; aspect-ratio: 1/1.2; background: #0c140e; border: 4px solid #1a2e21; border-radius: 15px;
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
 
+        /* ТЕРРИТОРИИ */
         .territory {
-            width: 100%; transition: height 0.5s ease;
+            width: 100%; transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: bold; border-bottom: 2px solid rgba(0,0,0,0.2);
-            color: #000;
+            font-size: 18px; font-weight: 900; color: rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
         .game-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.7); 
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; text-align: center;
+            pointer-events: none;
         }
 
+        /* ПАНЕЛЬ ИГРОКОВ СНИЗУ */
         .players-panel {
-            margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-            max-height: 150px; overflow-y: auto; padding: 5px;
+            margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            max-height: 160px; overflow-y: auto; padding: 5px;
         }
         .player-mini-card {
             background: rgba(255,255,255,0.05); border-radius: 12px; padding: 8px;
-            display: flex; align-items: center; gap: 8px; border-left: 4px solid transparent;
+            display: flex; align-items: center; gap: 10px; border-left: 4px solid transparent;
         }
-        .p-avatar { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); }
-        .p-info { font-size: 9px; line-height: 1.2; }
-        .p-name { display: block; color: #fff; font-weight: bold; max-width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .p-chance { color: var(--neon-green); display: block; }
+        .p-avatar { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+        .p-info { font-size: 10px; line-height: 1.2; }
+        .p-name { display: block; color: #fff; font-weight: bold; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .p-chance { color: var(--neon-green); font-weight: 800; }
 
+        /* КНОПКИ */
         .btn-play { width: 100%; padding: 18px; background: var(--neon-green); color: #000; border: none; border-radius: 15px; font-size: 16px; margin-top: 15px; cursor: pointer; font-weight: 900; }
-        .btn-play:disabled { background: #222; color: #555; }
+        .btn-play:disabled { background: #222; color: #555; cursor: not-allowed; }
 
+        /* NAV */
         .nav-dock { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 70px; background: rgba(10,15,12,0.95); border-radius: 35px; display: flex; align-items: center; border: 1px solid var(--border); }
         .nav-link { flex: 1; text-align: center; color: var(--text-dim); text-decoration: none; font-size: 10px; display: flex; flex-direction: column; align-items: center; background: none; border: none; }
         .nav-link i { font-size: 20px; margin-bottom: 4px; }
@@ -103,6 +109,7 @@
     </header>
 
     <main class="main-scroll">
+        <!-- ПРОФИЛЬ -->
         <section id="profile" class="page active">
             <div class="profile-section">
                 <div class="avatar-frame">
@@ -120,19 +127,23 @@
             <button class="btn-play" style="background: none; border: 1px solid var(--border); color: #fff; margin-top: 20px;">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
         </section>
 
+        <!-- АРЕНА -->
         <section id="arena" class="page">
-            <div class="bank-info">ОБЩИЙ БАНК: <span id="total-bank">0.00</span> TON</div>
+            <div class="bank-info">БАНК: <span id="total-bank">0.00</span> TON</div>
             
             <div class="stadium" id="stadium">
                 <div id="game-overlay" class="game-overlay">
-                    <h2 id="status-text">ОЖИДАНИЕ СТАВОК...</h2>
-                    <p id="timer-text" style="color: var(--neon-green); font-size: 24px; margin-top: 10px;"></p>
+                    <h2 id="status-text">НУЖНО МИНИМУМ 2 ИГРОКА</h2>
+                    <p id="timer-text" style="color: var(--neon-green); font-size: 28px; margin-top: 10px; font-weight: 900;"></p>
                 </div>
+                <!-- Территории создаются здесь -->
             </div>
 
-            <div class="players-panel" id="players-list"></div>
+            <div class="players-panel" id="players-list">
+                <!-- Карточки игроков создаются здесь -->
+            </div>
 
-            <button id="find-match-btn" class="btn-play" onclick="placeBet()">ПОСТАВИТЬ 1.0 TON</button>
+            <button id="bet-btn" class="btn-play" onclick="placeBet()">СДЕЛАТЬ СТАВКУ 1.0 TON</button>
         </section>
     </main>
 
@@ -149,6 +160,7 @@
     let myBalance = 10.00;
     const user = tg.initDataUnsafe.user || { first_name: "Игрок", username: "username", photo_url: "" };
     
+    // Начальные данные
     document.getElementById('user-name').innerText = user.first_name.toUpperCase();
     document.getElementById('user-tag').innerText = "@" + (user.username || "id" + user.id);
     if(user.photo_url) document.getElementById('user-avatar').src = user.photo_url;
@@ -159,8 +171,8 @@
     }
     updateBalanceUI();
 
-    // Авто-подключение к текущему хосту
-    const socket = io(); 
+    // Подключение (автоматически к серверу)
+    const socket = io();
 
     function tab(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -173,7 +185,6 @@
         if (myBalance >= 1.0) {
             myBalance -= 1.0;
             updateBalanceUI();
-            document.getElementById('find-match-btn').disabled = true;
             
             socket.emit('place_bet', {
                 name: user.first_name,
@@ -181,6 +192,8 @@
                 avatar: user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`,
                 amount: 1.0
             });
+        } else {
+            tg.showAlert("Недостаточно баланса!");
         }
     }
 
@@ -189,14 +202,27 @@
         const playersList = document.getElementById('players-list');
         const overlay = document.getElementById('game-overlay');
         
-        // Очистка
+        // Очищаем территорию, сохраняя оверлей
         stadium.innerHTML = '';
         stadium.appendChild(overlay);
         playersList.innerHTML = '';
 
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
 
+        if (data.players.length === 0) {
+            overlay.style.display = 'flex';
+            document.getElementById('status-text').innerText = "НУЖНО МИНИМУМ 2 ИГРОКА";
+            document.getElementById('timer-text').innerText = "";
+            document.getElementById('bet-btn').disabled = false;
+        } else {
+            // Если есть хоть одна ставка — скрываем надпись "Нужно 2 игрока" если таймер еще не запущен
+            if (data.players.length < 2) {
+                document.getElementById('status-text').innerText = "ОЖИДАНИЕ СОПЕРНИКА...";
+            }
+        }
+
         data.players.forEach(p => {
+            // Рисуем территорию
             const territory = document.createElement('div');
             territory.className = 'territory';
             territory.style.height = (p.amount / data.totalBank * 100) + '%';
@@ -204,6 +230,7 @@
             territory.innerHTML = `<span>${p.chance}%</span>`;
             stadium.appendChild(territory);
 
+            // Рисуем карточку внизу
             const card = document.createElement('div');
             card.className = 'player-mini-card';
             card.style.borderLeftColor = p.color;
@@ -211,38 +238,28 @@
                 <img src="${p.avatar}" class="p-avatar">
                 <div class="p-info">
                     <span class="p-name">@${p.username}</span>
-                    <span class="p-chance">${p.amount} TON • ${p.chance}%</span>
+                    <span class="p-chance">${p.amount.toFixed(1)} TON • ${p.chance}%</span>
                 </div>
             `;
             playersList.appendChild(card);
         });
-
-        if (data.players.length >= 2) {
-            document.getElementById('status-text').innerText = "ИГРА СКОРО НАЧНЕТСЯ";
-            overlay.style.display = 'flex';
-        } else {
-            document.getElementById('status-text').innerText = "ОЖИДАНИЕ СТАВОК...";
-        }
     });
 
     socket.on('timer_tick', (seconds) => {
         document.getElementById('game-overlay').style.display = 'flex';
-        document.getElementById('timer-text').innerText = "ДО СТАРТА: " + seconds + "с";
+        document.getElementById('status-text').innerText = "МАТЧ НАЧНЕТСЯ ЧЕРЕЗ";
+        document.getElementById('timer-text').innerText = seconds + " СЕКУНД";
     });
 
     socket.on('game_result', (winner) => {
         document.getElementById('timer-text').innerText = "";
-        document.getElementById('status-text').innerHTML = `ВЫИГРАЛ:<br><span style="color: ${winner.color}">@${winner.username}</span>`;
-        
-        if (winner.id === socket.id) {
-            // Если выиграли мы — можно добавить спецэффект
-        }
+        document.getElementById('status-text').innerHTML = `ВЫИГРАЛ:<br><span style="color: ${winner.color}; font-size: 24px;">@${winner.username}</span>`;
+        document.getElementById('bet-btn').disabled = true;
 
-        setTimeout(() => {
-            document.getElementById('game-overlay').style.display = 'flex';
-            document.getElementById('status-text').innerText = "ОЖИДАНИЕ СТАВОК...";
-            document.getElementById('find-match-btn').disabled = false;
-        }, 5000);
+        if (winner.username === user.username) {
+            tg.HapticFeedback.notificationOccurred('success');
+            // Здесь можно добавить логику начисления выигрыша к визуальному балансу
+        }
     });
 </script>
 </body>
