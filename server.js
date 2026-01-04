@@ -1,10 +1,21 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, { 
+    cors: { origin: "*" } 
+});
+
+// ЭТО ИСПРАВЛЯЕТ ОШИБКУ "Cannot GET /"
+// Сервер теперь понимает, что нужно отправить index.html пользователю
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 let gameState = {
     players: [],
@@ -17,10 +28,14 @@ let gameState = {
 const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600'];
 
 io.on('connection', (socket) => {
+    console.log('Новое подключение:', socket.id);
+
     socket.on('place_bet', (userData) => {
         if (gameState.isGameRunning) return;
 
-        // Добавляем игрока
+        // Проверяем, не сделал ли игрок ставку уже (чтобы не дублировать)
+        if (gameState.players.find(p => p.id === socket.id)) return;
+
         const playerColor = COLORS[gameState.players.length % COLORS.length];
         const newPlayer = {
             id: socket.id,
@@ -35,12 +50,16 @@ io.on('connection', (socket) => {
         gameState.players.push(newPlayer);
         calculateGameState();
 
-        // Если 2 игрока и таймер не запущен — запускаем
+        // Начинаем таймер, если зашло 2 и более игрока
         if (gameState.players.length >= 2 && !gameState.timer) {
             startCountdown();
         }
 
         updateAll();
+    });
+
+    socket.on('disconnect', () => {
+        // Опционально: удаление игрока при выходе, но для ставок лучше оставить до конца игры
     });
 });
 
@@ -59,6 +78,7 @@ function startCountdown() {
 
         if (gameState.countdown <= 0) {
             clearInterval(gameState.timer);
+            gameState.timer = null;
             resolveWinner();
         }
     }, 1000);
@@ -66,8 +86,8 @@ function startCountdown() {
 
 function resolveWinner() {
     if (gameState.players.length === 0) return;
+    gameState.isGameRunning = true;
 
-    // Случайный выбор победителя с учетом шансов
     const random = Math.random() * 100;
     let currentRange = 0;
     let winner = gameState.players[0];
@@ -82,7 +102,6 @@ function resolveWinner() {
 
     io.emit('game_result', winner);
 
-    // Сброс игры через 5 секунд
     setTimeout(() => {
         gameState = {
             players: [],
@@ -102,4 +121,6 @@ function updateAll() {
     });
 }
 
-server.listen(3000, () => console.log('Server running on port 3000'));
+// На Render порт выдается автоматически через process.env.PORT
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
