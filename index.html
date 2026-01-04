@@ -31,51 +31,98 @@
         body {
             background-color: var(--pitch-dark);
             background-image: radial-gradient(circle at top, rgba(0, 255, 102, 0.15) 0%, transparent 60%), linear-gradient(180deg, #0a140d 0%, #070a08 100%);
-            color: var(--text-white); height: 100vh; overflow: hidden; display: flex; justify-content: center;
+            color: var(--text-white); 
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center;
         }
 
-        .app-container { width: 100%; max-width: 450px; height: 100%; display: flex; flex-direction: column; position: relative; }
+        .app-container { 
+            width: 100%; 
+            max-width: 500px; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
 
         .header { padding: 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: rgba(0, 0, 0, 0.6); padding: 10px 16px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
         .ton-logo-wrap { width: 22px; height: 22px; background: #fff; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .ton-logo-wrap img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
 
-        .main-scroll { flex: 1; padding: 0 20px; overflow-y: auto; padding-bottom: 130px; }
+        .main-scroll { 
+            flex: 1; 
+            padding: 0 20px; 
+            overflow-y: auto; 
+            padding-bottom: 140px; /* Отступ для нижней навигации */
+            scrollbar-width: none; 
+        }
+        .main-scroll::-webkit-scrollbar { display: none; }
+
         .page { display: none; animation: fadeIn 0.4s ease-out; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .profile-section { text-align: center; margin: 20px 0 35px; }
-        .avatar-frame { width: 120px; height: 120px; margin: 0 auto 15px; border-radius: 50%; border: 4px solid var(--neon-green); padding: 4px; box-shadow: 0 0 25px rgba(0, 255, 102, 0.2); background: rgba(0, 255, 102, 0.05); }
+        .avatar-frame { 
+            width: 100px; 
+            height: 100px; 
+            margin: 0 auto 15px; 
+            border-radius: 50%; 
+            border: 3px solid var(--neon-green); 
+            padding: 3px; 
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.15); 
+            background: rgba(0, 255, 102, 0.05); 
+            overflow: hidden;
+        }
         .avatar-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .nick { font-size: 28px; letter-spacing: -1px; }
-        .tag { font-size: 14px; color: var(--neon-green); opacity: 0.8; margin-top: 5px; }
+        
+        /* Заглушка если нет фото */
+        .avatar-placeholder {
+            width: 100%; height: 100%; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--neon-green);
+        }
 
-        .card { background: var(--card-bg); border-radius: 30px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .card-head h3 { font-size: 14px; color: var(--text-dim); }
-        .sell-btn { font-size: 12px; color: var(--neon-green); cursor: pointer; }
+        .nick { font-size: 24px; letter-spacing: -1px; word-break: break-word; }
+        .tag { font-size: 14px; color: var(--neon-green); opacity: 0.8; margin-top: 5px; text-transform: lowercase; }
 
-        .inv-grid { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 5px; }
-        .inv-grid::-webkit-scrollbar { display: none; }
-        .gift-slot { min-width: 90px; height: 100px; background: rgba(255,255,255,0.03); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 35px; color: var(--neon-green); border: 1px solid rgba(255,255,255,0.05); }
+        .card { background: var(--card-bg); border-radius: 25px; padding: 20px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card-head h3 { font-size: 12px; color: var(--text-dim); }
 
-        .btn-action { width: 100%; padding: 18px; background: var(--neon-green); color: #000; border: none; border-radius: 18px; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .btn-action:active { transform: scale(0.96); opacity: 0.9; }
-        .btn-copy { width: 60px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border); border-radius: 18px; cursor: pointer; }
+        .inv-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px; }
+        .gift-slot { min-width: 80px; height: 80px; background: rgba(255,255,255,0.03); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: var(--neon-green); border: 1px solid rgba(255,255,255,0.05); }
 
-        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px 5px; }
-        .stat-item { font-size: 13px; color: var(--text-dim); }
-        .stat-item b { color: #fff; font-size: 16px; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-withdraw { background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 12px 25px; border-radius: 15px; font-size: 13px; }
+        .btn-action { width: 100%; padding: 16px; background: var(--neon-green); color: #000; border: none; border-radius: 16px; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-action:active { transform: scale(0.97); }
+        .btn-copy { width: 55px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border); border-radius: 16px; cursor: pointer; }
 
-        .nav-dock { position: absolute; bottom: 30px; left: 20px; right: 20px; height: 80px; background: rgba(10, 15, 12, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 40px; display: flex; align-items: center; justify-content: space-around; padding: 0 10px; border: 1px solid var(--border); z-index: 1000; }
-        .nav-link { background: none; border: none; color: var(--text-dim); display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; transition: 0.3s; }
-        .nav-link i { font-size: 24px; margin-bottom: 5px; }
-        .nav-link span { font-size: 10px; }
+        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 5px; }
+        .stat-item { font-size: 12px; color: var(--text-dim); }
+        .stat-item b { color: #fff; font-size: 15px; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-withdraw { background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 10px 20px; border-radius: 12px; font-size: 12px; }
+
+        .nav-dock { 
+            position: fixed; 
+            bottom: 25px; 
+            left: 20px; 
+            right: 20px; 
+            height: 70px; 
+            background: rgba(10, 15, 12, 0.98); 
+            backdrop-filter: blur(20px); 
+            border-radius: 35px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-around; 
+            border: 1px solid var(--border); 
+            z-index: 1000; 
+        }
+        .nav-link { background: none; border: none; color: var(--text-dim); display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; }
+        .nav-link i { font-size: 20px; margin-bottom: 4px; }
+        .nav-link span { font-size: 9px; }
         .nav-link.active { color: var(--neon-green); }
-        .nav-link.active i { transform: translateY(-5px); filter: drop-shadow(0 0 10px var(--neon-green)); }
     </style>
 </head>
 <body>
@@ -87,54 +134,58 @@
                     <img src="https://static.vecteezy.com/system/resources/thumbnails/044/626/800/small_2x/toncoin-ton-logo-on-transparent-background-free-vector.jpg">
                 </div>
                 <span>0.00</span>
-                <i class="fa-solid fa-plus" style="font-size: 10px; opacity: 0.3;"></i>
             </div>
         </header>
 
         <main class="main-scroll">
+            <!-- СТРАНИЦА ПРОФИЛЯ -->
             <section id="profile" class="page active">
                 <div class="profile-section">
-                    <div class="avatar-frame"><img src="https://i.postimg.cc/9FmDZHX0/blue-crystal.png"></div>
-                    <h1 class="nick" id="user-name">ИГРОК</h1>
+                    <div class="avatar-frame" id="user-avatar-container">
+                        <!-- Сюда вставится аватарка через JS -->
+                        <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                    </div>
+                    <h1 class="nick" id="user-name">ЗАГРУЗКА...</h1>
                     <div class="tag" id="user-tag">@username</div>
                 </div>
 
                 <div class="card">
-                    <div class="card-head"><h3>ИНВЕНТАРЬ (0)</h3><span class="sell-btn"></span></div>
+                    <div class="card-head"><h3>ИНВЕНТАРЬ (0)</h3></div>
                     <div class="inv-grid">
                         <div class="gift-slot"><i class="fa-solid fa-gift"></i></div>
                         <div class="gift-slot"><i class="fa-solid fa-gift"></i></div>
-                        <div class="gift-slot" style="background: rgba(0,255,102,0.05); border-color: var(--neon-green);"><i class="fa-solid fa-chevron-right" style="font-size: 20px;"></i></div>
+                        <div class="gift-slot" style="background: rgba(0,255,102,0.05); border-color: var(--neon-green);"><i class="fa-solid fa-chevron-right" style="font-size: 18px;"></i></div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-bottom: 20px; line-height: 1.4; color: #fff;">ПОЛУЧАЙТЕ 10% ОТ ДЕПОЗИТОВ ВАШИХ ДРУЗЕЙ</h3>
-                    <div style="display: flex; gap: 12px;">
-                        <button class="btn-action">ПРИГЛАСИТЬ</button>
-                        <button class="btn-copy"><i class="fa-solid fa-copy"></i></button>
+                    <h3 style="margin-bottom: 15px; line-height: 1.4; color: #fff; font-size: 13px;">ПРИГЛАШАЙ ДРУЗЕЙ И ПОЛУЧАЙ 10%</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-action" onclick="inviteFriend()">ПРИГЛАСИТЬ</button>
+                        <button class="btn-copy" onclick="copyLink()"><i class="fa-solid fa-copy"></i></button>
                     </div>
                 </div>
 
                 <div class="stats-row">
                     <div>
-                        <div class="stat-item">БАЛАНС: <b>0.43 
-                            <div class="ton-logo-wrap" style="width: 14px; height: 14px; display: inline-flex; vertical-align: middle;">
+                        <div class="stat-item">БАЛАНС: <b>0.00 
+                            <div class="ton-logo-wrap" style="width: 12px; height: 12px; display: inline-flex;">
                                 <img src="https://static.vecteezy.com/system/resources/thumbnails/044/626/800/small_2x/toncoin-ton-logo-on-transparent-background-free-vector.jpg">
                             </div>
                         </b></div>
-                        <div class="stat-item" style="margin-top: 5px;">РЕФЕРАЛОВ: <b>27</b></div>
+                        <div class="stat-item" style="margin-top: 4px;">РЕФЕРАЛОВ: <b>0</b></div>
                     </div>
                     <button class="btn-withdraw">ВЫВОД</button>
                 </div>
             </section>
 
+            <!-- СТРАНИЦА АРЕНЫ -->
             <section id="arena" class="page">
-                <div class="card" style="text-align: center; padding: 60px 20px;">
-                    <i class="fa-solid fa-futbol" style="font-size: 70px; color: var(--neon-green); margin-bottom: 25px;"></i>
-                    <h2 style="font-size: 24px;">СТАДИОН LIVE</h2>
-                    <p style="color: var(--text-dim); margin-top: 10px;">ВЫХОДИ НА ПОЛЕ И СРАЗИСЬ ЗА ГЛАВНЫЙ ТРОФЕЙ!</p>
-                    <button class="btn-action" style="margin-top: 40px;">НАЙТИ МАТЧ</button>
+                <div class="card" style="text-align: center; padding: 50px 20px;">
+                    <i class="fa-solid fa-futbol" style="font-size: 60px; color: var(--neon-green); margin-bottom: 20px;"></i>
+                    <h2 style="font-size: 22px;">СТАДИОН LIVE</h2>
+                    <p style="color: var(--text-dim); margin-top: 10px; font-size: 12px;">ВЫХОДИ НА ПОЛЕ И СРАЗИСЬ ЗА ГЛАВНЫЙ ТРОФЕЙ!</p>
+                    <button class="btn-action" style="margin-top: 30px;">НАЙТИ МАТЧ</button>
                 </div>
             </section>
         </main>
@@ -146,14 +197,36 @@
     </div>
 
     <script>
-        // Интеграция с Telegram
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand();
+        tg.enableClosingConfirmation();
 
-        // Подставляем реальные данные из Telegram
-        if (tg.initDataUnsafe.user) {
-            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name.toUpperCase();
-            document.getElementById('user-tag').innerText = "@" + tg.initDataUnsafe.user.username;
+        // Настройка данных пользователя
+        function initUserData() {
+            const user = tg.initDataUnsafe.user;
+            
+            if (user) {
+                // Имя пользователя
+                document.getElementById('user-name').innerText = 
+                    (user.first_name + (user.last_name ? ' ' + user.last_name : '')).toUpperCase();
+                
+                // Юзернейм
+                document.getElementById('user-tag').innerText = user.username ? "@" + user.username : "";
+
+                // Аватарка
+                if (user.photo_url) {
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = user.photo_url;
+                    avatarImg.alt = "User Avatar";
+                    const container = document.getElementById('user-avatar-container');
+                    container.innerHTML = ''; 
+                    container.appendChild(avatarImg);
+                }
+            } else {
+                // Если открыто не в Telegram
+                document.getElementById('user-name').innerText = "ИГРОК";
+                document.getElementById('user-tag').innerText = "@guest";
+            }
         }
 
         function tab(id, el) {
@@ -161,8 +234,28 @@
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
             el.classList.add('active');
-            tg.HapticFeedback.impactOccurred('medium'); // Вибрация Telegram
+            tg.HapticFeedback.impactOccurred('light');
         }
+
+        function copyLink() {
+            const dummy = document.createElement('input');
+            dummy.value = 'https://t.me/your_bot_name';
+            document.body.appendChild(dummy);
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            tg.showAlert('Ссылка скопирована!');
+        }
+
+        function inviteFriend() {
+            const inviteLink = 'https://t.me/your_bot_name';
+            const shareText = 'Присоединяйся к Football Arena!';
+            const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
+            tg.openTelegramLink(fullUrl);
+        }
+
+        // Запуск при загрузке
+        window.onload = initUserData;
     </script>
 </body>
 </html>
