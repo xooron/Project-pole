@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Football Arena Mini App</title>
+    <title>Football Arena Battle</title>
     
-    <!-- ПОДКЛЮЧЕНИЕ TELEGRAM SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
@@ -19,7 +17,6 @@
             --border: rgba(0, 255, 102, 0.25);
             --text-white: #ffffff;
             --text-dim: #94a398;
-            --pitch-line: rgba(255, 255, 255, 0.2);
         }
 
         * {
@@ -32,98 +29,66 @@
         body {
             background-color: var(--pitch-dark);
             background-image: radial-gradient(circle at top, rgba(0, 255, 102, 0.15) 0%, transparent 60%), linear-gradient(180deg, #0a140d 0%, #070a08 100%);
-            color: var(--text-white); 
-            height: 100vh; width: 100vw; overflow: hidden; display: flex; justify-content: center;
+            color: var(--text-white); height: 100vh; width: 100vw; overflow: hidden; display: flex; justify-content: center;
         }
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; display: flex; flex-direction: column; position: relative; }
 
-        /* HEADER */
-        .header { padding: 20px; display: flex; justify-content: flex-end; z-index: 10; }
+        .header { padding: 15px 20px; display: flex; justify-content: flex-end; z-index: 10; }
         .balance-pill { background: rgba(0, 0, 0, 0.6); padding: 10px 16px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
-        .ton-logo-wrap { width: 22px; height: 22px; background: #fff; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .ton-logo-wrap img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
+        .ton-logo { width: 20px; height: 20px; border-radius: 50%; }
 
-        /* MAIN CONTENT */
-        .main-scroll { flex: 1; padding: 0 20px; overflow-y: auto; padding-bottom: 140px; scrollbar-width: none; }
+        .main-scroll { flex: 1; padding: 0 20px; overflow-y: auto; padding-bottom: 120px; scrollbar-width: none; }
         .main-scroll::-webkit-scrollbar { display: none; }
 
-        .page { display: none; animation: fadeIn 0.4s ease-out; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PROFILE */
-        .profile-section { text-align: center; margin: 10px 0 25px; }
-        .avatar-frame { 
-            width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; border: 3px solid var(--neon-green); 
-            padding: 3px; box-shadow: 0 0 20px rgba(0, 255, 102, 0.15); background: rgba(0, 255, 102, 0.05); overflow: hidden;
-        }
+        /* ПРОФИЛЬ */
+        .profile-section { text-align: center; margin: 10px 0 20px; }
+        .avatar-frame { width: 90px; height: 90px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--neon-green); padding: 3px; background: rgba(0, 255, 102, 0.05); overflow: hidden; }
         .avatar-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .avatar-placeholder { width: 100%; height: 100%; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--neon-green); }
-        .nick { font-size: 24px; letter-spacing: -1px; }
-        .tag { font-size: 14px; color: var(--neon-green); opacity: 0.8; margin-top: 5px; text-transform: lowercase; }
+        .nick { font-size: 22px; }
+        .tag { font-size: 13px; color: var(--neon-green); opacity: 0.8; text-transform: lowercase; }
 
-        /* CARDS */
-        .card { background: var(--card-bg); border-radius: 25px; padding: 20px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .card-head h3 { font-size: 12px; color: var(--text-dim); }
+        /* АРЕНА И СТАДИОН */
+        .bank-display { text-align: center; background: rgba(0, 255, 102, 0.1); border: 1px dashed var(--neon-green); border-radius: 15px; padding: 10px; margin-bottom: 10px; }
+        .bank-display span { color: var(--neon-green); font-size: 20px; }
 
-        /* STADIUM (ARENA PAGE) */
-        .stadium-container {
-            width: 100%; aspect-ratio: 1 / 1.2; background: #0e1a12; border: 2px solid var(--border); border-radius: 20px;
-            position: relative; overflow: hidden; margin-bottom: 20px;
-            background-image: 
-                linear-gradient(rgba(0,255,102,0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,255,102,0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
+        .stadium {
+            width: 100%; aspect-ratio: 1/1.2; background: #0c140e; border: 3px solid var(--border); border-radius: 15px;
+            position: relative; overflow: hidden;
         }
-        .pitch-line-center { position: absolute; top: 50%; width: 100%; height: 2px; background: var(--pitch-line); }
-        .pitch-circle { 
+        .territory { position: absolute; width: 100%; height: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.1); }
+        .territory.enemy { top: 0; background: rgba(255, 0, 0, 0.03); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .territory.mine { bottom: 0; background: rgba(0, 255, 102, 0.03); }
+        
+        .center-circle { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80px; height: 80px; border: 2px solid var(--pitch-line); border-radius: 50%;
+            width: 70px; height: 70px; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; 
         }
-        .gate-top { 
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-            width: 80px; height: 15px; border: 2px solid var(--neon-green); border-top: none;
-            box-shadow: 0 5px 15px rgba(0, 255, 102, 0.3);
-        }
-        .gate-bottom { 
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 80px; height: 15px; border: 2px solid var(--neon-green); border-bottom: none;
-            box-shadow: 0 -5px 15px rgba(0, 255, 102, 0.3);
-        }
-        .ball {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 24px; filter: drop-shadow(0 0 10px var(--neon-green));
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
-        /* BETTING UI */
-        .bet-panel { display: flex; flex-direction: column; gap: 15px; }
-        .bet-input-wrap { display: flex; background: rgba(255,255,255,0.05); border-radius: 15px; border: 1px solid var(--border); padding: 5px; }
-        .bet-input-wrap input { 
-            background: transparent; border: none; color: white; flex: 1; padding: 12px; font-size: 16px; outline: none; 
+        #ball {
+            position: absolute; width: 25px; height: 25px; background: #fff; border-radius: 50%;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px var(--neon-green); z-index: 5;
+            transition: top 0.1s linear, left 0.1s linear;
+            display: flex; align-items: center; justify-content: center; color: #000; font-size: 14px;
         }
-        .bet-input-wrap span { display: flex; align-items: center; padding-right: 15px; color: var(--neon-green); font-size: 12px; }
 
-        /* BUTTONS */
-        .btn-action { width: 100%; padding: 16px; background: var(--neon-green); color: #000; border: none; border-radius: 16px; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .btn-action:active { transform: scale(0.97); }
-        .btn-copy { width: 55px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border); border-radius: 16px; cursor: pointer; }
+        .game-status { position: absolute; width: 100%; text-align: center; top: 45%; z-index: 10; color: var(--neon-green); font-size: 24px; text-shadow: 0 0 10px #000; pointer-events: none; }
 
-        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 5px; }
-        .stat-item { font-size: 12px; color: var(--text-dim); }
-        .stat-item b { color: #fff; font-size: 15px; display: inline-flex; align-items: center; gap: 4px; }
+        /* ИНТЕРФЕЙС СТАВОК */
+        .card { background: var(--card-bg); border-radius: 20px; padding: 15px; border: 1px solid var(--border); margin-top: 15px; }
+        .bet-input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #fff; width: 100%; text-align: center; font-size: 18px; outline: none; margin-bottom: 10px; }
+        .btn-play { width: 100%; padding: 15px; background: var(--neon-green); color: #000; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; }
+        .btn-play:disabled { background: #333; color: #666; }
 
-        /* NAVIGATION */
-        .nav-dock { 
-            position: fixed; bottom: 25px; left: 20px; right: 20px; height: 70px; 
-            background: rgba(10, 15, 12, 0.98); backdrop-filter: blur(20px); border-radius: 35px; 
-            display: flex; align-items: center; justify-content: space-around; border: 1px solid var(--border); z-index: 1000; 
-        }
+        /* НАВИГАЦИЯ */
+        .nav-dock { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 65px; background: rgba(10, 15, 12, 0.98); backdrop-filter: blur(15px); border-radius: 30px; display: flex; align-items: center; justify-content: space-around; border: 1px solid var(--border); z-index: 1000; }
         .nav-link { background: none; border: none; color: var(--text-dim); display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; }
-        .nav-link i { font-size: 20px; margin-bottom: 4px; }
+        .nav-link i { font-size: 18px; margin-bottom: 4px; }
         .nav-link span { font-size: 9px; }
         .nav-link.active { color: var(--neon-green); }
     </style>
@@ -131,84 +96,53 @@
 <body>
 
     <div class="app-container">
-        <!-- ВЕРХНИЙ БАЛАНС -->
         <header class="header">
             <div class="balance-pill">
-                <div class="ton-logo-wrap"><img src="https://static.vecteezy.com/system/resources/thumbnails/044/626/800/small_2x/toncoin-ton-logo-on-transparent-background-free-vector.jpg"></div>
-                <span id="header-balance">0.00</span>
+                <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" class="ton-logo">
+                <span id="user-balance">10.00</span>
             </div>
         </header>
 
         <main class="main-scroll">
-            
-            <!-- СТРАНИЦА ПРОФИЛЯ -->
+            <!-- ПРОФИЛЬ -->
             <section id="profile" class="page active">
                 <div class="profile-section">
-                    <div class="avatar-frame" id="user-avatar-container">
-                        <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                    <div class="avatar-frame" id="avatar-box">
+                        <img src="https://i.postimg.cc/9FmDZHX0/blue-crystal.png" id="user-pic">
                     </div>
-                    <h1 class="nick" id="user-name">ЗАГРУЗКА...</h1>
+                    <h1 class="nick" id="user-name">ИГРОК</h1>
                     <div class="tag" id="user-tag">@username</div>
                 </div>
-
                 <div class="card">
-                    <div class="card-head"><h3>ИНВЕНТАРЬ (0)</h3></div>
-                    <div style="display: flex; gap: 10px;">
-                        <div style="width: 70px; height: 70px; background: rgba(255,255,255,0.03); border-radius: 15px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--neon-green); font-size: 24px;">
-                            <i class="fa-solid fa-lock"></i>
-                        </div>
-                        <div style="flex: 1; display: flex; align-items: center; font-size: 11px; color: var(--text-dim);">ПРЕДМЕТЫ ПОЯВЯТСЯ ПОСЛЕ ПЕРВОЙ ИГРЫ</div>
+                    <div style="display: flex; justify-content: space-between; color: var(--text-dim); font-size: 12px;">
+                        <span>РЕФЕРАЛОВ: 0</span>
+                        <span>ИНВЕНТАРЬ: 0</span>
                     </div>
-                </div>
-
-                <div class="card">
-                    <h3 style="margin-bottom: 15px; color: #fff; font-size: 13px;">РЕФЕРАЛЬНАЯ ПРОГРАММА</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn-action" onclick="inviteFriend()">ПРИГЛАСИТЬ ДРУГА</button>
-                        <button class="btn-copy" onclick="copyLink()"><i class="fa-solid fa-copy"></i></button>
-                    </div>
-                </div>
-
-                <div class="stats-row">
-                    <div>
-                        <div class="stat-item">БАЛАНС: <b>0.00 TON</b></div>
-                        <div class="stat-item" style="margin-top: 4px;">РЕФЕРАЛОВ: <b>0</b></div>
-                    </div>
-                    <button class="btn-action" style="width: auto; padding: 10px 20px; font-size: 12px;">ВЫВОД</button>
                 </div>
             </section>
 
-            <!-- СТРАНИЦА АРЕНЫ -->
+            <!-- АРЕНА -->
             <section id="arena" class="page">
-                <div class="stadium-container">
-                    <div class="gate-top"></div>
-                    <div class="pitch-line-center"></div>
-                    <div class="pitch-circle"></div>
-                    <div class="ball"><i class="fa-solid fa-futbol"></i></div>
-                    <div class="gate-bottom"></div>
+                <div class="bank-display">ОБЩИЙ БАНК: <span id="total-bank">0.00</span> TON</div>
+                
+                <div class="stadium" id="stadium">
+                    <div class="territory enemy">ТЕРРИТОРИЯ ВРАГА</div>
+                    <div class="center-circle"></div>
+                    <div class="territory mine">ВАША ТЕРРИТОРИЯ</div>
+                    <div id="ball"><i class="fa-solid fa-futbol"></i></div>
+                    <div id="status-label" class="game-status"></div>
                 </div>
 
                 <div class="card">
-                    <div class="bet-panel">
-                        <h3 style="font-size: 14px; text-align: center;">СДЕЛАТЬ СТАВКУ</h3>
-                        <div class="bet-input-wrap">
-                            <input type="number" id="bet-amount" placeholder="0.00" step="0.1">
-                            <span>TON</span>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn-action" onclick="placeBet('WIN')" style="background: var(--neon-green);">ПОБЕДА</button>
-                            <button class="btn-action" onclick="placeBet('DRAW')" style="background: #1a1a1a; color: #fff; border: 1px solid var(--border);">НИЧЬЯ</button>
-                        </div>
-                    </div>
+                    <input type="number" id="bet-amount" class="bet-input" value="1.0" min="0.1" step="0.1">
+                    <button id="start-btn" class="btn-play" onclick="initGame()">ВСТУПИТЬ В БОЙ</button>
                 </div>
             </section>
-
         </main>
 
-        <!-- НАВИГАЦИЯ -->
         <nav class="nav-dock">
-            <button class="nav-link" id="nav-arena" onclick="tab('arena', this)"><i class="fa-solid fa-trophy"></i><span>АРЕНА</span></button>
-            <button class="nav-link active" id="nav-profile" onclick="tab('profile', this)"><i class="fa-solid fa-circle-user"></i><span>ПРОФИЛЬ</span></button>
+            <button class="nav-link" onclick="tab('arena', this)"><i class="fa-solid fa-trophy"></i><span>АРЕНА</span></button>
+            <button class="nav-link active" onclick="tab('profile', this)"><i class="fa-solid fa-circle-user"></i><span>ПРОФИЛЬ</span></button>
         </nav>
     </div>
 
@@ -216,58 +150,139 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ
-        function initUser() {
-            const user = tg.initDataUnsafe.user;
-            if (user) {
-                // Имя
+        let balance = 10.0;
+        let isPlaying = false;
+
+        // Инициализация данных пользователя
+        function setupUser() {
+            if (tg.initDataUnsafe.user) {
+                const user = tg.initDataUnsafe.user;
                 document.getElementById('user-name').innerText = (user.first_name + (user.last_name ? ' ' + user.last_name : '')).toUpperCase();
-                // Username
                 document.getElementById('user-tag').innerText = user.username ? "@" + user.username : "@id" + user.id;
-                // Аватарка
-                if (user.photo_url) {
-                    const container = document.getElementById('user-avatar-container');
-                    container.innerHTML = `<img src="${user.photo_url}" alt="avatar">`;
-                }
-            } else {
-                document.getElementById('user-name').innerText = "ИГРОК";
-                document.getElementById('user-tag').innerText = "@username";
+                if (user.photo_url) document.getElementById('user-pic').src = user.photo_url;
             }
+            updateBalanceUI();
         }
 
-        // 2. ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+        function updateBalanceUI() {
+            document.getElementById('user-balance').innerText = balance.toFixed(2);
+        }
+
         function tab(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
             el.classList.add('active');
-            tg.HapticFeedback.impactOccurred('medium');
+            tg.HapticFeedback.impactOccurred('light');
         }
 
-        // 3. ФУНКЦИЯ СТАВКИ
-        function placeBet(type) {
-            const amount = document.getElementById('bet-amount').value;
-            if (!amount || amount <= 0) {
-                tg.showAlert("Введите сумму ставки!");
+        // ЛОГИКА ИГРЫ
+        function initGame() {
+            const betInput = document.getElementById('bet-amount');
+            const bet = parseFloat(betInput.value);
+
+            if (bet > balance) {
+                tg.showAlert("Недостаточно средств!");
                 return;
             }
-            tg.HapticFeedback.notificationOccurred('success');
-            tg.showAlert(`Ставка ${amount} TON на ${type} принята!\n(Демо-режим: баланс 0.00)`);
+
+            isPlaying = true;
+            balance -= bet;
+            updateBalanceUI();
+            
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('total-bank').innerText = (bet * 2).toFixed(2);
+            
+            startCountdown(bet);
         }
 
-        // 4. ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ
-        function copyLink() {
-            const link = "https://t.me/YourBotName";
-            navigator.clipboard.writeText(link);
-            tg.showAlert("Ссылка скопирована!");
+        function startCountdown(bet) {
+            let timeLeft = 10;
+            const label = document.getElementById('status-label');
+            
+            const timer = setInterval(() => {
+                label.innerText = timeLeft;
+                timeLeft--;
+                if (timeLeft < 0) {
+                    clearInterval(timer);
+                    label.innerText = "МЯЧ В ИГРЕ!";
+                    launchBall(bet);
+                }
+            }, 1000);
         }
 
-        function inviteFriend() {
-            tg.openTelegramLink("https://t.me/share/url?url=https://t.me/YourBotName&text=Играй со мной в Football Arena!");
+        function launchBall(bet) {
+            const ball = document.getElementById('ball');
+            const stadium = document.getElementById('stadium');
+            const label = document.getElementById('status-label');
+            
+            let duration = 10000; // 10 секунд полета
+            let startTime = Date.now();
+            
+            const animate = () => {
+                let elapsed = Date.now() - startTime;
+                
+                if (elapsed < duration) {
+                    // Случайное движение
+                    let randomX = Math.random() * (stadium.clientWidth - 30);
+                    let randomY = Math.random() * (stadium.clientHeight - 30);
+                    
+                    ball.style.left = randomX + 'px';
+                    ball.style.top = randomY + 'px';
+                    
+                    setTimeout(() => requestAnimationFrame(animate), 150);
+                } else {
+                    stopBall(bet);
+                }
+            };
+            
+            requestAnimationFrame(animate);
         }
 
-        // Инициализация при старте
-        window.onload = initUser;
+        function stopBall(bet) {
+            const ball = document.getElementById('ball');
+            const stadium = document.getElementById('stadium');
+            const label = document.getElementById('status-label');
+            
+            // Плавное финальное торможение
+            const finalX = Math.random() * (stadium.clientWidth - 30);
+            const finalY = Math.random() * (stadium.clientHeight - 30);
+            
+            ball.style.transition = "all 2s cubic-bezier(0.1, 0.5, 0.2, 1)";
+            ball.style.left = finalX + 'px';
+            ball.style.top = finalY + 'px';
+
+            setTimeout(() => {
+                const rect = ball.getBoundingClientRect();
+                const stadiumRect = stadium.getBoundingClientRect();
+                const relativeY = rect.top - stadiumRect.top;
+
+                // Если мяч в нижней половине (больше середины)
+                if (relativeY > stadium.clientHeight / 2) {
+                    const winAmount = bet * 2;
+                    balance += winAmount;
+                    label.innerText = "ПОБЕДА!";
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    label.innerText = "ПРОИГРЫШ";
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+
+                updateBalanceUI();
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('total-bank').innerText = "0.00";
+                isPlaying = false;
+                
+                setTimeout(() => { 
+                    label.innerText = ""; 
+                    ball.style.transition = "top 0.1s linear, left 0.1s linear";
+                    ball.style.top = "50%";
+                    ball.style.left = "50%";
+                }, 3000);
+            }, 2000);
+        }
+
+        window.onload = setupUser;
     </script>
 </body>
 </html>
