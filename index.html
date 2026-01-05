@@ -25,7 +25,6 @@
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
         
-        /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { 
             background: #111814; padding: 8px 14px; border-radius: 50px; 
@@ -38,7 +37,7 @@
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PROFILE (ORIGINAL STYLE RESTORED) */
+        /* PROFILE */
         .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
         .profile-main { text-align: center; }
         .avatar-wrap { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #000; }
@@ -48,8 +47,8 @@
 
         .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
         .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; }
+        .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+        .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; }
 
         .stat-group { margin-bottom: 15px; }
         .stat-title { font-size: 10px; color: #5a6b61; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
@@ -60,7 +59,7 @@
         .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
         .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
 
-        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; }
+        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
 
         /* ARENA */
         .arena-info { text-align: center; margin-bottom: 20px; }
@@ -84,7 +83,7 @@
         #winner-panel p { font-weight: 900; font-size: 26px; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; }
+        .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; cursor: pointer; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
 
         .players-list { display: flex; flex-direction: column; gap: 10px; }
@@ -92,7 +91,7 @@
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
         .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
         .p-user { font-size: 14px; font-weight: 800; color: #fff; }
-        .p-bet-info { display: flex; align-items: center; gap: 15px; } /* Убран притык шанса */
+        .p-bet-info { display: flex; align-items: center; gap: 12px; } /* Убран притык */
         .p-amount { font-size: 14px; font-weight: 800; }
         .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; }
 
@@ -116,7 +115,6 @@
     </header>
 
     <main class="main-scroll">
-        <!-- ARENA PAGE -->
         <section id="arena-page" class="page active">
             <div class="arena-info">
                 <span class="arena-label" id="timer-text">ОЖИДАНИЕ ИГРОКОВ...</span>
@@ -128,7 +126,7 @@
                 <div id="winner-panel">
                     <img id="win-ava" src="">
                     <h2 id="win-title">ПОБЕДИТЕЛЬ!</h2>
-                    <div id="win-user-name" style="font-weight: 800; margin-bottom: 5px;">@username</div>
+                    <div id="win-name" style="font-weight: 800; margin-bottom: 5px;">@username</div>
                     <div><span class="win-mult" id="win-x">x0.0</span></div>
                     <p id="win-sum">0.00 TON</p>
                 </div>
@@ -142,11 +140,9 @@
                 <button class="b-btn" onclick="makeBet(50)">50</button>
                 <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">MAX</button>
             </div>
-
             <div class="players-list" id="players-list"></div>
         </section>
 
-        <!-- PROFILE PAGE (RESTORED TO ORIGINAL) -->
         <section id="profile-page" class="page">
             <div class="glass-panel profile-main">
                 <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
@@ -206,7 +202,13 @@
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
     
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 12, state: 'hidden', friction: 0.9935 };
+    // Мяч поменьше и физика на 15 секунд
+    let ball = { 
+        x: 150, y: 150, vx: 0, vy: 0, 
+        radius: 9, // Мяч поменьше
+        state: 'hidden', 
+        friction: 0.9955 // Настроено на ~15 секунд при vx/vy ~10
+    };
     let arrowAngle = 0;
     let arenaPlayers = [];
 
@@ -255,7 +257,7 @@
     socket.on('game_status', (data) => {
         const label = document.getElementById('timer-text');
         if (data.status === 'countdown') label.innerText = `СТАРТ ЧЕРЕЗ: ${data.timer}с`;
-        else if (data.status === 'running') label.innerText = `БИТВА ИДЕТ!`;
+        else if (data.status === 'running') label.innerText = `МЯЧ В ИГРЕ!`;
         else label.innerText = `ОЖИДАНИЕ ИГРОКОВ...`;
     });
 
@@ -265,8 +267,9 @@
         ball.state = 'spawning';
         arrowAngle = 0;
         setTimeout(() => {
-            ball.vx = Math.cos(arrowAngle) * 8.2; 
-            ball.vy = Math.sin(arrowAngle) * 8.2;
+            // Чуть быстрее запуск
+            ball.vx = Math.cos(arrowAngle) * 10.5; 
+            ball.vy = Math.sin(arrowAngle) * 10.5;
             ball.state = 'moving';
         }, 2000);
     });
@@ -274,12 +277,12 @@
     socket.on('announce_winner', (data) => {
         const panel = document.getElementById('winner-panel');
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
-        document.getElementById('win-user-name').innerText = `@${data.winner.username}`;
+        document.getElementById('win-name').innerText = `@${data.winner.username}`;
         document.getElementById('win-sum').innerText = `+${data.bank.toFixed(2)} TON`;
         const xVal = data.winnerBet > 0 ? (data.bank / data.winnerBet).toFixed(1) : "1.0";
         document.getElementById('win-x').innerText = `x${xVal}`;
         panel.style.display = 'block';
-        setTimeout(() => { panel.style.display = 'none'; }, 3000);
+        setTimeout(() => { panel.style.display = 'none'; }, 4000);
     });
 
     socket.on('update_arena', (data) => {
@@ -308,7 +311,22 @@
         let curX = 0;
         arenaPlayers.forEach(p => {
             let w = (p.chance / 100) * 300;
-            ctx.fillStyle = p.color; ctx.fillRect(curX, 0, w, 300);
+            // Сектор
+            ctx.fillStyle = p.color; 
+            ctx.fillRect(curX, 0, w, 300);
+            
+            // Аватарка на территории
+            const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
+            if (!imgCache[avaUrl]) {
+                imgCache[avaUrl] = new Image(); imgCache[avaUrl].src = avaUrl;
+            } else if (imgCache[avaUrl].complete && w > 24) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(curX + w/2, 150, 11, 0, Math.PI*2);
+                ctx.clip();
+                ctx.drawImage(imgCache[avaUrl], curX + w/2 - 11, 139, 22, 22);
+                ctx.restore();
+            }
             curX += w;
         });
 
@@ -335,7 +353,7 @@
                     socket.emit('request_winner', { finalX: ball.x });
                 }
             }
-            ctx.font = '30px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('⚽', ball.x, ball.y);
         }
         requestAnimationFrame(drawArena);
