@@ -13,25 +13,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
-        :root { 
-            --neon: #00ff66; 
-            --bg: #030805;
-            --card: #0d120f;
-            --border: rgba(0, 255, 102, 0.12); 
-        }
-
+        :root { --neon: #00ff66; --bg: #030805; --card: #0d120f; --border: rgba(0, 255, 102, 0.12); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
-
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
-        
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
-        .balance-pill { 
-            background: #111814; padding: 8px 14px; border-radius: 50px; 
-            border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; 
-            font-weight: 800; font-size: 14px;
-        }
-
+        .balance-pill { background: #111814; padding: 8px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; }
         .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.3s ease; }
@@ -44,37 +31,30 @@
         .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
-
         .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
         .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
         .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; }
-
         .stat-group { margin-bottom: 15px; }
         .stat-title { font-size: 10px; color: #5a6b61; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
         .count-pill { background: rgba(255,255,255,0.03); border: 1px solid var(--border); width: fit-content; padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
-
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 18px; }
         .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
         .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-
         .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
 
         /* ARENA */
         .arena-info { text-align: center; margin-bottom: 20px; }
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
-        
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
 
-        /* WINNER PANEL STYLED */
         #winner-panel {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon);
-            color: #fff; padding: 25px; border-radius: 30px;
-            text-align: center; z-index: 100; display: none; width: 85%;
+            color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%;
             backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0, 255, 102, 0.4);
         }
         #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
@@ -85,7 +65,6 @@
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; cursor: pointer; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
-
         .players-list { display: flex; flex-direction: column; gap: 10px; }
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
@@ -95,16 +74,14 @@
         .p-amount { font-size: 14px; font-weight: 800; }
         .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; }
 
-        /* NAV */
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
         .nav-btn { flex: 1; text-align: center; color: #3d4a42; font-size: 10px; font-weight: 800; background: none; border: none; }
         .nav-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
         .nav-btn.active { color: var(--neon); }
-
         #ton-connect-btn { display: flex; justify-content: center; padding-top: 5px; }
     </style>
 </head>
-<body onclick="startMusic()"> <!-- Клик для запуска музыки -->
+<body onclick="startMusic()">
 
 <audio id="stadium-bg" loop>
     <source src="https://www.soundjay.com/misc/sounds/stadium-ambience-1.mp3" type="audio/mpeg">
@@ -112,10 +89,7 @@
 
 <div class="app-container">
     <header class="header">
-        <div class="balance-pill">
-            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="18">
-            <span id="user-bal">0.00</span>
-        </div>
+        <div class="balance-pill"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="18"> <span id="user-bal">0.00</span></div>
     </header>
 
     <main class="main-scroll">
@@ -124,7 +98,6 @@
                 <span class="arena-label" id="timer-text">ОЖИДАНИЕ ИГРОКОВ...</span>
                 <div class="arena-bank"><span id="total-bank">0.00</span> TON</div>
             </div>
-            
             <div class="canvas-box">
                 <canvas id="arena-canvas" width="300" height="300"></canvas>
                 <div id="winner-panel">
@@ -135,7 +108,6 @@
                     <p id="win-sum">0.00 TON</p>
                 </div>
             </div>
-
             <div class="bet-grid">
                 <button class="b-btn" onclick="makeBet(0.5)">0.5</button>
                 <button class="b-btn" onclick="makeBet(1)">1.0</button>
@@ -154,33 +126,20 @@
                 <span class="u-tag" id="u-tag">@username</span>
                 <div id="ton-connect-btn"></div>
             </div>
-
             <div class="glass-panel">
                 <p class="ref-text">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
                 <div class="actions-row">
                     <button class="btn-sq" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn-invite-wide" onclick="invite()">Пригласить друзей</button>
                 </div>
-
                 <div class="stat-group">
                     <p class="stat-title">Твои рефералы</p>
-                    <div class="count-pill">
-                        <i class="fa-solid fa-user-group" style="color: #0098ea;"></i>
-                        <span id="ref-count">0</span>
-                    </div>
+                    <div class="count-pill"><i class="fa-solid fa-user-group" style="color: #0098ea;"></i><span id="ref-count">0</span></div>
                 </div>
-
                 <div class="stats-grid">
-                    <div class="stat-item">
-                        <span>Доступно к зачислению</span>
-                        <div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-pending">0.00</span></div>
-                    </div>
-                    <div class="stat-item">
-                        <span>Всего зачислено</span>
-                        <div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-total">0.00</span></div>
-                    </div>
+                    <div class="stat-item"><span>Доступно к зачислению</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-pending">0.00</span></div></div>
+                    <div class="stat-item"><span>Всего зачислено</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-total">0.00</span></div></div>
                 </div>
-
                 <button class="btn-claim" onclick="claim()">Зачислить TON</button>
             </div>
         </section>
@@ -195,16 +154,13 @@
 <script>
     const tg = window.Telegram.WebApp;
     const socket = io();
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
 
-    // Музыка
     let musicStarted = false;
     function startMusic() {
         if (!musicStarted) {
             const audio = document.getElementById('stadium-bg');
-            audio.volume = 0.2; // Тихая музыка
-            audio.play().catch(() => {});
+            audio.volume = 0.15; audio.play().catch(() => {});
             musicStarted = true;
         }
     }
@@ -217,15 +173,11 @@
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
     
-    // Мяч 15 секунд (friction 0.9955)
-    let ball = { 
-        x: 150, y: 150, vx: 0, vy: 0, 
-        radius: 9, 
-        state: 'hidden', 
-        friction: 0.9955 
-    };
+    // Мяч еще меньше (r:7), время 15 сек (friction: 0.9958)
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 7, state: 'hidden', friction: 0.9958 };
     let arrowAngle = 0;
     let arenaPlayers = [];
+    let territoryGrid = []; // Сетка 15x15
 
     socket.emit('user_joined', { 
         id: userData.id, name: userData.first_name, 
@@ -240,20 +192,9 @@
         el.classList.add('active');
     }
 
-    function makeBet(amount) {
-        socket.emit('place_bet', { id: userData.id, amount: amount });
-    }
-
-    function copyRef() {
-        navigator.clipboard.writeText(`https://t.me/БОТ/app?startapp=${userData.id}`);
-        tg.showAlert("Ссылка скопирована!");
-    }
-
-    function invite() {
-        const url = `https://t.me/share/url?url=https://t.me/БОТ/app?startapp=${userData.id}`;
-        tg.openTelegramLink(url);
-    }
-
+    function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/БОТ/app?startapp=${userData.id}`); tg.showAlert("Ссылка скопирована!"); }
+    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/БОТ/app?startapp=${userData.id}`); }
     function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
     socket.on('update_data', (u) => {
@@ -272,18 +213,17 @@
     socket.on('game_status', (data) => {
         const label = document.getElementById('timer-text');
         if (data.status === 'countdown') label.innerText = `СТАРТ ЧЕРЕЗ: ${data.timer}с`;
-        else if (data.status === 'running') label.innerText = `МЯЧ В ИГРЕ!`;
+        else if (data.status === 'running') label.innerText = `МАТЧ ИДЕТ!`;
         else label.innerText = `ОЖИДАНИЕ ИГРОКОВ...`;
     });
 
     socket.on('start_game_sequence', (data) => {
         ball.x = data.startX; ball.y = data.startY;
-        ball.vx = 0; ball.vy = 0;
-        ball.state = 'spawning';
+        ball.vx = 0; ball.vy = 0; ball.state = 'spawning';
         arrowAngle = 0;
         setTimeout(() => {
-            ball.vx = Math.cos(arrowAngle) * 10.5; 
-            ball.vy = Math.sin(arrowAngle) * 10.5;
+            ball.vx = Math.cos(arrowAngle) * 11; // Побыстрее старт
+            ball.vy = Math.sin(arrowAngle) * 11;
             ball.state = 'moving';
         }, 2000);
     });
@@ -302,9 +242,46 @@
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
+        generateTerritoryGrid(data.players);
         updatePlayersList(data.players);
         if (data.players.length === 0) ball.state = 'hidden';
     });
+
+    // Генерация случайной сетки (детерминированная)
+    function generateTerritoryGrid(players) {
+        if (!players || players.length === 0) { territoryGrid = []; return; }
+        const grid = [];
+        const size = 15; // 15x15 квадратов
+        const totalCells = size * size;
+        
+        // Создаем массив ID согласно шансам
+        let pool = [];
+        players.forEach(p => {
+            let cellsCount = Math.floor((p.chance / 100) * totalCells);
+            for(let i=0; i<cellsCount; i++) pool.push(p.id);
+        });
+        while(pool.length < totalCells) pool.push(players[0].id);
+
+        // Перемешиваем детерминировано (чтобы у всех одинаково)
+        let seed = 123;
+        function pseudoRandom() {
+            seed = (seed * 9301 + 49297) % 233280;
+            return seed / 233280;
+        }
+
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(pseudoRandom() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+
+        for(let y=0; y<size; y++) {
+            grid[y] = [];
+            for(let x=0; x<size; x++) {
+                grid[y][x] = pool[y * size + x];
+            }
+        }
+        territoryGrid = grid;
+    }
 
     function updatePlayersList(players) {
         const list = document.getElementById('players-list');
@@ -322,39 +299,47 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
         
-        let curX = 0;
-        arenaPlayers.forEach(p => {
-            let w = (p.chance / 100) * 300;
-            ctx.fillStyle = p.color; 
-            ctx.fillRect(curX, 0, w, 300);
-            
-            // Аватарки на территориях
-            const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
-            if (!imgCache[avaUrl]) {
-                imgCache[avaUrl] = new Image(); imgCache[avaUrl].src = avaUrl;
-            } else if (imgCache[avaUrl].complete && w > 24) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(curX + w/2, 150, 11, 0, Math.PI*2);
-                ctx.clip();
-                ctx.drawImage(imgCache[avaUrl], curX + w/2 - 11, 139, 22, 22);
-                ctx.restore();
+        if (territoryGrid.length > 0) {
+            const cellSize = 20; // 300 / 15
+            for(let y=0; y<15; y++) {
+                for(let x=0; x<15; x++) {
+                    const ownerId = territoryGrid[y][x];
+                    const player = arenaPlayers.find(p => p.id === ownerId);
+                    ctx.fillStyle = player ? player.color : '#111';
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
             }
-            curX += w;
-        });
+            
+            // Аватарки в центре (по одной для каждого игрока)
+            arenaPlayers.forEach(p => {
+                const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
+                if (!imgCache[avaUrl]) {
+                    imgCache[avaUrl] = new Image(); imgCache[avaUrl].src = avaUrl;
+                } else if (imgCache[avaUrl].complete) {
+                    // Ищем первый попавшийся квадрат игрока для аватарки (или центр)
+                    let found = false;
+                    for(let y=7; y<15 && !found; y++) {
+                        for(let x=0; x<15 && !found; x++) {
+                            if (territoryGrid[y][x] === p.id) {
+                                ctx.save(); ctx.beginPath();
+                                ctx.arc(x * 20 + 10, y * 20 + 10, 8, 0, Math.PI*2);
+                                ctx.clip(); ctx.drawImage(imgCache[avaUrl], x * 20 + 2, y * 20 + 2, 16, 16);
+                                ctx.restore();
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         if (ball.state !== 'hidden') {
             if (ball.state === 'spawning') {
                 arrowAngle += 0.12;
-                ctx.save();
-                ctx.translate(ball.x, ball.y);
-                ctx.rotate(arrowAngle);
-                ctx.beginPath();
-                ctx.moveTo(35, 0); ctx.lineTo(22, -10); ctx.lineTo(22, 10); ctx.closePath();
-                ctx.fillStyle = '#00ff66';
-                ctx.shadowBlur = 15; ctx.shadowColor = '#00ff66';
-                ctx.fill();
-                ctx.restore();
+                ctx.save(); ctx.translate(ball.x, ball.y); ctx.rotate(arrowAngle);
+                ctx.beginPath(); ctx.moveTo(35, 0); ctx.lineTo(22, -10); ctx.lineTo(22, 10); ctx.closePath();
+                ctx.fillStyle = '#00ff66'; ctx.shadowBlur = 15; ctx.shadowColor = '#00ff66';
+                ctx.fill(); ctx.restore();
             }
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
@@ -363,10 +348,10 @@
                 if (ball.y - ball.radius < 0 || ball.y + ball.radius > 300) ball.vy *= -1;
                 if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
                     ball.state = 'stopped';
-                    socket.emit('request_winner', { finalX: ball.x });
+                    socket.emit('request_winner', { finalX: ball.x, finalY: ball.y });
                 }
             }
-            ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.font = '18px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('⚽', ball.x, ball.y);
         }
         requestAnimationFrame(drawArena);
