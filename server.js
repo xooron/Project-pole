@@ -20,15 +20,32 @@ const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600'
 io.on('connection', (socket) => {
     socket.on('user_joined', (data) => {
         if (!db.users[data.id]) {
-            db.users[data.id] = { id: data.id, name: data.name, username: data.username, balance: 50.0, refBy: data.refBy, refCount: 0, refPending: 0 };
+            db.users[data.id] = { 
+                id: data.id, 
+                name: data.name, 
+                username: data.username, 
+                balance: 100.0, 
+                refBy: data.refBy, 
+                refCount: 0, 
+                refPending: 0,
+                walletAddress: null 
+            };
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
         broadcastData();
     });
 
+    socket.on('wallet_connected', (data) => {
+        const user = db.users[data.id];
+        if (user) {
+            user.walletAddress = "EQ...connected"; // Имитация адреса
+            broadcastData();
+        }
+    });
+
     socket.on('place_bet', (data) => {
         const user = db.users[data.id];
-        if (user && user.balance >= data.amount && gameStatus !== 'playing') {
+        if (user && user.balance >= data.amount && gameStatus !== 'playing' && user.walletAddress) {
             user.balance -= data.amount;
             if (user.refBy && db.users[user.refBy]) db.users[user.refBy].refPending += data.amount * 0.1;
 
@@ -39,9 +56,7 @@ io.on('connection', (socket) => {
             calculate();
             broadcastData();
 
-            if (players.length >= 2 && gameStatus === 'waiting') {
-                startCountdown();
-            }
+            if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
         }
     });
 
@@ -66,27 +81,21 @@ function startCountdown() {
     timerId = setInterval(() => {
         timer--;
         io.emit('timer_tick', timer);
-        if (timer <= 0) {
-            clearInterval(timerId);
-            startGame();
-        }
+        if (timer <= 0) { clearInterval(timerId); startGame(); }
     }, 1000);
 }
 
 function startGame() {
     gameStatus = 'playing';
-    // Сервер заранее считает победителя по шансам, но анимация на клиенте выглядит как рандом
     const rand = Math.random() * 100;
     let curr = 0, winner = players[0];
     for (const p of players) {
         curr += parseFloat(p.chance);
         if (rand <= curr) { winner = p; break; }
     }
-
     io.emit('start_game_animation', { winner });
-
     setTimeout(() => {
-        db.users[winner.id].balance += totalBank;
+        if (winner) db.users[winner.id].balance += totalBank;
         players = []; totalBank = 0; gameStatus = 'waiting';
         broadcastData();
     }, 16000); 
