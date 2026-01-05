@@ -56,6 +56,21 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Логика вывода
+    socket.on('withdraw_ton', (data) => {
+        const u = db.users[data.id];
+        const amt = parseFloat(data.amount);
+        if (!u) return;
+
+        if (amt >= 1 && u.balance >= amt) {
+            u.balance -= amt;
+            io.emit('update_data', db.users);
+            socket.emit('withdraw_response', { success: true, message: "Успешно!" });
+        } else {
+            socket.emit('withdraw_response', { success: false, message: "Не хватает средств!" });
+        }
+    });
+
     socket.on('request_winner', (data) => {
         if (gameStatus !== 'running') return;
         gameStatus = 'calculating';
@@ -117,5 +132,5 @@ function resetGame() {
 }
 
 server.listen(3000, () => {
-    console.log('Server running on port 3000');
+    console.log('Server is running on port 3000');
 });
