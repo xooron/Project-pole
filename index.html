@@ -82,7 +82,6 @@
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
 
-        /* PANEL PLAYERS */
         .players-list { display: flex; flex-direction: column; gap: 10px; }
         .player-row { 
             background: var(--card); border: 1px solid var(--border); padding: 12px 15px; 
@@ -120,7 +119,7 @@
     <main class="main-scroll">
         <section id="arena-page" class="page active">
             <div class="arena-info">
-                <span class="arena-label" id="timer-text">АРЕНА БИТВЫ</span>
+                <span class="arena-label" id="timer-text">ОЖИДАНИЕ ИГРОКОВ...</span>
                 <div class="arena-bank"><span id="total-bank">0.00</span> TON</div>
             </div>
             
@@ -137,10 +136,7 @@
                 <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">MAX</button>
             </div>
 
-            <!-- СПИСОК ИГРОКОВ -->
-            <div class="players-list" id="players-list">
-                <!-- Сюда добавляются игроки -->
-            </div>
+            <div class="players-list" id="players-list"></div>
         </section>
 
         <section id="profile-page" class="page">
@@ -198,6 +194,10 @@
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
+    
+    // Переменные для мяча
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, active: false, friction: 1 };
+    let arenaPlayers = [];
 
     socket.emit('user_joined', { 
         id: userData.id, 
@@ -230,10 +230,36 @@
         }
     });
 
+    socket.on('game_status', (data) => {
+        const label = document.getElementById('timer-text');
+        if (data.status === 'countdown') {
+            label.innerText = `НАЧАЛО ЧЕРЕЗ: ${data.timer} сек`;
+        } else if (data.status === 'running') {
+            label.innerText = `ИГРА ИДЕТ!`;
+        } else if (data.status === 'waiting') {
+            label.innerText = `ОЖИДАНИЕ ИГРОКОВ...`;
+        }
+    });
+
+    socket.on('start_ball', (data) => {
+        ball.x = data.startX;
+        ball.y = data.startY;
+        ball.vx = data.vx;
+        ball.vy = data.vy;
+        ball.active = true;
+        ball.friction = 1;
+
+        // Через 10 секунд плавно тормозим
+        setTimeout(() => {
+            ball.friction = 0.985;
+        }, 10000);
+    });
+
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
-        drawArena(data.players);
+        arenaPlayers = data.players;
         updatePlayersList(data.players);
+        if (!ball.active) drawArena();
     });
 
     function updatePlayersList(players) {
@@ -256,19 +282,19 @@
         });
     }
 
-    function drawArena(players) {
+    function drawArena() {
         const canvas = document.getElementById('arena-canvas');
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
         
-        if(players.length === 0) {
+        if(arenaPlayers.length === 0) {
             ctx.fillStyle = 'rgba(255,255,255,0.03)';
             ctx.fillRect(0, 0, 300, 300);
             return;
         }
 
         let currentX = 0;
-        players.forEach(p => {
+        arenaPlayers.forEach(p => {
             const width = (p.chance / 100) * 300;
             ctx.fillStyle = p.color;
             ctx.fillRect(currentX, 0, width, 300);
@@ -277,28 +303,56 @@
             if (!imgCache[avaUrl]) {
                 imgCache[avaUrl] = new Image();
                 imgCache[avaUrl].src = avaUrl;
-                imgCache[avaUrl].onload = () => drawArena(players);
             } else if (imgCache[avaUrl].complete) {
-                const size = Math.min(width * 0.6, 40);
-                if (size > 5) {
-                    const centerX = currentX + width / 2;
-                    const centerY = 150;
+                const size = Math.min(width * 0.5, 40);
+                if (size > 10) {
                     ctx.save();
                     ctx.beginPath();
-                    ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+                    ctx.arc(currentX + width/2, 150, size/2, 0, Math.PI*2);
                     ctx.clip();
-                    ctx.drawImage(imgCache[avaUrl], centerX - size / 2, centerY - size / 2, size, size);
+                    ctx.drawImage(imgCache[avaUrl], currentX + width/2 - size/2, 150 - size/2, size, size);
                     ctx.restore();
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
-                    ctx.stroke();
                 }
             }
             currentX += width;
         });
+
+        if (ball.active) {
+            // Физика мяча
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            ball.vx *= ball.friction;
+            ball.vy *= ball.friction;
+
+            // Отскоки
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > 300) {
+                ball.vx *= -1;
+                ball.x = ball.x < 150 ? ball.radius : 300 - ball.radius;
+            }
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > 300) {
+                ball.vy *= -1;
+                ball.y = ball.y < 150 ? ball.radius : 300 - ball.radius;
+            }
+
+            // Рисуем мяч
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#fff';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Остановка
+            if (Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1 && ball.friction < 1) {
+                ball.active = false;
+                socket.emit('check_winner', { finalX: ball.x });
+            }
+        }
+        requestAnimationFrame(drawArena);
     }
+    
+    drawArena();
 </script>
 </body>
 </html>
