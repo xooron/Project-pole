@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
         if (u && amt >= 1 && u.balance >= amt) {
             u.balance -= amt;
             io.emit('update_data', db.users);
-            socket.emit('withdraw_response', { success: true, message: "Успешно!" });
+            socket.emit('withdraw_response', { success: true, message: "Успешно! Ожидайте выплату." });
         } else {
             socket.emit('withdraw_response', { success: false, message: "Не хватает средств!" });
         }
