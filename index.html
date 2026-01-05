@@ -16,18 +16,25 @@
         :root { --neon: #00ff66; --bg: #030805; --card: #0d120f; --border: rgba(0, 255, 102, 0.12); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
+        
+        /* ЗАГРУЗОЧНЫЙ ЭКРАН */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .loader-logo { font-size: 32px; font-weight: 900; color: var(--neon); text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px; text-shadow: 0 0 20px var(--neon); }
+        .loader-bar { width: 200px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .loader-progress { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); animation: load 3s linear forwards; }
+        @keyframes load { to { width: 100%; } }
+
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
         
         /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
         
-        .add-bal-btn { 
-            background: var(--neon); color: #000; border: none; border-radius: 50%; 
-            width: 22px; height: 22px; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; 
-            margin-left: 5px; padding: 0; 
-        }
+        .add-bal-btn { background: var(--neon); color: #000; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 5px; padding: 0; }
         .add-bal-btn i { font-size: 11px; font-weight: 900; }
 
         /* MODALS */
@@ -42,20 +49,10 @@
 
         /* SOUND CONTROLS */
         .sound-controls { position: absolute; top: 10px; left: 10px; display: flex; gap: 8px; z-index: 200; }
-        .snd-btn { 
-            background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; 
-            width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; backdrop-filter: blur(4px); transition: 0.2s;
-        }
-        .snd-btn:active { transform: scale(0.9); }
+        .snd-btn { background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: 0.2s; }
 
         /* LUCKY NOTIF */
-        #lucky-notif { 
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            background: #ffcc00; color: #000; padding: 8px 20px; border-radius: 20px;
-            font-weight: 900; font-size: 13px; z-index: 200; display: none;
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); text-transform: uppercase;
-        }
+        #lucky-notif { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #ffcc00; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: 900; font-size: 13px; z-index: 200; display: none; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); text-transform: uppercase; }
 
         /* PROFILE */
         .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
@@ -68,20 +65,6 @@
         .wallet-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
         .btn-withdraw { background: #ff4500; color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase; height: 38px; }
 
-        .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
-        .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; }
-
-        .stat-group { margin-bottom: 15px; }
-        .stat-title { font-size: 10px; color: #5a6b61; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
-        .count-pill { background: rgba(255,255,255,0.03); border: 1px solid var(--border); width: fit-content; padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 18px; text-align: left; }
-        .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
-        .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-
         .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
 
         /* ARENA */
@@ -91,12 +74,7 @@
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
 
-        #winner-panel {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon);
-            color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%;
-            backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0, 255, 102, 0.4);
-        }
+        #winner-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon); color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0, 255, 102, 0.4); }
         #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
@@ -104,8 +82,7 @@
         
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
-
+        
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
         .nav-btn { flex: 1; text-align: center; color: #3d4a42; font-size: 10px; font-weight: 800; background: none; border: none; }
         .nav-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
@@ -114,8 +91,16 @@
 </head>
 <body onclick="startMusic()">
 
-<!-- АУДИО ТЕГ -->
-<audio id="stadium-bg" loop><source src="https://www.soundjay.com/misc/sounds/stadium-ambience-1.mp3" type="audio/mpeg"></audio>
+<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
+<div id="loading-screen">
+    <div class="loader-logo">ARENA GAME</div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+</div>
+
+<!-- ЗВУК СТАДИОНА (Обновленный источник) -->
+<audio id="stadium-bg" loop>
+    <source src="https://www.soundjay.com/misc/sounds/stadium-ambience-1.mp3" type="audio/mpeg">
+</audio>
 
 <div id="deposit-panel">
     <div class="glass-panel dep-box">
@@ -149,7 +134,6 @@
 
     <main class="main-scroll">
         <section id="arena-page" class="page active" style="position:relative;">
-            <!-- КНОПКИ ЗВУКА -->
             <div class="sound-controls">
                 <div class="snd-btn" id="mute-btn" onclick="toggleSound(true)"><i class="fa-solid fa-volume-high"></i></div>
                 <div class="snd-btn" id="unmute-btn" style="display:none;" onclick="toggleSound(false)"><i class="fa-solid fa-volume-xmark"></i></div>
@@ -220,14 +204,20 @@
     const socket = io();
     tg.ready(); tg.expand();
 
+    // ЗАГРУЗКА
+    setTimeout(() => {
+        document.getElementById('loading-screen').style.opacity = '0';
+        setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500);
+    }, 3000);
+
     let musicStarted = false;
     let isMuted = false;
 
     function startMusic() {
         if (!musicStarted) {
             const audio = document.getElementById('stadium-bg');
-            audio.volume = 0.05; // ТИХАЯ МУЗЫКА
-            audio.play().catch(() => {});
+            audio.volume = 0.05;
+            audio.play().catch(e => console.log("Audio play error:", e));
             musicStarted = true;
         }
     }
@@ -245,7 +235,7 @@
         buttonRootId: 'ton-connect-btn'
     });
 
-    const myAddress = "ВАШ_АДРЕС_КОШЕЛЬКА"; 
+    const myAddress = "UQBNvrPw9ZQLIFDqn5s9sFX_Jz-mL5nDv6WHkUgTsV8ek3Mi"; 
 
     function openDeposit() { document.getElementById('deposit-panel').style.display = 'flex'; }
     function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
@@ -331,7 +321,7 @@
     });
 
     socket.on('announce_winner', (data) => {
-        ball.state = 'hidden'; // ОЧИЩАЕМ МЯЧ ПРИ ПОЯВЛЕНИИ ПАНЕЛИ
+        ball.state = 'hidden'; 
         const panel = document.getElementById('winner-panel');
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
@@ -356,8 +346,8 @@
     }
 
     function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
-    function copyRef() { navigator.clipboard.writeText(`https://t.me/БОТ/app?startapp=${userData.id}`); tg.showAlert("Копировано!"); }
-    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/БОТ/app?startapp=${userData.id}`); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Копировано!"); }
+    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`); }
     function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
     function updatePlayersList(players) {
@@ -420,13 +410,11 @@
             } else if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
-                
                 if (ball.x < 8 || ball.x > 292) ball.vx *= -1;
                 if (ball.y < 8 || ball.y > 292) {
                     if (showGoals && ball.x > 115 && ball.x < 185) triggerLucky();
                     ball.vy *= -1;
                 }
-
                 if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
                     ball.state = 'stopped';
                     ball.vx = 0; ball.vy = 0; 
