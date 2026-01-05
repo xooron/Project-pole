@@ -2,19 +2,15 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const cors = require('cors'); // Обязательно: npm install cors
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Настройка CORS для TonConnect
 app.use(cors());
-
-// Раздача статики
 app.use(express.static(__dirname));
 
-// Принудительно отдаем манифест как JSON
 app.get('/tonconnect-manifest.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.sendFile(path.join(__dirname, 'tonconnect-manifest.json'));
@@ -50,7 +46,10 @@ io.on('connection', (socket) => {
                 p.amount += amount;
             } else {
                 players.push({ 
-                    id: u.id, username: u.username, amount: amount, 
+                    id: u.id, 
+                    username: u.username, 
+                    avatar: u.avatar, // Добавлено сохранение аватарки игрока
+                    amount: amount, 
                     color: COLORS[players.length % COLORS.length] 
                 });
             }
@@ -63,13 +62,9 @@ io.on('connection', (socket) => {
 
 function calculateChances() {
     totalBank = players.reduce((s, p) => s + p.amount, 0);
-    let currentPos = 0;
     players.forEach(p => {
         p.chance = (p.amount / totalBank) * 100;
-        p.startAngle = currentPos;
-        currentPos += (p.chance / 100) * 360;
-        p.endAngle = currentPos;
     });
 }
 
-server.listen(3000, () => console.log('Server started on port 3000 (with CORS)'));
+server.listen(3000, () => console.log('Server started on port 3000 (with Avatars Support)'));
