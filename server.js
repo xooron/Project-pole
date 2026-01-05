@@ -15,7 +15,8 @@ let players = [];
 let totalBank = 0;
 let gameStatus = 'waiting';
 
-const COLORS = ['#00ff66', '#ff00ff', '#8b00ff', '#00ffff', '#ffcc00', '#ff4500', '#adff2f'];
+// ТЁМНЫЕ ЦВЕТА СЕКТОРОВ
+const COLORS = ['#00441b', '#4a004a', '#2e0052', '#00474f', '#5e4b00', '#5e1900', '#415e11'];
 
 io.on('connection', (socket) => {
     socket.on('user_joined', (data) => {
@@ -93,7 +94,7 @@ function startCountdown() {
 function startGame() {
     gameStatus = 'running';
     const angle = Math.random() * Math.PI * 2;
-    io.emit('start_game_sequence', { vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12 });
+    io.emit('start_game_sequence', { vx: Math.cos(angle) * 11, vy: Math.sin(angle) * 11 });
 }
 
 function resetGame() {
