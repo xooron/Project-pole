@@ -22,7 +22,6 @@
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
         
-        /* НОРМАЛЬНЫЙ РОВНЫЙ ПЛЮСИК */
         .add-bal-btn { 
             background: var(--neon); color: #000; border: none; border-radius: 50%; 
             width: 22px; height: 22px; cursor: pointer; 
@@ -41,7 +40,15 @@
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PROFILE RESTORED */
+        /* LUCKY NOTIF */
+        #lucky-notif { 
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #ffcc00; color: #000; padding: 8px 20px; border-radius: 20px;
+            font-weight: 900; font-size: 13px; z-index: 200; display: none;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); text-transform: uppercase;
+        }
+
+        /* PROFILE */
         .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
         .profile-main { text-align: center; }
         .avatar-wrap { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #000; }
@@ -68,9 +75,8 @@
 
         .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
 
-        /* ARENA RESTORED */
+        /* ARENA */
         .arena-info { text-align: center; margin-bottom: 20px; }
-        .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
@@ -88,8 +94,7 @@
         
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
-
+        
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
         .nav-btn { flex: 1; text-align: center; color: #3d4a42; font-size: 10px; font-weight: 800; background: none; border: none; }
         .nav-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
@@ -119,6 +124,8 @@
     </div>
 </div>
 
+<div id="lucky-notif"></div>
+
 <div class="app-container">
     <header class="header">
         <div class="balance-pill">
@@ -131,7 +138,7 @@
     <main class="main-scroll">
         <section id="arena-page" class="page active">
             <div class="arena-info">
-                <span class="arena-label" id="timer-text">ОЖИДАНИЕ ИГРОКОВ...</span>
+                <span class="arena-label" id="timer-text">ОЖИДАНИЕ...</span>
                 <div class="arena-bank"><span id="total-bank">0.00</span> TON</div>
             </div>
             <div class="canvas-box">
@@ -215,11 +222,11 @@
     function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
     async function processDeposit() {
         const amt = parseFloat(document.getElementById('dep-amt').value);
-        if (!amt || amt < 1) { tg.showAlert("Минимальная сумма — 1 TON"); return; }
+        if (!amt || amt < 1) { tg.showAlert("Мин. 1 TON"); return; }
         if (!tonConnectUI.connected) { tg.showAlert("Подключите кошелек!"); return; }
         const nanoAmount = (amt * 1000000000).toString();
         const transaction = { validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: myAddress, amount: nanoAmount }] };
-        try { closeDeposit(); await tonConnectUI.sendTransaction(transaction); socket.emit('deposit_ton', { id: userData.id, amount: amt }); tg.showAlert("Транзакция отправлена!"); } catch (e) { console.error(e); }
+        try { closeDeposit(); await tonConnectUI.sendTransaction(transaction); socket.emit('deposit_ton', { id: userData.id, amount: amt }); } catch (e) {}
     }
 
     function openWithdraw() { document.getElementById('withdraw-panel').style.display = 'flex'; }
@@ -227,8 +234,7 @@
     function processWithdraw() {
         const amt = parseFloat(document.getElementById('wit-amt').value);
         const addr = document.getElementById('wit-addr').value;
-        if (amt >= 1 && addr.length > 10) { socket.emit('withdraw_ton', { id: userData.id, amount: amt, address: addr }); } 
-        else { tg.showAlert("Введите корректную сумму и адрес!"); }
+        if (amt >= 1 && addr.length > 10) socket.emit('withdraw_ton', { id: userData.id, amount: amt, address: addr });
     }
     socket.on('withdraw_response', (res) => { tg.showAlert(res.message); if (res.success) closeWithdraw(); });
 
@@ -236,20 +242,31 @@
     const imgCache = {};
     let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995 };
     let arenaPlayers = [];
+    let luckyUsedThisRound = false;
+    let showGoals = false;
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
-    function showTab(id, el) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id + '-page').classList.add('active');
-        document.querySelectorAll('.nav-btn').forEach(l => l.classList.remove('active'));
-        el.classList.add('active');
+    function triggerLucky() {
+        if (luckyUsedThisRound || !showGoals) return;
+        luckyUsedThisRound = true;
+        const types = ["shuffle", "stop", "ice"];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const notif = document.getElementById('lucky-notif');
+        if (type === "shuffle") {
+            notif.innerText = "🎲 ЛАКИ БЛОК: СМЕНА ТЕРРИТОРИЙ (3с)";
+            setTimeout(() => { arenaPlayers.sort(() => Math.random() - 0.5); }, 3000);
+        } else if (type === "stop") {
+            notif.innerText = "🛑 ЛАКИ БЛОК: РЕЗКИЙ СТОП (2с)";
+            setTimeout(() => { ball.vx = 0; ball.vy = 0; }, 2000);
+        } else {
+            notif.innerText = "⛸️ ЛАКИ БЛОК: СКОЛЬЗКИЙ ПОЛ";
+            ball.friction = 0.9998;
+            setTimeout(() => { ball.friction = 0.995; }, 4000);
+        }
+        notif.style.display = 'block';
+        setTimeout(() => { notif.style.display = 'none'; }, 4000);
     }
-
-    function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
-    function copyRef() { navigator.clipboard.writeText(`https://t.me/БОТ/app?startapp=${userData.id}`); tg.showAlert("Ссылка скопирована!"); }
-    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/БОТ/app?startapp=${userData.id}`); }
-    function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
     socket.on('update_data', (u) => {
         const me = u[userData.id];
@@ -272,6 +289,8 @@
 
     socket.on('start_game_sequence', (data) => {
         ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0; ball.state = 'spawning';
+        luckyUsedThisRound = false;
+        showGoals = Math.random() < 0.3; // 30% шанс на ворота
         setTimeout(() => { ball.vx = data.vx; ball.vy = data.vy; ball.state = 'moving'; ball.friction = 0.995; }, 2000);
     });
 
@@ -288,10 +307,22 @@
 
     socket.on('game_status', (data) => {
         const label = document.getElementById('timer-text');
-        if (data.status === 'countdown') label.innerText = `СТАРТ ЧЕРЕЗ: ${data.timer}с`;
-        else if (data.status === 'running') label.innerText = `БИТВА ИДЕТ!`;
-        else label.innerText = `ОЖИДАНИЕ ИГРОКОВ...`;
+        if (data.status === 'countdown') label.innerText = `СТАРТ: ${data.timer}с`;
+        else if (data.status === 'running') label.innerText = `БИТВА!`;
+        else label.innerText = `ОЖИДАНИЕ...`;
     });
+
+    function showTab(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id + '-page').classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(l => l.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Cкопировано!"); }
+    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`); }
+    function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
     function updatePlayersList(players) {
         const list = document.getElementById('players-list');
@@ -315,8 +346,27 @@
                 ctx.beginPath(); ctx.moveTo(150, 150);
                 ctx.arc(150, 150, 400, currentAngle, currentAngle + sliceAngle);
                 ctx.fillStyle = p.color; ctx.fill();
+
+                // РИСУЕМ АВАТАРКИ НА СЕКТОРАХ
+                const midAngle = currentAngle + sliceAngle / 2;
+                const ax = 150 + Math.cos(midAngle) * 85;
+                const ay = 150 + Math.sin(midAngle) * 85;
+                const avaSrc = p.avatar || 'https://pixsafe.online/i/mglZT';
+                if (!imgCache[avaSrc]) { imgCache[avaSrc] = new Image(); imgCache[avaSrc].src = avaSrc; }
+                else if (imgCache[avaSrc].complete && sliceAngle > 0.1) {
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(ax, ay, 14, 0, Math.PI * 2); ctx.clip();
+                    ctx.drawImage(imgCache[avaSrc], ax - 14, ay - 14, 28, 28);
+                    ctx.restore();
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+                }
                 currentAngle += sliceAngle;
             });
+        }
+
+        if (showGoals) {
+            ctx.fillStyle = "rgba(100,100,100,0.5)";
+            ctx.fillRect(115, 0, 70, 6); ctx.fillRect(115, 294, 70, 6); 
         }
 
         if (ball.state !== 'hidden') {
@@ -324,14 +374,15 @@
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
                 if (ball.x < 8 || ball.x > 292) ball.vx *= -1;
-                if (ball.y < 8 || ball.y > 292) ball.vy *= -1;
-
+                if (ball.y < 8 || ball.y > 292) {
+                    if (showGoals && ball.x > 115 && ball.x < 185) triggerLucky();
+                    ball.vy *= -1;
+                }
                 if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
                     ball.state = 'stopped';
                     const angle = Math.atan2(ball.y - 150, ball.x - 150);
                     const normalizedAngle = (angle + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
-                    let checkAngle = 0;
-                    let winner = arenaPlayers[0];
+                    let checkAngle = 0, winner = arenaPlayers[0];
                     for(let p of arenaPlayers) {
                         const slice = (p.chance / 100) * (Math.PI * 2);
                         if(normalizedAngle >= checkAngle && normalizedAngle < checkAngle + slice) { winner = p; break; }
