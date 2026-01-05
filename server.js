@@ -23,11 +23,10 @@ io.on('connection', (socket) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
                 id: data.id, name: data.name, username: data.username, 
-                balance: 100.0, refBy: data.refBy, refCount: 0, refPending: 0, address: null 
+                balance: 100.0, refBy: data.refBy, refCount: 0, refPending: 0, refTotal: 0, address: null 
             };
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
-        // Сразу отправляем данные пользователю
         socket.emit('update_data', { users: db.users });
         broadcastArena();
     });
@@ -69,6 +68,16 @@ io.on('connection', (socket) => {
             broadcastArena();
         }
     });
+
+    socket.on('claim_rewards', (data) => {
+        const u = db.users[data.id];
+        if (u && u.refPending > 0) {
+            u.balance += u.refPending;
+            u.refTotal += u.refPending;
+            u.refPending = 0;
+            socket.emit('update_data', { users: db.users });
+        }
+    });
 });
 
 function calc() {
@@ -90,4 +99,4 @@ function broadcastArena() {
     io.emit('update_arena', { players, totalBank, status: gameStatus });
 }
 
-server.listen(3000, () => console.log('Server started on port 3000'));
+server.listen(3000, () => console.log('Server started on 3000'));
