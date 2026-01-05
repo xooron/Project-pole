@@ -21,7 +21,26 @@
         /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
-        .add-bal-btn { background: var(--neon); color: #000; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 5px; }
+        
+        /* Исправленная кнопка плюсика */
+        .add-bal-btn { 
+            background: var(--neon); 
+            color: #000; 
+            border: none; 
+            border-radius: 50%; 
+            width: 24px; 
+            height: 24px; 
+            font-weight: 800; 
+            font-size: 18px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-left: 5px;
+            line-height: 1;
+            padding: 0;
+            padding-bottom: 2px; /* Микро-коррекция для центровки символа + */
+        }
 
         /* DEPOSIT MODAL */
         #deposit-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
@@ -189,24 +208,60 @@
         }
     }
 
-    // Логика пополнения
-    function openDeposit() { document.getElementById('deposit-panel').style.display = 'flex'; }
-    function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
-    function processDeposit() {
-        const amt = parseFloat(document.getElementById('dep-amt').value);
-        if (amt >= 1) {
-            socket.emit('deposit_ton', { id: userData.id, amount: amt });
-            closeDeposit();
-            tg.showAlert(`Запрос на пополнение ${amt} TON отправлен!`);
-        } else {
-            tg.showAlert("Минимальная сумма — 1 TON");
-        }
-    }
-
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: window.location.origin + '/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-btn'
     });
+
+    // --- ЛОГИКА ПОПОЛНЕНИЯ ЧЕРЕЗ TON CONNECT ---
+    const myAddress = "ВАШ_АДРЕС_КОШЕЛЬКА"; // <--- ЗАМЕНИ НА СВОЙ TON АДРЕС
+
+    function openDeposit() { document.getElementById('deposit-panel').style.display = 'flex'; }
+    function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
+
+    async function processDeposit() {
+        const amt = parseFloat(document.getElementById('dep-amt').value);
+        if (isNaN(amt) || amt < 1) {
+            tg.showAlert("Минимальная сумма — 1 TON");
+            return;
+        }
+
+        if (!tonConnectUI.connected) {
+            tg.showAlert("Сначала подключите кошелек во вкладке Профиль!");
+            closeDeposit();
+            showTab('profile', document.querySelectorAll('.nav-btn')[1]);
+            return;
+        }
+
+        // Переводим TON в нанотоны (1 TON = 10^9 Nanotons)
+        const nanoAmount = (amt * 1000000000).toString();
+
+        const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 600, // 10 минут на оплату
+            messages: [
+                {
+                    address: myAddress,
+                    amount: nanoAmount,
+                }
+            ]
+        };
+
+        try {
+            closeDeposit();
+            tg.showConfirm(`Открыть кошелек для перевода ${amt} TON?`, async (ok) => {
+                if (ok) {
+                    const result = await tonConnectUI.sendTransaction(transaction);
+                    // Если кошелек подтвердил отправку, уведомляем сервер
+                    socket.emit('deposit_ton', { id: userData.id, amount: amt });
+                    tg.showAlert("Транзакция отправлена в сеть!");
+                }
+            });
+        } catch (e) {
+            console.error(e);
+            tg.showAlert("Ошибка или отмена транзакции");
+        }
+    }
+    // ------------------------------------------
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
@@ -259,7 +314,7 @@
     });
 
     socket.on('announce_winner', (data) => {
-        ball.state = 'hidden'; // Скрываем и очищаем мяч
+        ball.state = 'hidden'; 
         const panel = document.getElementById('winner-panel');
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
