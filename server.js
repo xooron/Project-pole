@@ -22,11 +22,13 @@ io.on('connection', (socket) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
                 id: data.id, 
-                name: data.name || "Игрок", 
+                name: data.name, 
                 username: data.username || "user",
                 avatar: data.avatar || `https://ui-avatars.com/api/?name=${data.name}&background=00ff66&color=000`,
                 balance: 10.0, // Даем 10 ТОН при первом входе
                 refCount: 0, 
+                refPending: 0, 
+                refTotal: 0, 
                 address: null 
             };
         }
@@ -92,27 +94,26 @@ function startTimer() {
 
 function startGame() {
     gameStatus = 'playing';
-    const winningRandomAngle = Math.random() * 360; 
-    const winner = players.find(p => winningRandomAngle >= p.startAngle && winningRandomAngle < p.endAngle);
+    const winAngle = Math.random() * 360; 
+    const winner = players.find(p => winAngle >= p.startAngle && winAngle < p.endAngle);
 
-    io.emit('start_game_anim', { winningAngle: winningRandomAngle, winner });
+    io.emit('start_game_anim', { winningAngle: winAngle, winner });
 
     setTimeout(() => {
         finishGame(winner);
-    }, 13000); // 2с стрелка + 10с полет + запас
+    }, 13000); 
 }
 
 function finishGame(winner) {
     if (winner) {
         const u = db.users[winner.id];
-        const profit = totalBank - winner.amount; // Чистая прибыль (деньги других игроков)
-        const commission = profit * 0.05; // 5% от прибыли
+        const othersBets = totalBank - winner.amount;
+        const commission = othersBets * 0.05; // 5% только с чужих ставок
         const winAmount = totalBank - commission;
         
         u.balance += winAmount;
         io.emit('game_result', { winner, winAmount });
     }
-    
     players = [];
     totalBank = 0;
     gameStatus = 'waiting';
