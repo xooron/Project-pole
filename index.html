@@ -22,6 +22,7 @@
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
         
+        /* РОВНЫЙ ПЛЮСИК */
         .add-bal-btn { background: var(--neon); color: #000; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 5px; padding: 0; }
         .add-bal-btn i { font-size: 12px; font-weight: 900; }
 
@@ -35,14 +36,15 @@
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* LUCKY BLOCK NOTIFICATION */
+        /* LUCKY NOTIF */
         #lucky-notif { 
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             background: #ffcc00; color: #000; padding: 8px 20px; border-radius: 20px;
-            font-weight: 900; font-size: 14px; z-index: 200; display: none;
-            box-shadow: 0 0 20px #ffcc00; text-transform: uppercase;
+            font-weight: 900; font-size: 13px; z-index: 200; display: none;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); text-transform: uppercase;
         }
 
+        /* PROFILE */
         .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
         .profile-main { text-align: center; }
         .avatar-wrap { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #000; }
@@ -50,8 +52,8 @@
         .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
 
-        .wallet-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
-        .btn-withdraw { background: #ff4500; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; text-transform: uppercase; height: 40px; }
+        .wallet-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px; }
+        .btn-withdraw { background: #ff4500; color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase; height: 38px; }
 
         .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
 
@@ -62,7 +64,6 @@
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
 
-        /* WINNER PANEL */
         #winner-panel {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon);
@@ -72,7 +73,7 @@
         #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; cursor: pointer; }
+        .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
         
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
@@ -87,7 +88,6 @@
 
 <audio id="stadium-bg" loop><source src="https://www.soundjay.com/misc/sounds/stadium-ambience-1.mp3" type="audio/mpeg"></audio>
 
-<!-- Панель пополнения -->
 <div id="deposit-panel">
     <div class="glass-panel dep-box">
         <h2 style="font-weight: 900;">ПОПОЛНЕНИЕ</h2>
@@ -97,7 +97,6 @@
     </div>
 </div>
 
-<!-- Панель вывода -->
 <div id="withdraw-panel">
     <div class="glass-panel dep-box">
         <h2 style="font-weight: 900;">ВЫВОД TON</h2>
@@ -157,7 +156,7 @@
                 </div>
             </div>
             <div class="glass-panel">
-                <p class="ref-text">Приглашайте рефералов и получайте 10% от их комиссий</p>
+                <p class="ref-text">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
                 <div class="actions-row">
                     <button class="btn-sq" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn-invite-wide" onclick="invite()">Пригласить друзей</button>
@@ -219,7 +218,7 @@
     const imgCache = {};
     let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995 };
     let arenaPlayers = [];
-    let luckyActive = false;
+    let luckyUsedThisRound = false;
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
@@ -235,22 +234,27 @@
     function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/БОТ/app?startapp=${userData.id}`); }
     function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
-    function triggerLucky(type) {
+    function triggerLucky() {
+        if (luckyUsedThisRound) return;
+        luckyUsedThisRound = true;
+
+        const types = ["shuffle", "stop", "ice"];
+        const type = types[Math.floor(Math.random() * types.length)];
         const notif = document.getElementById('lucky-notif');
-        luckyActive = true;
-        if (type === 0) {
+        
+        if (type === "shuffle") {
             notif.innerText = "🎲 ЛАКИ БЛОК: СМЕНА ТЕРРИТОРИЙ (3с)";
-            setTimeout(() => { arenaPlayers.reverse(); }, 3000);
-        } else if (type === 1) {
+            setTimeout(() => { arenaPlayers.sort(() => Math.random() - 0.5); }, 3000);
+        } else if (type === "stop") {
             notif.innerText = "🛑 ЛАКИ БЛОК: РЕЗКИЙ СТОП (2с)";
             setTimeout(() => { ball.vx = 0; ball.vy = 0; }, 2000);
         } else {
             notif.innerText = "⛸️ ЛАКИ БЛОК: СКОЛЬЗКИЙ ПОЛ";
-            ball.friction = 0.9999;
+            ball.friction = 0.9998;
             setTimeout(() => { ball.friction = 0.995; }, 4000);
         }
         notif.style.display = 'block';
-        setTimeout(() => { notif.style.display = 'none'; luckyActive = false; }, 4000);
+        setTimeout(() => { notif.style.display = 'none'; }, 4000);
     }
 
     socket.on('update_data', (u) => {
@@ -271,6 +275,7 @@
 
     socket.on('start_game_sequence', (data) => {
         ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0; ball.state = 'spawning';
+        luckyUsedThisRound = false;
         setTimeout(() => { ball.vx = data.vx; ball.vy = data.vy; ball.state = 'moving'; ball.friction = 0.995; }, 2000);
     });
 
@@ -307,7 +312,6 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
 
-        // Рисуем сектора
         if (arenaPlayers.length > 0) {
             let currentAngle = -Math.PI / 2;
             arenaPlayers.forEach(p => {
@@ -319,24 +323,20 @@
             });
         }
 
-        // Ворота
-        ctx.fillStyle = "rgba(255,255,255,0.8)";
-        ctx.fillRect(110, 0, 80, 8); // Верхние
-        ctx.fillRect(110, 292, 80, 8); // Нижние
+        // Ворота (серые, неяркие)
+        ctx.fillStyle = "rgba(100,100,100,0.5)";
+        ctx.fillRect(115, 0, 70, 6); 
+        ctx.fillRect(115, 294, 70, 6); 
 
         if (ball.state !== 'hidden') {
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
 
-                // Столкновения со стенками
                 if (ball.x < 8 || ball.x > 292) ball.vx *= -1;
                 
-                // Столкновение с воротами или стенкой Y
                 if (ball.y < 8 || ball.y > 292) {
-                    if (ball.x > 110 && ball.x < 190 && !luckyActive) {
-                        triggerLucky(Math.floor(Math.random() * 3));
-                    }
+                    if (ball.x > 115 && ball.x < 185) triggerLucky();
                     ball.vy *= -1;
                 }
 
@@ -355,6 +355,7 @@
                 }
             }
             ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            // Используем Math.round для плавной отрисовки без тряски
             ctx.fillText('⚽', Math.round(ball.x), Math.round(ball.y));
         }
         requestAnimationFrame(draw);
