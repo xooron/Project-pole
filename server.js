@@ -15,7 +15,7 @@ let players = [];
 let totalBank = 0;
 let gameStatus = 'waiting';
 
-// ТЁМНЫЕ ЦВЕТА СЕКТОРОВ
+// ТЕМНЫЕ ЦВЕТА СЕКТОРОВ
 const COLORS = ['#00441b', '#4a004a', '#2e0052', '#00474f', '#5e4b00', '#5e1900', '#415e11'];
 
 io.on('connection', (socket) => {
@@ -25,6 +25,7 @@ io.on('connection', (socket) => {
                 id: data.id, name: data.name, username: data.username, avatar: data.avatar, 
                 balance: 100.0, refCount: 0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy 
             };
+            if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
         io.emit('update_data', db.users);
         socket.emit('update_arena', { players, totalBank });
@@ -69,10 +70,27 @@ io.on('connection', (socket) => {
         gameStatus = 'calculating';
         const winner = players.find(p => p.id === data.winnerId) || players[0];
         const winAmount = totalBank * 0.95;
-        if (db.users[winner.id]) db.users[winner.id].balance += winAmount;
+        if (db.users[winner.id]) {
+            db.users[winner.id].balance += winAmount;
+            // Реферальные 10% от 5% комиссии
+            players.forEach(p => {
+                const betUser = db.users[p.id];
+                if (betUser && betUser.referredBy && db.users[betUser.referredBy]) {
+                    db.users[betUser.referredBy].refPending += (p.amount * 0.05) * 0.1;
+                }
+            });
+        }
         io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
         io.emit('update_data', db.users);
         setTimeout(resetGame, 4000);
+    });
+
+    socket.on('claim_ref', (data) => {
+        const u = db.users[data.id];
+        if (u && u.refPending > 0) {
+            u.balance += u.refPending; u.refTotal += u.refPending; u.refPending = 0;
+            io.emit('update_data', db.users);
+        }
     });
 });
 
