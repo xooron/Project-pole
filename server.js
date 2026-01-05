@@ -15,7 +15,6 @@ let players = [];
 let totalBank = 0;
 let gameStatus = 'waiting';
 
-// ТЕМНЫЕ ЦВЕТА СЕКТОРОВ
 const COLORS = ['#00441b', '#4a004a', '#2e0052', '#00474f', '#5e4b00', '#5e1900', '#415e11'];
 
 io.on('connection', (socket) => {
@@ -72,7 +71,6 @@ io.on('connection', (socket) => {
         const winAmount = totalBank * 0.95;
         if (db.users[winner.id]) {
             db.users[winner.id].balance += winAmount;
-            // Реферальные 10% от 5% комиссии
             players.forEach(p => {
                 const betUser = db.users[p.id];
                 if (betUser && betUser.referredBy && db.users[betUser.referredBy]) {
