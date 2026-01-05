@@ -14,9 +14,8 @@ let db = { users: {} };
 let players = [];
 let totalBank = 0;
 let gameStatus = 'waiting';
-let currentSeed = Math.random();
 
-const COLORS = ['#00ff66', '#ff00ff', '#8b00ff', '#00ffff', '#ffcc00'];
+const COLORS = ['#00ff66', '#ff00ff', '#8b00ff', '#00ffff', '#ffcc00', '#ff4500', '#adff2f'];
 
 io.on('connection', (socket) => {
     socket.on('user_joined', (data) => {
@@ -28,7 +27,7 @@ io.on('connection', (socket) => {
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
         io.emit('update_data', db.users);
-        socket.emit('update_arena', { players, totalBank, seed: currentSeed });
+        socket.emit('update_arena', { players, totalBank });
     });
 
     socket.on('place_bet', (data) => {
@@ -44,29 +43,43 @@ io.on('connection', (socket) => {
         
         updateChances();
         io.emit('update_data', db.users);
-        io.emit('update_arena', { players, totalBank, seed: currentSeed });
+        io.emit('update_arena', { players, totalBank });
         if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
     });
 
     socket.on('request_winner', (data) => {
         if (gameStatus !== 'running') return;
         gameStatus = 'calculating';
-        // Победитель определяется по координатам остановки мяча (на чьей территории встал)
-        io.emit('announce_winner', { 
-            winner: data.winner, 
-            bank: totalBank * 0.95, 
-            winnerBet: data.winnerBet 
+        
+        const winner = players.find(p => p.id === data.winnerId) || players[0];
+        const winAmount = totalBank * 0.95;
+        db.users[winner.id].balance += winAmount;
+
+        // Реферальные
+        players.forEach(p => {
+            const user = db.users[p.id];
+            if (user.referredBy && db.users[user.referredBy]) {
+                db.users[user.referredBy].refPending += (p.amount * 0.05) * 0.1;
+            }
         });
-        db.users[data.winner.id].balance += totalBank * 0.95;
+
+        io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
         io.emit('update_data', db.users);
         setTimeout(resetGame, 4000);
+    });
+
+    socket.on('claim_ref', (data) => {
+        const u = db.users[data.id];
+        if (u && u.refPending > 0) {
+            u.balance += u.refPending; u.refTotal += u.refPending; u.refPending = 0;
+            io.emit('update_data', db.users);
+        }
     });
 });
 
 function updateChances() {
     totalBank = players.reduce((s, p) => s + p.amount, 0);
     players.forEach(p => p.chance = (p.amount / totalBank) * 100);
-    // Сортируем: самый богатый в начало (для центра)
     players.sort((a, b) => b.amount - a.amount);
 }
 
@@ -85,14 +98,13 @@ function startGame() {
     const angle = Math.random() * Math.PI * 2;
     io.emit('start_game_sequence', {
         startX: 150, startY: 150,
-        vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12
+        vx: Math.cos(angle) * 11, vy: Math.sin(angle) * 11
     });
 }
 
 function resetGame() {
     players = []; totalBank = 0; gameStatus = 'waiting';
-    currentSeed = Math.random();
-    io.emit('update_arena', { players, totalBank, seed: currentSeed });
+    io.emit('update_arena', { players, totalBank });
     io.emit('game_status', { status: 'waiting' });
 }
 
