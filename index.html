@@ -78,9 +78,22 @@
         .canvas-box { position: relative; width: 260px; height: 260px; margin: 0 auto 30px; border: 2px solid var(--border); border-radius: 20px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; }
 
-        .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
+
+        /* PANEL PLAYERS */
+        .players-list { display: flex; flex-direction: column; gap: 10px; }
+        .player-row { 
+            background: var(--card); border: 1px solid var(--border); padding: 12px 15px; 
+            border-radius: 16px; display: flex; align-items: center; gap: 12px; 
+        }
+        .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+        .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
+        .p-user { font-size: 14px; font-weight: 800; color: #fff; }
+        .p-bet-info { text-align: right; }
+        .p-amount { font-size: 14px; font-weight: 800; display: block; }
+        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; }
 
         .nav-bar { 
             position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; 
@@ -122,6 +135,11 @@
                 <button class="b-btn" onclick="makeBet(10)">10</button>
                 <button class="b-btn" onclick="makeBet(50)">50</button>
                 <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">MAX</button>
+            </div>
+
+            <!-- СПИСОК ИГРОКОВ -->
+            <div class="players-list" id="players-list">
+                <!-- Сюда добавляются игроки -->
             </div>
         </section>
 
@@ -179,7 +197,7 @@
     });
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
-    const imgCache = {}; // Кэш для аватарок
+    const imgCache = {};
 
     socket.emit('user_joined', { 
         id: userData.id, 
@@ -215,7 +233,28 @@
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         drawArena(data.players);
+        updatePlayersList(data.players);
     });
+
+    function updatePlayersList(players) {
+        const list = document.getElementById('players-list');
+        list.innerHTML = '';
+        players.sort((a, b) => b.amount - a.amount).forEach(p => {
+            const row = document.createElement('div');
+            row.className = 'player-row';
+            row.innerHTML = `
+                <img src="${p.avatar || 'https://pixsafe.online/i/mglZT'}" class="p-ava">
+                <div class="p-info">
+                    <span class="p-user">@${p.username}</span>
+                    <div class="p-bet-info">
+                        <span class="p-amount">${p.amount.toFixed(2)} TON</span>
+                        <span class="p-percent">${p.chance.toFixed(1)}%</span>
+                    </div>
+                </div>
+            `;
+            list.appendChild(row);
+        });
+    }
 
     function drawArena(players) {
         const canvas = document.getElementById('arena-canvas');
@@ -231,31 +270,25 @@
         let currentX = 0;
         players.forEach(p => {
             const width = (p.chance / 100) * 300;
-            
-            // Отрисовка территории
             ctx.fillStyle = p.color;
             ctx.fillRect(currentX, 0, width, 300);
 
-            // Отрисовка аватарки в центре территории
             const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
             if (!imgCache[avaUrl]) {
                 imgCache[avaUrl] = new Image();
                 imgCache[avaUrl].src = avaUrl;
                 imgCache[avaUrl].onload = () => drawArena(players);
             } else if (imgCache[avaUrl].complete) {
-                const size = Math.min(width * 0.6, 40); // Размер аватарки
+                const size = Math.min(width * 0.6, 40);
                 if (size > 5) {
                     const centerX = currentX + width / 2;
                     const centerY = 150;
-
                     ctx.save();
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
                     ctx.clip();
                     ctx.drawImage(imgCache[avaUrl], centerX - size / 2, centerY - size / 2, size, size);
                     ctx.restore();
-                    
-                    // Ободок аватарки
                     ctx.strokeStyle = '#fff';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
