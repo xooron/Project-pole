@@ -18,8 +18,15 @@
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
         
+        /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
-        .balance-pill { background: #111814; padding: 8px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; }
+        .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
+        .add-bal-btn { background: var(--neon); color: #000; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 5px; }
+
+        /* DEPOSIT MODAL */
+        #deposit-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .dep-box { width: 85%; padding: 30px; text-align: center; }
+        .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 18px; font-weight: 800; text-align: center; margin: 20px 0; outline: none; }
 
         .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
         .page { display: none; }
@@ -48,7 +55,7 @@
         .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
         .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
 
-        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; }
+        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
 
         /* ARENA */
         .arena-info { text-align: center; margin-bottom: 20px; }
@@ -73,11 +80,9 @@
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; cursor: pointer; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
 
-        .players-list { display: flex; flex-direction: column; gap: 10px; }
-        .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
+        .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
         .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
-        .p-amount { font-size: 14px; font-weight: 800; }
         .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; margin-left: 12px; }
 
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
@@ -91,9 +96,24 @@
 
 <audio id="stadium-bg" loop><source src="https://www.soundjay.com/misc/sounds/stadium-ambience-1.mp3" type="audio/mpeg"></audio>
 
+<!-- Панель пополнения -->
+<div id="deposit-panel">
+    <div class="glass-panel dep-box">
+        <h2 style="font-weight: 900;">ПОПОЛНЕНИЕ</h2>
+        <p style="font-size: 12px; color: #5a6b61; margin-top: 5px;">Введите сумму (мин. 1 TON)</p>
+        <input type="number" id="dep-amt" class="dep-input" placeholder="0.00" min="1">
+        <button class="btn-claim" onclick="processDeposit()">ПОПОЛНИТЬ</button>
+        <button class="btn-claim" style="background:none; color:#fff; border:1px solid var(--border); margin-top:10px;" onclick="closeDeposit()">ОТМЕНА</button>
+    </div>
+</div>
+
 <div class="app-container">
     <header class="header">
-        <div class="balance-pill"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="18"> <span id="user-bal">0.00</span></div>
+        <div class="balance-pill">
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="18"> 
+            <span id="user-bal">0.00</span>
+            <button class="add-bal-btn" onclick="openDeposit()">+</button>
+        </div>
     </header>
 
     <main class="main-scroll">
@@ -169,6 +189,20 @@
         }
     }
 
+    // Логика пополнения
+    function openDeposit() { document.getElementById('deposit-panel').style.display = 'flex'; }
+    function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
+    function processDeposit() {
+        const amt = parseFloat(document.getElementById('dep-amt').value);
+        if (amt >= 1) {
+            socket.emit('deposit_ton', { id: userData.id, amount: amt });
+            closeDeposit();
+            tg.showAlert(`Запрос на пополнение ${amt} TON отправлен!`);
+        } else {
+            tg.showAlert("Минимальная сумма — 1 TON");
+        }
+    }
+
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: window.location.origin + '/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-btn'
@@ -176,7 +210,6 @@
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
-    // Трение 0.995 + скорость 15 = ~17 секунд полета
     let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 7, state: 'hidden', friction: 0.995 };
     let arrowAngle = 0;
     let arenaPlayers = [];
@@ -226,6 +259,7 @@
     });
 
     socket.on('announce_winner', (data) => {
+        ball.state = 'hidden'; // Скрываем и очищаем мяч
         const panel = document.getElementById('winner-panel');
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
@@ -261,15 +295,12 @@
             let currentAngle = -Math.PI / 2;
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * (Math.PI * 2);
-                
-                // Рисуем сектор (Радиальный треугольник)
                 ctx.beginPath();
                 ctx.moveTo(150, 150);
                 ctx.arc(150, 150, 400, currentAngle, currentAngle + sliceAngle);
                 ctx.fillStyle = p.color;
                 ctx.fill();
 
-                // Аватарка в центре сектора
                 const midAngle = currentAngle + sliceAngle / 2;
                 const ax = 150 + Math.cos(midAngle) * 80;
                 const ay = 150 + Math.sin(midAngle) * 80;
@@ -295,7 +326,6 @@
                 ctx.rotate(arrowAngle);
                 ctx.beginPath();
                 ctx.moveTo(40, 0); ctx.lineTo(25, -12); ctx.lineTo(25, 12); ctx.closePath();
-                // Белая стрелка с черной обводкой
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
@@ -311,7 +341,6 @@
                     ball.state = 'stopped';
                     const angle = Math.atan2(ball.y - 150, ball.x - 150);
                     const normalizedAngle = (angle + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
-                    
                     let checkAngle = 0;
                     let winner = arenaPlayers[0];
                     for(let p of arenaPlayers) {
