@@ -67,8 +67,8 @@
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         
-        .canvas-box { position: relative; width: 260px; height: 260px; margin: 0 auto 30px; border: 2px solid var(--border); border-radius: 20px; overflow: hidden; background: #000; }
-        #arena-canvas { width: 100%; height: 100%; }
+        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; box-shadow: 0 0 20px rgba(0, 255, 102, 0.05); }
+        #arena-canvas { width: 100%; height: 100%; display: block; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; }
@@ -82,16 +82,26 @@
         .p-amount { font-size: 14px; font-weight: 800; }
         .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; }
 
-        /* WINNER PANEL */
+        /* WINNER PANEL STYLED */
         #winner-panel {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #fff; color: #000; padding: 20px; border-radius: 20px;
-            text-align: center; z-index: 100; display: none; width: 85%;
-            box-shadow: 0 0 40px var(--neon);
+            background: rgba(13, 18, 15, 0.95); 
+            border: 2px solid var(--neon);
+            color: #fff; padding: 25px; border-radius: 30px;
+            text-align: center; z-index: 100; display: none; width: 80%;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0, 255, 102, 0.3);
+            animation: panelIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        #winner-panel img { width: 65px; height: 65px; border-radius: 50%; border: 3px solid #000; margin-bottom: 10px; }
-        #winner-panel h2 { font-weight: 900; font-size: 16px; }
-        #winner-panel p { font-weight: 900; font-size: 24px; }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translate(-50%, -40%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; box-shadow: 0 0 15px var(--neon); }
+        #winner-panel h2 { font-weight: 900; font-size: 14px; color: var(--neon); text-transform: uppercase; margin-bottom: 5px; }
+        #winner-panel .win-user { font-size: 18px; font-weight: 800; margin-bottom: 10px; display: block; }
+        #winner-panel .win-multiplier { background: var(--neon); color: #000; padding: 4px 12px; border-radius: 10px; font-size: 16px; font-weight: 900; margin-bottom: 10px; display: inline-block; }
+        #winner-panel p { font-weight: 900; font-size: 26px; color: #fff; }
 
         /* NAV */
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
@@ -113,7 +123,6 @@
     </header>
 
     <main class="main-scroll">
-        <!-- ARENA -->
         <section id="arena-page" class="page active">
             <div class="arena-info">
                 <span class="arena-label" id="timer-text">ОЖИДАНИЕ ИГРОКОВ...</span>
@@ -124,7 +133,9 @@
                 <canvas id="arena-canvas" width="300" height="300"></canvas>
                 <div id="winner-panel">
                     <img id="win-ava" src="">
-                    <h2 id="win-name">ПОБЕДИТЕЛЬ!</h2>
+                    <h2 id="win-title">ПОБЕДИТЕЛЬ!</h2>
+                    <span class="win-user" id="win-name">@username</span>
+                    <div><span class="win-multiplier" id="win-x">x0.0</span></div>
                     <p id="win-sum">0.00 TON</p>
                 </div>
             </div>
@@ -141,7 +152,6 @@
             <div class="players-list" id="players-list"></div>
         </section>
 
-        <!-- PROFILE -->
         <section id="profile-page" class="page">
             <div class="glass-panel profile-main">
                 <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
@@ -201,7 +211,13 @@
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const startParam = tg.initDataUnsafe.start_param || null;
     const imgCache = {};
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 1 };
+    
+    // Мяч и физика
+    let ball = { 
+        x: 150, y: 150, vx: 0, vy: 0, 
+        radius: 12, state: 'hidden', 
+        friction: 0.993 // Настроено для полета ~10 секунд
+    };
     let arenaPlayers = [];
 
     socket.emit('user_joined', { 
@@ -254,18 +270,14 @@
     socket.on('game_status', (data) => {
         const label = document.getElementById('timer-text');
         if (data.status === 'countdown') label.innerText = `СТАРТ ЧЕРЕЗ: ${data.timer}с`;
-        else if (data.status === 'running') label.innerText = `БИТВА ИДЕТ!`;
+        else if (data.status === 'running') label.innerText = `МЯЧ В ИГРЕ!`;
         else label.innerText = `ОЖИДАНИЕ ИГРОКОВ...`;
     });
 
     socket.on('start_game_sequence', (data) => {
         ball.x = data.startX; ball.y = data.startY;
         ball.vx = data.vx; ball.vy = data.vy;
-        ball.state = 'spawning';
-        setTimeout(() => {
-            ball.state = 'moving';
-            ball.friction = 0.992;
-        }, 2000);
+        ball.state = 'moving';
     });
 
     socket.on('announce_winner', (data) => {
@@ -273,8 +285,13 @@
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
         document.getElementById('win-sum').innerText = `+${data.bank.toFixed(2)} TON`;
+        
+        // Расчет Икса
+        const multiplier = (data.bank / data.winnerBet).toFixed(1);
+        document.getElementById('win-x').innerText = `x${multiplier}`;
+        
         panel.style.display = 'block';
-        setTimeout(() => { panel.style.display = 'none'; }, 3000);
+        setTimeout(() => { panel.style.display = 'none'; }, 4000);
     });
 
     socket.on('update_arena', (data) => {
@@ -299,6 +316,7 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
         
+        // Фон арены (сектора игроков)
         if(arenaPlayers.length === 0) {
             ctx.fillStyle = 'rgba(255,255,255,0.03)';
             ctx.fillRect(0, 0, 300, 300);
@@ -311,27 +329,42 @@
                 const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
                 if (!imgCache[avaUrl]) {
                     imgCache[avaUrl] = new Image(); imgCache[avaUrl].src = avaUrl;
-                } else if (imgCache[avaUrl].complete && w > 15) {
-                    ctx.save(); ctx.beginPath(); ctx.arc(curX + w/2, 150, 10, 0, Math.PI*2); ctx.clip();
-                    ctx.drawImage(imgCache[avaUrl], curX + w/2 - 10, 140, 20, 20); ctx.restore();
+                } else if (imgCache[avaUrl].complete && w > 20) {
+                    ctx.save(); ctx.beginPath(); ctx.arc(curX + w/2, 150, 12, 0, Math.PI*2); ctx.clip();
+                    ctx.drawImage(imgCache[avaUrl], curX + w/2 - 12, 138, 24, 24); ctx.restore();
                 }
                 curX += w;
             });
         }
 
+        // Отрисовка футбольного мяча
         if (ball.state !== 'hidden') {
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
-                if (ball.x - ball.radius < 0 || ball.x + ball.radius > 300) ball.vx *= -1;
-                if (ball.y - ball.radius < 0 || ball.y + ball.radius > 300) ball.vy *= -1;
-                if (Math.abs(ball.vx) < 0.15 && Math.abs(ball.vy) < 0.15) {
+                
+                // Отскоки от стенок
+                if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -1; }
+                if (ball.x + ball.radius > 300) { ball.x = 300 - ball.radius; ball.vx *= -1; }
+                if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -1; }
+                if (ball.y + ball.radius > 300) { ball.y = 300 - ball.radius; ball.vy *= -1; }
+
+                // Плавная остановка (если скорость стала мизерной)
+                if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
                     ball.state = 'stopped';
-                    setTimeout(() => { socket.emit('request_winner', { finalX: ball.x }); ball.state = 'hidden'; }, 2000);
+                    socket.emit('request_winner', { finalX: ball.x });
+                    setTimeout(() => { ball.state = 'hidden'; }, 1000);
                 }
             }
-            ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fillStyle = '#fff';
-            ctx.shadowBlur = 15; ctx.shadowColor = '#fff'; ctx.fill(); ctx.shadowBlur = 0;
+
+            // Рисуем мяч через эмодзи для простоты и красоты
+            ctx.font = '24px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.fillText('⚽', ball.x, ball.y);
+            ctx.shadowBlur = 0;
         }
         requestAnimationFrame(drawArena);
     }
