@@ -17,27 +17,27 @@
         .header { padding: 10px 15px; display: flex; justify-content: flex-end; }
         .balance-pill { background: var(--panel); padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; }
 
-        .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 100px; }
+        .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 100px; scroll-behavior: smooth; }
         .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ПРОФИЛЬ (УМЕНЬШЕННЫЙ) */
+        /* ПРОФИЛЬ КОМПАКТНЫЙ */
         .glass-panel { background: var(--panel); border-radius: 20px; padding: 15px; border: 1px solid var(--border); margin-bottom: 12px; backdrop-filter: blur(10px); }
-        .profile-card { text-align: center; }
-        .avatar-frame { width: 65px; height: 65px; margin: 0 auto 8px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #111; overflow: hidden; }
+        .profile-card { text-align: center; padding: 10px; }
+        .avatar-frame { width: 60px; height: 60px; margin: 0 auto 8px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #111; overflow: hidden; }
         .avatar-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .nick { font-size: 18px; font-weight: 800; }
-        .tag { font-size: 11px; color: var(--neon); opacity: 0.7; margin-top: 2px; text-transform: lowercase; }
+        .nick { font-size: 16px; font-weight: 800; }
+        .tag { font-size: 11px; color: var(--neon); opacity: 0.7; text-transform: lowercase; }
 
-        .ref-title { font-size: 13px; line-height: 1.3; margin-bottom: 12px; }
-        .ref-actions { display: flex; gap: 8px; margin-bottom: 15px; }
-        .btn-copy { width: 45px; height: 45px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-size: 18px; }
-        .btn-invite-main { flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; font-size: 12px; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .stat-box { background: var(--card-bg); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-label { font-size: 9px; color: #777; margin-bottom: 4px; display: block; }
-        .btn-claim-ton { width: 100%; margin-top: 12px; background: #fff; color: #000; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 12px; }
+        .ref-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-copy { width: 40px; height: 40px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; color: #fff; }
+        .btn-invite-main { flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-weight: 800; font-size: 11px; }
+        
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .stat-box { background: var(--card-bg); border-radius: 10px; padding: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-label { font-size: 8px; color: #777; margin-bottom: 2px; display: block; }
+        .btn-claim-ton { width: 100%; margin-top: 10px; background: #fff; color: #000; border: none; padding: 10px; border-radius: 10px; font-weight: 800; font-size: 11px; }
 
         /* АРЕНА */
         .arena-status-wrap { text-align: center; margin-bottom: 10px; }
@@ -47,15 +47,23 @@
 
         .stadium { width: 100%; aspect-ratio: 1/1.1; background: #020503; border: 2px solid #141a16; border-radius: 25px; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: inset 0 0 40px #000; }
         .territory { width: 100%; transition: height 0.5s ease; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .t-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #fff; z-index: 5; }
+        .t-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #fff; z-index: 5; opacity: 0.6; }
 
-        #ball { position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; z-index: 100; display: none; box-shadow: 0 0 15px #fff; border: 2px solid #000; }
-        #arrow { position: absolute; width: 35px; height: 3px; background: var(--neon); border-radius: 2px; transform-origin: left center; z-index: 99; display: none; box-shadow: 0 0 10px var(--neon); }
+        #ball { position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; z-index: 100; display: none; box-shadow: 0 0 15px #fff; border: 2px solid #000; transition: transform 0.1s linear; }
+        #arrow { position: absolute; width: 40px; height: 4px; background: var(--neon); border-radius: 2px; transform-origin: left center; z-index: 99; display: none; box-shadow: 0 0 10px var(--neon); }
 
         .bet-panel { background: var(--panel); border-radius: 20px; padding: 12px; border: 1px solid var(--border); margin-top: 15px; }
         .bet-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .bet-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,102,0.1); color: #fff; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; transition: 0.2s; }
         .bet-btn:active { background: var(--neon); color: #000; transform: scale(0.95); }
+
+        /* СПИСОК ИГРОКОВ */
+        .player-card { background: var(--panel); padding: 8px; border-radius: 12px; display: flex; align-items: center; gap: 8px; border-left: 3px solid transparent; }
+        .p-ava { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); }
+        .p-info { flex: 1; }
+        .p-info span { font-size: 10px; color: #aaa; text-transform: lowercase; display: block; }
+        .p-info b { font-size: 11px; color: #fff; }
+        .p-bet { font-size: 11px; font-weight: 800; color: var(--neon); }
 
         .nav-dock { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 70px; background: rgba(5,8,6,0.98); border-radius: 35px; display: flex; align-items: center; border: 1px solid var(--border); backdrop-filter: blur(15px); }
         .nav-link { flex: 1; text-align: center; color: #444; font-size: 9px; display: flex; flex-direction: column; align-items: center; background: none; border: none; font-weight: 800; }
@@ -77,16 +85,15 @@
                 <h1 class="nick" id="u-nick">...</h1>
                 <div class="tag" id="u-tag">@username</div>
             </div>
-
             <div class="glass-panel">
-                <p class="ref-title">РЕФЕРАЛЬНАЯ СИСТЕМА <span style="color:var(--neon)">10%</span></p>
+                <span class="stat-label">РЕФЕРАЛЬНАЯ СИСТЕМА</span>
                 <div class="ref-actions">
                     <button class="btn-copy" onclick="copyRefLink()"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn-invite-main" onclick="inviteFriends()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
                 </div>
                 <div class="stat-grid">
-                    <div class="stat-box"><span class="stat-label">РЕФЕРАЛЫ</span><b id="ref-count" style="font-size:16px">0</b></div>
-                    <div class="stat-box"><span class="stat-label">ДОСТУПНО</span><div style="display:flex;align-items:center;gap:4px"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:12px"><b id="ref-pending">0.00</b></div></div>
+                    <div class="stat-box"><span class="stat-label">РЕФЕРАЛЫ</span><b id="ref-count">0</b></div>
+                    <div class="stat-box"><span class="stat-label">ДОСТУПНО</span><div style="display:flex;align-items:center;gap:4px"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:10px"><b id="ref-pending">0.00</b></div></div>
                 </div>
                 <button class="btn-claim-ton" onclick="claimRewards()">ЗАЧИСЛИТЬ TON</button>
             </div>
@@ -95,14 +102,12 @@
         <section id="arena-page" class="page">
             <div class="arena-status-wrap">
                 <div id="status-top">ОЖИДАНИЕ СТАВОК</div>
-                <div class="bank-pill">ОБЩИЙ БАНК: <b id="total-bank">0.00</b> <span style="font-size:12px">TON</span></div>
+                <div class="bank-pill">ОБЩИЙ БАНК: <b id="total-bank">0.00</b> <span style="font-size:10px">TON</span></div>
             </div>
-
             <div class="stadium" id="stadium">
                 <div id="arrow"></div>
                 <div id="ball"></div>
             </div>
-
             <div class="bet-panel">
                 <div class="bet-grid">
                     <button class="bet-btn" onclick="makeBet(1)">1 TON</button>
@@ -110,8 +115,7 @@
                     <button class="bet-btn" onclick="makeBet(10)">10 TON</button>
                 </div>
             </div>
-            
-            <div id="player-list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"></div>
+            <div id="player-list" style="display:grid; grid-template-columns: 1fr; gap:6px; margin-top:10px"></div>
         </section>
     </main>
 
@@ -124,7 +128,7 @@
 <script>
     const tg = window.Telegram.WebApp;
     const socket = io();
-    const user = tg.initDataUnsafe.user || { id: 123, first_name: "Игрок", username: "user" };
+    const user = tg.initDataUnsafe.user || { id: 777, first_name: "Игрок", username: "user" };
     
     socket.emit('user_joined', { id: user.id, name: user.first_name, username: user.username, refBy: tg.initDataUnsafe.start_param });
 
@@ -140,8 +144,8 @@
     }
 
     function makeBet(amt) { socket.emit('place_bet', { id: user.id, amount: amt }); tg.HapticFeedback.impactOccurred('medium'); }
-    function copyRefLink() { navigator.clipboard.writeText(`https://t.me/YOUR_BOT?start=${user.id}`); tg.showAlert("Копировано!"); }
-    function inviteFriends() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/YOUR_BOT?start=${user.id}&text=Играй со мной!`); }
+    function copyRefLink() { navigator.clipboard.writeText(`https://t.me/YOUR_BOT?start=${user.id}`); tg.showAlert("Ссылка скопирована!"); }
+    function inviteFriends() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/YOUR_BOT?start=${user.id}&text=Давай играть!`); }
     function claimRewards() { socket.emit('claim_rewards', { id: user.id }); }
 
     socket.on('update_data', (data) => {
@@ -157,8 +161,6 @@
         document.getElementById('total-bank').innerText = state.totalBank.toFixed(2);
         const stadium = document.getElementById('stadium');
         const list = document.getElementById('player-list');
-        
-        // Очищаем только территории, не трогая мяч и стрелку
         stadium.querySelectorAll('.territory').forEach(t => t.remove());
         list.innerHTML = '';
 
@@ -172,7 +174,16 @@
             t.style.backgroundColor = p.color;
             t.innerHTML = `<img src="${p.avatar}" class="t-avatar">`;
             stadium.appendChild(t);
-            list.innerHTML += `<div style="background:var(--panel);padding:8px;border-radius:10px;border-left:3px solid ${p.color};font-size:10px"><b>@${p.username}</b><br><span style="color:var(--neon)">${p.chance}%</span></div>`;
+            
+            list.innerHTML += `
+                <div class="player-card" style="border-left-color:${p.color}">
+                    <img src="${p.avatar}" class="p-ava">
+                    <div class="p-info">
+                        <b>@${p.username}</b>
+                        <span>Шанс: ${p.chance}%</span>
+                    </div>
+                    <div class="p-bet">${p.amount} TON</div>
+                </div>`;
         });
     });
 
@@ -184,64 +195,47 @@
         const ball = document.getElementById('ball');
         const arrow = document.getElementById('arrow');
         const stadium = document.getElementById('stadium');
-        
         document.getElementById('status-top').innerText = "НАЧАЛО ИГРЫ";
         
-        // 1. Появление
         ball.style.display = 'block';
         ball.style.left = '50%'; ball.style.top = '50%';
         ball.style.transform = 'translate(-50%, -50%)';
         arrow.style.display = 'block';
         arrow.style.left = '50%'; arrow.style.top = '50%';
 
-        let angle = 0;
-        const rotateInterval = setInterval(() => {
-            angle += 15;
-            arrow.style.transform = `rotate(${angle}deg)`;
-        }, 30);
+        let angle = Math.random() * 360;
+        const rotate = setInterval(() => { angle += 15; arrow.style.transform = `rotate(${angle}deg)`; }, 30);
 
-        // 2. Через 2 секунды - полет
         setTimeout(() => {
-            clearInterval(rotateInterval);
+            clearInterval(rotate);
             arrow.style.display = 'none';
             
             let px = stadium.clientWidth / 2, py = stadium.clientHeight / 2;
-            let vx = Math.cos(angle * Math.PI / 180) * 8;
-            let vy = Math.sin(angle * Math.PI / 180) * 8;
-            let startTime = Date.now();
+            let speed = 12 + Math.random() * 5; 
+            let vx = Math.cos(angle * Math.PI / 180) * speed;
+            let vy = Math.sin(angle * Math.PI / 180) * speed;
+            let friction = 0.988; // Плавное замедление
 
-            function animate() {
-                let elapsed = Date.now() - startTime;
-                if(elapsed < 10000) { // 10 секунд полета
-                    px += vx; py += vy;
-                    
-                    // Коллизия со стенками
-                    if(px < 10 || px > stadium.clientWidth - 10) vx *= -1;
-                    if(py < 10 || py > stadium.clientHeight - 10) vy *= -1;
+            function phys() {
+                vx *= friction; vy *= friction;
+                px += vx; py += vy;
+                
+                if(px < 10 || px > stadium.clientWidth - 10) vx *= -0.8; 
+                if(py < 10 || py > stadium.clientHeight - 10) vy *= -0.8;
 
-                    ball.style.left = px + 'px'; ball.style.top = py + 'px';
-                    requestAnimationFrame(animate);
+                ball.style.left = px + 'px'; ball.style.top = py + 'px';
+
+                if (Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1) {
+                    requestAnimationFrame(phys);
                 } else {
-                    // 3. Плавное торможение к победителю
-                    const zone = document.getElementById('zone-' + data.winner.id);
-                    const targetY = zone.offsetTop + (zone.clientHeight / 2);
-                    const targetX = stadium.clientWidth / 2;
-
-                    let brakeStep = 0;
-                    const brake = setInterval(() => {
-                        brakeStep++;
-                        px += (targetX - px) * 0.1;
-                        py += (targetY - py) * 0.1;
-                        ball.style.left = px + 'px'; ball.style.top = py + 'px';
-                        if(brakeStep > 50) {
-                            clearInterval(brake);
-                            document.getElementById('status-top').innerText = "ПОБЕДА: " + data.winner.username;
-                            setTimeout(() => { ball.style.display = 'none'; }, 3000);
-                        }
-                    }, 30);
+                    document.getElementById('status-top').innerText = "МЯЧ ОСТАНОВИЛСЯ";
+                    setTimeout(() => {
+                        document.getElementById('status-top').innerText = "ПОБЕДА: " + data.winner.username;
+                        setTimeout(() => { ball.style.display = 'none'; }, 3000);
+                    }, 1000);
                 }
             }
-            animate();
+            phys();
         }, 2000);
     });
 </script>
