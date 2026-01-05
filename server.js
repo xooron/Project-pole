@@ -23,20 +23,19 @@ io.on('connection', (socket) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
                 id: data.id, name: data.name, username: data.username, 
-                balance: 100.0, refBy: data.refBy, refCount: 0, refPending: 0, refTotal: 0, address: null 
+                balance: 100.0, refBy: data.refBy, refCount: 0, refPending: 0, address: null 
             };
-            if (data.refBy && db.users[data.refBy]) {
-                db.users[data.refBy].refCount++;
-            }
+            if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
+        // Сразу отправляем данные пользователю
         socket.emit('update_data', { users: db.users });
-        io.emit('update_arena', { players, totalBank, status: gameStatus });
+        broadcastArena();
     });
 
     socket.on('wallet_connected', (data) => {
         if(db.users[data.id]) {
             db.users[data.id].address = data.address;
-            socket.emit('update_data', { users: db.users });
+            io.emit('update_data', { users: db.users });
         }
     });
 
@@ -44,42 +43,20 @@ io.on('connection', (socket) => {
         const u = db.users[data.id];
         if (u && u.balance >= data.amount && gameStatus !== 'playing') {
             u.balance -= data.amount;
-            
-            // 10% комиссия рефереру
-            if (u.refBy && db.users[u.refBy]) {
-                db.users[u.refBy].refPending += data.amount * 0.1;
-            }
+            if (u.refBy && db.users[u.refBy]) db.users[u.refBy].refPending += data.amount * 0.1;
 
             let p = players.find(x => x.id === data.id);
-            if (p) {
-                p.amount += data.amount;
-            } else {
-                players.push({ 
-                    id: u.id, username: u.username, 
-                    avatar: `https://ui-avatars.com/api/?name=${u.name}&background=00ff66&color=000`, 
-                    amount: data.amount, color: COLORS[players.length % COLORS.length] 
-                });
-            }
+            if (p) p.amount += data.amount;
+            else players.push({ 
+                id: u.id, username: u.username, 
+                avatar: `https://ui-avatars.com/api/?name=${u.name}&background=00ff66&color=000`, 
+                amount: data.amount, color: COLORS[players.length % COLORS.length] 
+            });
 
-            totalBank = players.reduce((s, p) => s + p.amount, 0);
-            players.forEach(p => p.chance = ((p.amount / totalBank) * 100).toFixed(1));
-
+            calc();
             io.emit('update_data', { users: db.users });
-            io.emit('update_arena', { players, totalBank, status: gameStatus });
-
-            if (players.length >= 2 && gameStatus === 'waiting') {
-                gameStatus = 'counting';
-                timer = 13;
-                timerId = setInterval(() => {
-                    timer--;
-                    io.emit('timer_tick', timer);
-                    if (timer <= 0) { 
-                        clearInterval(timerId); 
-                        gameStatus = 'playing';
-                        io.emit('start_game_animation'); 
-                    }
-                }, 1000);
-            }
+            broadcastArena();
+            if (players.length >= 2 && gameStatus === 'waiting') startTimer();
         }
     });
 
@@ -89,19 +66,28 @@ io.on('connection', (socket) => {
             if (winner) winner.balance += totalBank;
             players = []; totalBank = 0; gameStatus = 'waiting';
             io.emit('update_data', { users: db.users });
-            io.emit('update_arena', { players, totalBank, status: gameStatus });
-        }
-    });
-
-    socket.on('claim_rewards', (data) => {
-        const u = db.users[data.id];
-        if (u && u.refPending > 0) {
-            u.balance += u.refPending;
-            u.refTotal += u.refPending;
-            u.refPending = 0;
-            socket.emit('update_data', { users: db.users });
+            broadcastArena();
         }
     });
 });
 
-server.listen(3000, () => console.log('Server started on 3000'));
+function calc() {
+    totalBank = players.reduce((s, p) => s + p.amount, 0);
+    players.forEach(p => p.chance = ((p.amount / totalBank) * 100).toFixed(1));
+}
+
+function startTimer() {
+    gameStatus = 'counting';
+    timer = 13;
+    timerId = setInterval(() => {
+        timer--;
+        io.emit('timer_tick', timer);
+        if (timer <= 0) { clearInterval(timerId); gameStatus = 'playing'; io.emit('start_game_animation'); }
+    }, 1000);
+}
+
+function broadcastArena() {
+    io.emit('update_arena', { players, totalBank, status: gameStatus });
+}
+
+server.listen(3000, () => console.log('Server started on port 3000'));
