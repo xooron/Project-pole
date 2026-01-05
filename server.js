@@ -5,98 +5,109 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server);
 
 app.use(express.static(__dirname));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// Эмуляция Базы Данных
+let db = {
+    users: {} 
+};
 
 let players = [];
 let totalBank = 0;
-let gameStatus = 'waiting'; 
-let countdown = 15;
-let serverTimer = null; 
-
-const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600', '#00ffff', '#ff00ff'];
+let gameStatus = 'waiting';
+const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff'];
 
 io.on('connection', (socket) => {
-    socket.emit('update_arena', { players, totalBank, status: gameStatus, countdown });
-
-    socket.on('place_bet', (data) => {
-        if (gameStatus === 'playing') return;
-
-        let player = players.find(p => p.username === data.username);
-        if (player) {
-            player.amount += data.amount;
-        } else {
-            const playerColor = COLORS[players.length % COLORS.length];
-            player = {
-                id: socket.id,
+    
+    socket.on('user_joined', (data) => {
+        if (!db.users[data.id]) {
+            db.users[data.id] = {
+                id: data.id,
                 name: data.name,
                 username: data.username,
-                avatar: data.avatar,
-                amount: data.amount,
-                color: playerColor,
-                chance: 0
+                balance: 10.00,
+                refBy: data.refBy, // ID того, кто пригласил
+                refCount: 0,
+                refPending: 0,
+                refTotal: 0
             };
-            players.push(player);
-        }
 
-        calculateChances();
-        if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
-        broadcastState();
+            // Если есть реферер, увеличиваем ему счетчик
+            if (data.refBy && db.users[data.refBy]) {
+                db.users[data.refBy].refCount++;
+            }
+        }
+        broadcastData();
+    });
+
+    socket.on('place_bet', (data) => {
+        const user = db.users[data.id];
+        if (user && user.balance >= data.amount && gameStatus !== 'playing') {
+            user.balance -= data.amount;
+            
+            // ЛОГИКА КОМИССИИ: 10% от ставки идет рефереру (как в твоем ТЗ)
+            if (user.refBy && db.users[user.refBy]) {
+                let commission = data.amount * 0.10;
+                db.users[user.refBy].refPending += commission;
+            }
+
+            let p = players.find(x => x.id === data.id);
+            if (p) { p.amount += data.amount; } 
+            else {
+                players.push({
+                    id: user.id,
+                    username: user.username,
+                    avatar: `https://ui-avatars.com/api/?name=${user.name}&background=00ff66`,
+                    amount: data.amount,
+                    color: COLORS[players.length % COLORS.length]
+                });
+            }
+            calculateChances();
+            broadcastData();
+            if (players.length >= 2 && gameStatus === 'waiting') startGameTimer();
+        }
+    });
+
+    socket.on('claim_rewards', (data) => {
+        const user = db.users[data.id];
+        if (user && user.refPending > 0) {
+            user.balance += user.refPending;
+            user.refTotal += user.refPending;
+            user.refPending = 0;
+            broadcastData();
+        }
     });
 });
 
 function calculateChances() {
     totalBank = players.reduce((sum, p) => sum + p.amount, 0);
-    players.forEach(p => {
-        p.chance = ((p.amount / totalBank) * 100).toFixed(1);
-    });
+    players.forEach(p => p.chance = ((p.amount / totalBank) * 100).toFixed(1));
 }
 
-function startCountdown() {
-    gameStatus = 'counting';
-    countdown = 15;
-    if (serverTimer) clearInterval(serverTimer);
-    serverTimer = setInterval(() => {
-        countdown--;
-        io.emit('timer_tick', countdown);
-        if (countdown <= 0) {
-            clearInterval(serverTimer);
-            serverTimer = null;
-            startGame();
-        }
-    }, 1000);
-}
-
-function startGame() {
+function startGameTimer() {
     gameStatus = 'playing';
-    const random = Math.random() * 100;
-    let currentRange = 0;
-    let winner = players[0];
-
-    for (const p of players) {
-        currentRange += parseFloat(p.chance);
-        if (random <= currentRange) {
-            winner = p;
-            break;
-        }
-    }
-
-    io.emit('start_game_animation', { winner });
-
+    // Простая логика выбора победителя
     setTimeout(() => {
-        players = [];
-        totalBank = 0;
-        gameStatus = 'waiting';
-        countdown = 15;
-        broadcastState();
-    }, 18000);
+        const winner = players[Math.floor(Math.random() * players.length)];
+        if (winner) {
+            db.users[winner.id].balance += totalBank;
+        }
+        io.emit('start_game_animation', { winner });
+        
+        setTimeout(() => {
+            players = [];
+            totalBank = 0;
+            gameStatus = 'waiting';
+            broadcastData();
+        }, 5000);
+    }, 3000);
 }
 
-function broadcastState() {
-    io.emit('update_arena', { players, totalBank, status: gameStatus, countdown });
+function broadcastData() {
+    io.emit('update_data', { users: db.users });
+    io.emit('update_arena', { players, totalBank, status: gameStatus });
 }
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server started on ${PORT}`));
+server.listen(3000, () => console.log('Server running on port 3000'));
