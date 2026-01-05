@@ -25,10 +25,10 @@ io.on('connection', (socket) => {
                 name: data.name, 
                 username: data.username || "user",
                 avatar: data.avatar || `https://ui-avatars.com/api/?name=${data.name}&background=00ff66&color=000`,
-                balance: 10.0, // Даем 10 ТОН при первом входе
+                balance: 10.0, // Даем 10 TON при первом входе
                 refCount: 0, 
-                refPending: 0, 
-                refTotal: 0, 
+                refPending: 0.00,
+                refTotal: 0.00,
                 address: null 
             };
         }
@@ -38,18 +38,18 @@ io.on('connection', (socket) => {
 
     socket.on('place_bet', (data) => {
         const u = db.users[data.id];
-        if (u && u.balance >= data.amount && gameStatus !== 'playing') {
-            u.balance -= data.amount;
+        if (u && u.balance >= 1.0 && gameStatus !== 'playing') {
+            u.balance -= 1.0;
             
             let p = players.find(x => x.id === data.id);
             if (p) {
-                p.amount += data.amount;
+                p.amount += 1.0;
             } else {
                 players.push({ 
                     id: u.id, 
                     username: u.username, 
                     avatar: u.avatar, 
-                    amount: data.amount, 
+                    amount: 1.0, 
                     color: COLORS[players.length % COLORS.length] 
                 });
             }
@@ -94,26 +94,27 @@ function startTimer() {
 
 function startGame() {
     gameStatus = 'playing';
-    const winAngle = Math.random() * 360; 
-    const winner = players.find(p => winAngle >= p.startAngle && winAngle < p.endAngle);
+    const winningAngle = Math.random() * 360; 
+    const winner = players.find(p => winningAngle >= p.startAngle && winningAngle < p.endAngle);
 
-    io.emit('start_game_anim', { winningAngle: winAngle, winner });
+    io.emit('start_game_anim', { winningAngle, winner });
 
     setTimeout(() => {
         finishGame(winner);
-    }, 13000); 
+    }, 13000); // 2с ожидание + 10с полет + 1с запас
 }
 
 function finishGame(winner) {
     if (winner) {
         const u = db.users[winner.id];
         const othersBets = totalBank - winner.amount;
-        const commission = othersBets * 0.05; // 5% только с чужих ставок
+        const commission = othersBets * 0.05; // 5% от ставки других
         const winAmount = totalBank - commission;
         
         u.balance += winAmount;
         io.emit('game_result', { winner, winAmount });
     }
+    
     players = [];
     totalBank = 0;
     gameStatus = 'waiting';
@@ -121,5 +122,4 @@ function finishGame(winner) {
     io.emit('update_arena', { players, totalBank, status: gameStatus });
 }
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(3000, () => console.log('Server started on port 3000'));
