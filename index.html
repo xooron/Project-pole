@@ -22,30 +22,27 @@
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
         
-        /* Исправленная кнопка плюсика */
+        /* РОВНЫЙ ПЛЮСИК */
         .add-bal-btn { 
             background: var(--neon); 
             color: #000; 
             border: none; 
             border-radius: 50%; 
-            width: 24px; 
-            height: 24px; 
-            font-weight: 800; 
-            font-size: 18px; 
+            width: 22px; 
+            height: 22px; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            margin-left: 5px;
-            line-height: 1;
+            margin-left: 5px; 
             padding: 0;
-            padding-bottom: 2px; /* Микро-коррекция для центровки символа + */
         }
+        .add-bal-btn i { font-size: 12px; font-weight: 900; }
 
-        /* DEPOSIT MODAL */
-        #deposit-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        /* MODALS (DEPOSIT & WITHDRAW) */
+        #deposit-panel, #withdraw-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .dep-box { width: 85%; padding: 30px; text-align: center; }
-        .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 18px; font-weight: 800; text-align: center; margin: 20px 0; outline: none; }
+        .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 16px; font-weight: 800; text-align: center; margin: 10px 0; outline: none; }
 
         .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
         .page { display: none; }
@@ -59,6 +56,10 @@
         .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
+
+        /* Wallet & Withdraw row */
+        .wallet-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-withdraw { background: #ff4500; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; text-transform: uppercase; height: 40px; }
 
         .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
         .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -108,7 +109,6 @@
         .nav-btn { flex: 1; text-align: center; color: #3d4a42; font-size: 10px; font-weight: 800; background: none; border: none; }
         .nav-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
         .nav-btn.active { color: var(--neon); }
-        #ton-connect-btn { display: flex; justify-content: center; padding-top: 5px; }
     </style>
 </head>
 <body onclick="startMusic()">
@@ -126,12 +126,23 @@
     </div>
 </div>
 
+<!-- Панель вывода -->
+<div id="withdraw-panel">
+    <div class="glass-panel dep-box">
+        <h2 style="font-weight: 900;">ВЫВОД TON</h2>
+        <input type="number" id="wit-amt" class="dep-input" placeholder="Сумма (мин. 1)" min="1">
+        <input type="text" id="wit-addr" class="dep-input" placeholder="Адрес кошелька">
+        <button class="btn-claim" onclick="processWithdraw()">ВЫВЕСТИ</button>
+        <button class="btn-claim" style="background:none; color:#fff; border:1px solid var(--border); margin-top:10px;" onclick="closeWithdraw()">ОТМЕНА</button>
+    </div>
+</div>
+
 <div class="app-container">
     <header class="header">
         <div class="balance-pill">
             <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="18"> 
             <span id="user-bal">0.00</span>
-            <button class="add-bal-btn" onclick="openDeposit()">+</button>
+            <button class="add-bal-btn" onclick="openDeposit()"><i class="fa-solid fa-plus"></i></button>
         </div>
     </header>
 
@@ -167,7 +178,10 @@
                 <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
                 <h1 class="u-nick" id="u-nick">ИГРОК</h1>
                 <span class="u-tag" id="u-tag">@username</span>
-                <div id="ton-connect-btn"></div>
+                <div class="wallet-row">
+                    <div id="ton-connect-btn"></div>
+                    <button class="btn-withdraw" onclick="openWithdraw()">Вывод</button>
+                </div>
             </div>
             <div class="glass-panel">
                 <p class="ref-text">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
@@ -213,55 +227,45 @@
         buttonRootId: 'ton-connect-btn'
     });
 
-    // --- ЛОГИКА ПОПОЛНЕНИЯ ЧЕРЕЗ TON CONNECT ---
-    const myAddress = "UQBNvrPw9ZQLIFDqn5s9sFX_Jz-mL5nDv6WHkUgTsV8ek3Mi"; // <--- ЗАМЕНИ НА СВОЙ TON АДРЕС
+    const myAddress = "UQBNvrPw9ZQLIFDqn5s9sFX_Jz-mL5nDv6WHkUgTsV8ek3Mi"; 
 
+    // Пополнение
     function openDeposit() { document.getElementById('deposit-panel').style.display = 'flex'; }
     function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
 
     async function processDeposit() {
         const amt = parseFloat(document.getElementById('dep-amt').value);
-        if (isNaN(amt) || amt < 1) {
-            tg.showAlert("Минимальная сумма — 1 TON");
-            return;
-        }
+        if (!amt || amt < 1) { tg.showAlert("Минимальная сумма — 1 TON"); return; }
+        if (!tonConnectUI.connected) { tg.showAlert("Подключите кошелек!"); return; }
 
-        if (!tonConnectUI.connected) {
-            tg.showAlert("Сначала подключите кошелек во вкладке Профиль!");
-            closeDeposit();
-            showTab('profile', document.querySelectorAll('.nav-btn')[1]);
-            return;
-        }
-
-        // Переводим TON в нанотоны (1 TON = 10^9 Nanotons)
         const nanoAmount = (amt * 1000000000).toString();
-
-        const transaction = {
-            validUntil: Math.floor(Date.now() / 1000) + 600, // 10 минут на оплату
-            messages: [
-                {
-                    address: myAddress,
-                    amount: nanoAmount,
-                }
-            ]
-        };
+        const transaction = { validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: myAddress, amount: nanoAmount }] };
 
         try {
             closeDeposit();
-            tg.showConfirm(`Открыть кошелек для перевода ${amt} TON?`, async (ok) => {
-                if (ok) {
-                    const result = await tonConnectUI.sendTransaction(transaction);
-                    // Если кошелек подтвердил отправку, уведомляем сервер
-                    socket.emit('deposit_ton', { id: userData.id, amount: amt });
-                    tg.showAlert("Транзакция отправлена в сеть!");
-                }
-            });
-        } catch (e) {
-            console.error(e);
-            tg.showAlert("Ошибка или отмена транзакции");
+            await tonConnectUI.sendTransaction(transaction);
+            socket.emit('deposit_ton', { id: userData.id, amount: amt });
+            tg.showAlert("Транзакция отправлена!");
+        } catch (e) { console.error(e); }
+    }
+
+    // Вывод
+    function openWithdraw() { document.getElementById('withdraw-panel').style.display = 'flex'; }
+    function closeWithdraw() { document.getElementById('withdraw-panel').style.display = 'none'; }
+    function processWithdraw() {
+        const amt = parseFloat(document.getElementById('wit-amt').value);
+        const addr = document.getElementById('wit-addr').value;
+        if (amt >= 1 && addr.length > 10) {
+            socket.emit('withdraw_ton', { id: userData.id, amount: amt, address: addr });
+        } else {
+            tg.showAlert("Введите корректную сумму и адрес!");
         }
     }
-    // ------------------------------------------
+
+    socket.on('withdraw_response', (res) => {
+        tg.showAlert(res.message);
+        if (res.success) closeWithdraw();
+    });
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
@@ -314,7 +318,7 @@
     });
 
     socket.on('announce_winner', (data) => {
-        ball.state = 'hidden'; 
+        ball.state = 'hidden';
         const panel = document.getElementById('winner-panel');
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
@@ -417,4 +421,3 @@
 </script>
 </body>
 </html>
-
