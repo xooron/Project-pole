@@ -17,31 +17,38 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
+        
+        /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 8px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; }
+
         .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PROFILE ORIGINAL */
+        /* PROFILE */
         .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
         .profile-main { text-align: center; }
         .avatar-wrap { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #000; }
         .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
+
         .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
         .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; }
+
         .stat-group { margin-bottom: 15px; }
         .stat-title { font-size: 10px; color: #5a6b61; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
         .count-pill { background: rgba(255,255,255,0.03); border: 1px solid var(--border); width: fit-content; padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
+
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 18px; }
         .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
         .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+
         .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; }
 
         /* ARENA */
@@ -49,8 +56,9 @@
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
-        #arena-canvas { width: 100%; height: 100%; }
+        #arena-canvas { width: 100%; height: 100%; display: block; }
 
+        /* WINNER PANEL */
         #winner-panel {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon);
@@ -63,13 +71,15 @@
         #winner-panel p { font-weight: 900; font-size: 26px; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; }
+        .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; cursor: pointer; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
-        .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .p-ava { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--border); }
+
+        .players-list { display: flex; flex-direction: column; gap: 10px; }
+        .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
+        .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
         .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
         .p-amount { font-size: 14px; font-weight: 800; }
-        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; margin-left: 10px; }
+        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; margin-left: 12px; }
 
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
         .nav-btn { flex: 1; text-align: center; color: #3d4a42; font-size: 10px; font-weight: 800; background: none; border: none; }
@@ -111,7 +121,7 @@
                 <button class="b-btn" onclick="makeBet(50)">50</button>
                 <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">MAX</button>
             </div>
-            <div id="players-list"></div>
+            <div class="players-list" id="players-list"></div>
         </section>
 
         <section id="profile-page" class="page">
@@ -167,9 +177,8 @@
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 7, state: 'hidden', friction: 0.9958 };
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 7, state: 'hidden', friction: 0.994 };
     let arenaPlayers = [];
-    let territoryMap = new Uint8Array(300 * 300);
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
@@ -202,7 +211,6 @@
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
         updatePlayersList(data.players);
-        generateTerritories();
     });
 
     socket.on('start_game_sequence', (data) => {
@@ -228,26 +236,6 @@
         else label.innerText = `ОЖИДАНИЕ ИГРОКОВ...`;
     });
 
-    function generateTerritories() {
-        if (arenaPlayers.length === 0) return;
-        const sorted = [...arenaPlayers].sort((a,b) => b.amount - a.amount);
-        const centers = [
-            {x: 150, y: 150}, {x: 0, y: 0}, {x: 300, y: 0}, 
-            {x: 0, y: 300}, {x: 300, y: 300}, {x: 150, y: 0}
-        ];
-        
-        for (let i = 0; i < 300 * 300; i++) {
-            const px = i % 300, py = Math.floor(i / 300);
-            let minDist = Infinity, ownerIdx = 0;
-            sorted.forEach((p, idx) => {
-                const c = centers[idx % centers.length];
-                const d = Math.hypot(px - c.x, py - c.y) / (p.chance / 10);
-                if (d < minDist) { minDist = d; ownerIdx = idx; }
-            });
-            territoryMap[i] = ownerIdx;
-        }
-    }
-
     function updatePlayersList(players) {
         const list = document.getElementById('players-list');
         list.innerHTML = '';
@@ -264,28 +252,36 @@
         ctx.clearRect(0,0,300,300);
 
         if (arenaPlayers.length > 0) {
-            const imageData = ctx.createImageData(300, 300);
-            const sorted = [...arenaPlayers].sort((a,b) => b.amount - a.amount);
-            for (let i = 0; i < 300 * 300; i++) {
-                const p = sorted[territoryMap[i]];
-                const rgb = hexToRgb(p.color);
-                imageData.data[i*4] = rgb.r;
-                imageData.data[i*4+1] = rgb.g;
-                imageData.data[i*4+2] = rgb.b;
-                imageData.data[i*4+3] = 255;
-            }
-            ctx.putImageData(imageData, 0, 0);
+            let currentAngle = -Math.PI / 2;
+            arenaPlayers.forEach(p => {
+                const sliceAngle = (p.chance / 100) * (Math.PI * 2);
+                
+                // Рисуем сектор (Треугольник от центра)
+                ctx.beginPath();
+                ctx.moveTo(150, 150);
+                ctx.arc(150, 150, 400, currentAngle, currentAngle + sliceAngle);
+                ctx.fillStyle = p.color;
+                ctx.fill();
 
-            // Аватарки на территориях
-            sorted.forEach((p, idx) => {
-                const c = [{x: 150, y: 150}, {x: 35, y: 35}, {x: 265, y: 35}, {x: 35, y: 265}, {x: 265, y: 265}][idx % 5];
+                // Аватарка на секторе
+                const midAngle = currentAngle + sliceAngle / 2;
+                const avaDist = 80;
+                const ax = 150 + Math.cos(midAngle) * avaDist;
+                const ay = 150 + Math.sin(midAngle) * avaDist;
                 const ava = p.avatar || 'https://pixsafe.online/i/mglZT';
+
                 if (!imgCache[ava]) { imgCache[ava] = new Image(); imgCache[ava].src = ava; }
                 else if (imgCache[ava].complete) {
-                    ctx.save(); ctx.beginPath(); ctx.arc(c.x, c.y, 15, 0, Math.PI*2); ctx.clip();
-                    ctx.drawImage(imgCache[ava], c.x-15, c.y-15, 30, 30); ctx.restore();
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(ax, ay, 15, 0, Math.PI * 2);
+                    ctx.clip();
+                    ctx.drawImage(imgCache[ava], ax - 15, ay - 15, 30, 30);
+                    ctx.restore();
                     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
                 }
+
+                currentAngle += sliceAngle;
             });
         }
 
@@ -294,22 +290,28 @@
             ball.vx *= ball.friction; ball.vy *= ball.friction;
             if (ball.x < 7 || ball.x > 293) ball.vx *= -1;
             if (ball.y < 7 || ball.y > 293) ball.vy *= -1;
+            
             if (Math.abs(ball.vx) < 0.01 && Math.abs(ball.vy) < 0.01) {
                 ball.state = 'stopped';
-                const sorted = [...arenaPlayers].sort((a,b) => b.amount - a.amount);
-                const winner = sorted[territoryMap[Math.floor(ball.y)*300 + Math.floor(ball.x)]];
-                socket.emit('request_winner', { winner, winnerBet: winner.amount });
+                const angle = Math.atan2(ball.y - 150, ball.x - 150);
+                const normalizedAngle = (angle + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
+                
+                let checkAngle = 0;
+                let winner = arenaPlayers[0];
+                for(let p of arenaPlayers) {
+                    const slice = (p.chance / 100) * (Math.PI * 2);
+                    if(normalizedAngle >= checkAngle && normalizedAngle < checkAngle + slice) {
+                        winner = p; break;
+                    }
+                    checkAngle += slice;
+                }
+                socket.emit('request_winner', { winnerId: winner.id });
             }
-            ctx.font = '20px serif'; ctx.textAlign = 'center'; ctx.fillText('⚽', ball.x, ball.y);
+            ctx.font = '20px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('⚽', ball.x, ball.y);
         }
         requestAnimationFrame(draw);
     }
-
-    function hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : {r:0,g:0,b:0};
-    }
-
     draw();
 </script>
 </body>
