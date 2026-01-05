@@ -44,32 +44,25 @@
         .page.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* АРЕНА (НОВОЕ) */
-        .arena-info { text-align: center; margin-bottom: 15px; }
-        .arena-status { color: var(--neon); font-size: 14px; font-weight: 800; margin-bottom: 5px; }
-        .bank-amount { font-size: 32px; font-weight: 900; }
-        
-        .arena-visual { position: relative; width: 280px; height: 280px; margin: 0 auto 30px; border-radius: 50%; }
-        #arena-canvas { width: 100%; height: 100%; transform: rotate(-90deg); }
-        
-        #ball {
-            position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%;
-            top: 50%; left: 50%; margin: -10px; display: none; z-index: 10;
-            box-shadow: 0 0 20px #fff; transition: transform 10s cubic-bezier(0.1, 0, 0.1, 1);
-        }
-        #arrow {
-            position: absolute; width: 50px; height: 4px; background: #fff; border-radius: 2px;
-            top: 50%; left: 50%; transform-origin: left center; display: none; z-index: 9;
-        }
+        /* АРЕНА ГРАФИКА */
+        .arena-header { text-align: center; margin-bottom: 10px; }
+        .arena-status { color: var(--neon); font-size: 14px; font-weight: 800; display: block; }
+        .bank-val { font-size: 32px; font-weight: 900; }
 
-        .bets-panel { background: var(--panel); border-radius: 24px; border: 1px solid var(--border); padding: 15px; }
-        .bet-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .bet-row:last-child { border: none; }
-        .bet-row img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--neon); }
-        .bet-user-info { flex: 1; }
-        .bet-nick { font-size: 14px; font-weight: 700; }
+        .arena-circle { position: relative; width: 280px; height: 280px; margin: 0 auto 30px; }
+        #arena-canvas { width: 100%; height: 100%; transform: rotate(-90deg); }
+        #ball { position: absolute; width: 22px; height: 22px; background: #fff; border-radius: 50%; top: 50%; left: 50%; margin: -11px; display: none; z-index: 10; box-shadow: 0 0 15px #fff; transition: transform 10s cubic-bezier(0.1, 0, 0.1, 1); }
+        #arrow { position: absolute; width: 45px; height: 3px; background: #fff; top: 50%; left: 50%; transform-origin: left center; display: none; z-index: 9; }
+
+        /* СПИСОК СТАВОК */
+        .bet-panel { background: var(--panel); border-radius: 24px; border: 1px solid var(--border); padding: 15px; margin-top: 10px; }
+        .bet-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .bet-item:last-child { border: none; }
+        .bet-item img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--neon); }
+        .bet-info { flex: 1; }
+        .bet-name { font-size: 14px; font-weight: 800; }
         .bet-chance { font-size: 11px; color: var(--neon); }
-        .bet-summ { font-weight: 800; font-size: 14px; }
+        .bet-amount { font-weight: 800; }
 
         /* ПРОФИЛЬ */
         .glass-panel { background: var(--panel); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 12px; }
@@ -79,7 +72,17 @@
         .nick { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 2px; }
         .tag { font-size: 13px; color: var(--neon); opacity: 0.8; text-transform: lowercase; margin-bottom: 15px; }
 
-        .btn-bet-action { width: 100%; padding: 18px; border-radius: 18px; background: var(--neon); color: #000; border: none; font-weight: 800; margin-bottom: 15px; font-size: 14px; }
+        /* РЕФЕРАЛЫ */
+        .ref-title { font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 15px; color: #eee; text-align: left; text-transform: none; }
+        .ref-actions { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-ref-icon { width: 50px; height: 50px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .btn-ref-main { flex: 1; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff; font-weight: 800; font-size: 13px; }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .stat-box { background: rgba(255, 255, 255, 0.02); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-label { font-size: 10px; color: #666; margin-bottom: 5px; display: block; }
+        .stat-val { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+        .btn-claim { width: 100%; padding: 18px; border-radius: 18px; background: #fff; color: #000; border: none; font-weight: 800; margin-top: 15px; font-size: 14px; }
 
         /* НАВИГАЦИЯ */
         .nav-dock { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(8,12,10,0.98); border-radius: 35px; display: flex; align-items: center; border: 1px solid var(--border); backdrop-filter: blur(20px); }
@@ -87,7 +90,8 @@
         .nav-link i { font-size: 22px; margin-bottom: 4px; }
         .nav-link.active { color: var(--neon); }
         
-        #ton-connect-btn { display: flex; justify-content: center; margin-top: 10px; }
+        #ton-connect-btn { display: flex; justify-content: center; margin-top: 5px; }
+        .bet-btn { width: 100%; padding: 18px; border-radius: 18px; background: var(--neon); color: #000; border: none; font-weight: 800; font-size: 14px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -105,38 +109,57 @@
     </header>
 
     <main class="main-scroll">
-        <!-- АРЕНА (ТЕПЕРЬ ПЕРВАЯ) -->
+        <!-- СТРАНИЦА АРЕНЫ (ТЕПЕРЬ ПЕРВАЯ) -->
         <section id="arena-page" class="page active">
-            <div class="arena-info">
-                <div id="arena-status" class="arena-status">ОЖИДАНИЕ ИГРОКОВ</div>
-                <div class="bank-amount"><span id="total-bank">0.00</span> TON</div>
+            <div class="arena-header">
+                <span id="game-status" class="arena-status">ОЖИДАНИЕ ИГРОКОВ</span>
+                <div class="bank-val"><span id="total-bank">0.00</span> TON</div>
             </div>
 
-            <div class="arena-visual">
+            <div class="arena-circle">
                 <canvas id="arena-canvas" width="300" height="300"></canvas>
                 <div id="ball"></div>
                 <div id="arrow"></div>
             </div>
 
-            <button class="btn-bet-action" onclick="placeBet()">СДЕЛАТЬ СТАВКУ 1.0 TON</button>
+            <button class="bet-btn" onclick="makeBet()">СДЕЛАТЬ СТАВКУ 1.0 TON</button>
 
-            <div class="bets-panel" id="bets-list">
-                <!-- Сюда добавляются ставки -->
+            <div class="bet-panel" id="bet-list">
+                <!-- Ставки игроков -->
             </div>
         </section>
 
-        <!-- ПРОФИЛЬ -->
+        <!-- СТРАНИЦА ПРОФИЛЯ (ВТОРАЯ) -->
         <section id="profile-page" class="page">
             <div class="glass-panel profile-card">
                 <div class="avatar-frame"><img src="" id="u-ava"></div>
                 <h1 class="nick" id="u-nick">...</h1>
                 <div class="tag" id="u-tag">@username</div>
+                <!-- ПОДКЛЮЧЕНИЕ НАСТОЯЩЕГО КОШЕЛЬКА -->
                 <div id="ton-connect-btn"></div>
             </div>
             
             <div class="glass-panel">
-                <button class="btn-bet-action" style="background: #fff;" onclick="invite()">Пригласить друзей</button>
-                <div style="font-size: 10px; opacity: 0.5; text-align: center;">ID: <span id="u-id">0</span></div>
+                <p class="ref-title">Приглашайте друзей и получайте 10% от их игровых взносов на свой баланс.</p>
+                <div class="ref-actions">
+                    <button class="btn-ref-icon" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
+                    <button class="btn-ref-main" onclick="invite()">Пригласить друзей</button>
+                </div>
+                <span class="stat-label">Твои рефералы</span>
+                <div class="stat-box" style="width: fit-content; min-width: 90px; margin-bottom: 12px;">
+                    <div class="stat-val"><i class="fa-solid fa-user-group" style="color:#0098ea; font-size:14px"></i> <span id="ref-count">0</span></div>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <span class="stat-label">Доступно</span>
+                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px"> <span id="ref-pending">0.00</span></div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Всего</span>
+                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px"> <span id="ref-total">0.00</span></div>
+                    </div>
+                </div>
+                <button class="btn-claim" onclick="claim()">Зачислить TON</button>
             </div>
         </section>
     </main>
@@ -171,7 +194,7 @@
         id: userData.id, 
         name: userData.first_name, 
         username: userData.username,
-        avatar: userData.photo_url
+        avatar: userData.photo_url 
     });
 
     function showTab(id, el) {
@@ -181,8 +204,8 @@
         el.classList.add('active');
     }
 
-    function placeBet() {
-        socket.emit('place_bet', { id: userData.id, amount: 1.0 });
+    function makeBet() {
+        socket.emit('place_bet', { id: userData.id });
     }
 
     socket.on('update_data', (data) => {
@@ -192,19 +215,23 @@
             document.getElementById('u-nick').innerText = u.name.toUpperCase();
             document.getElementById('u-tag').innerText = "@" + u.username;
             document.getElementById('u-ava').src = u.avatar;
-            document.getElementById('u-id').innerText = u.id;
+            document.getElementById('ref-count').innerText = u.refCount;
+            document.getElementById('ref-pending').innerText = u.refPending.toFixed(2);
+            document.getElementById('ref-total').innerText = u.refTotal.toFixed(2);
         }
     });
 
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
-        if(data.status === 'waiting') document.getElementById('arena-status').innerText = "ОЖИДАНИЕ ИГРОКОВ";
+        if(data.status === 'waiting') {
+            document.getElementById('game-status').innerText = "ОЖИДАНИЕ ИГРОКОВ";
+        }
         drawArena(data.players);
         renderBets(data.players);
     });
 
     socket.on('timer_tick', (t) => {
-        document.getElementById('arena-status').innerText = `ДО НАЧАЛА: ${t} СЕК`;
+        document.getElementById('game-status').innerText = `ДО НАЧАЛА: ${t} СЕКУНД`;
     });
 
     socket.on('start_game_anim', (data) => {
@@ -216,19 +243,19 @@
         arrow.style.display = 'block';
 
         let rotation = 0;
-        const spin = setInterval(() => {
+        const rotateInterval = setInterval(() => {
             rotation += 20;
             arrow.style.transform = `translate(0, -50%) rotate(${rotation}deg)`;
         }, 40);
 
         setTimeout(() => {
-            clearInterval(spin);
+            clearInterval(rotateInterval);
             arrow.style.display = 'none';
             
-            const rad = data.winningAngle * (Math.PI / 180);
-            const dist = 125; 
-            const x = Math.cos(rad) * dist;
-            const y = Math.sin(rad) * dist;
+            const winningRad = data.winningAngle * (Math.PI / 180);
+            const distance = 125; 
+            const x = Math.cos(winningRad) * distance;
+            const y = Math.sin(winningRad) * distance;
             
             ball.style.transform = `translate(${x}px, ${y}px)`;
         }, 2000);
@@ -238,7 +265,7 @@
         tg.showAlert(`ПОБЕДИТЕЛЬ: @${data.winner.username}\nВЫИГРЫШ: ${data.winAmount.toFixed(2)} TON`);
         setTimeout(() => {
             document.getElementById('ball').style.display = 'none';
-        }, 3500);
+        }, 3000);
     });
 
     function drawArena(players) {
@@ -263,29 +290,36 @@
             ctx.fill();
         });
         
+        // Центр (черная дыра)
         ctx.beginPath();
         ctx.arc(150, 150, 115, 0, Math.PI*2);
-        ctx.fillStyle = '#030805'; // Цвет фона внутри
+        ctx.fillStyle = '#030805';
         ctx.fill();
     }
 
     function renderBets(players) {
-        const list = document.getElementById('bets-list');
+        const list = document.getElementById('bet-list');
         list.innerHTML = players.map(p => `
-            <div class="bet-row">
+            <div class="bet-item">
                 <img src="${p.avatar}">
-                <div class="bet-user-info">
-                    <div class="bet-nick">@${p.username}</div>
+                <div class="bet-info">
+                    <div class="bet-name">@${p.username}</div>
                     <div class="bet-chance">ШАНС: ${p.chance}%</div>
                 </div>
-                <div class="bet-summ">${p.amount.toFixed(1)} TON</div>
+                <div class="bet-amount">${p.amount.toFixed(1)} TON</div>
             </div>
         `).reverse().join('');
     }
 
+    function copyRef() {
+        const link = `https://t.me/твой_бот?start=${userData.id}`;
+        navigator.clipboard.writeText(link);
+        tg.showAlert("Ссылка скопирована!");
+    }
+
     function invite() {
-        const link = `https://t.me/share/url?url=https://t.me/твой_бот?start=${userData.id}`;
-        tg.openTelegramLink(link);
+        const link = `https://t.me/твой_бот?start=${userData.id}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}`);
     }
 </script>
 </body>
