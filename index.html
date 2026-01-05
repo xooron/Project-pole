@@ -80,7 +80,7 @@
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         
-        .canvas-box { position: relative; width: 260px; height: 260px; margin: 0 auto 30px; }
+        .canvas-box { position: relative; width: 260px; height: 260px; margin: 0 auto 30px; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
         #arena-canvas { width: 100%; height: 100%; transform: rotate(-90deg); }
 
         /* BET BUTTONS */
@@ -186,9 +186,7 @@
     tg.ready();
     tg.expand();
 
-    // ИСПРАВЛЕНИЕ ОШИБКИ МАНИФЕСТА
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        // Используем динамический URL манифеста
         manifestUrl: window.location.origin + '/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-btn'
     });
@@ -237,26 +235,18 @@
         ctx.clearRect(0,0,300,300);
         
         if(players.length === 0) {
-            ctx.beginPath();
-            ctx.arc(150, 150, 130, 0, Math.PI*2);
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-            ctx.lineWidth = 15;
-            ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.05)';
+            ctx.fillRect(0, 0, 300, 300);
             return;
         }
 
+        let currentX = 0;
         players.forEach(p => {
-            ctx.beginPath();
-            ctx.moveTo(150, 150);
-            ctx.arc(150, 150, 140, p.startAngle * Math.PI/180, p.endAngle * Math.PI/180);
+            const width = (p.chance / 100) * 300;
             ctx.fillStyle = p.color;
-            ctx.fill();
+            ctx.fillRect(currentX, 0, width, 300);
+            currentX += width;
         });
-        
-        ctx.beginPath();
-        ctx.arc(150, 150, 115, 0, Math.PI*2);
-        ctx.fillStyle = '#030805';
-        ctx.fill();
     }
 </script>
 </body>
