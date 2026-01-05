@@ -22,6 +22,7 @@
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
         
+        /* РОВНЫЙ ПЛЮСИК */
         .add-bal-btn { 
             background: var(--neon); color: #000; border: none; border-radius: 50%; 
             width: 22px; height: 22px; cursor: pointer; 
@@ -77,6 +78,7 @@
 
         /* ARENA */
         .arena-info { text-align: center; margin-bottom: 20px; }
+        .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
@@ -94,7 +96,8 @@
         
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        
+        .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
+
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
         .nav-btn { flex: 1; text-align: center; color: #3d4a42; font-size: 10px; font-weight: 800; background: none; border: none; }
         .nav-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
@@ -241,6 +244,7 @@
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
     let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995 };
+    let arrowAngle = 0;
     let arenaPlayers = [];
     let luckyUsedThisRound = false;
     let showGoals = false;
@@ -288,14 +292,19 @@
     });
 
     socket.on('start_game_sequence', (data) => {
-        ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0; ball.state = 'spawning';
+        ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0; 
+        ball.state = 'spawning';
+        arrowAngle = 0;
         luckyUsedThisRound = false;
-        showGoals = Math.random() < 0.3; // 30% шанс на ворота
-        setTimeout(() => { ball.vx = data.vx; ball.vy = data.vy; ball.state = 'moving'; ball.friction = 0.995; }, 2000);
+        showGoals = Math.random() < 0.3;
+        setTimeout(() => { 
+            ball.vx = data.vx; ball.vy = data.vy; 
+            ball.state = 'moving'; ball.friction = 0.995; 
+        }, 2000);
     });
 
     socket.on('announce_winner', (data) => {
-        ball.state = 'hidden';
+        // Мяч НЕ пропадает резко, просто остается в состоянии 'stopped'
         const panel = document.getElementById('winner-panel');
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
@@ -320,7 +329,7 @@
     }
 
     function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
-    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Cкопировано!"); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Копировано!"); }
     function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`); }
     function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
@@ -347,7 +356,6 @@
                 ctx.arc(150, 150, 400, currentAngle, currentAngle + sliceAngle);
                 ctx.fillStyle = p.color; ctx.fill();
 
-                // РИСУЕМ АВАТАРКИ НА СЕКТОРАХ
                 const midAngle = currentAngle + sliceAngle / 2;
                 const ax = 150 + Math.cos(midAngle) * 85;
                 const ay = 150 + Math.sin(midAngle) * 85;
@@ -370,7 +378,19 @@
         }
 
         if (ball.state !== 'hidden') {
-            if (ball.state === 'moving') {
+            if (ball.state === 'spawning') {
+                arrowAngle += 0.12; 
+                ctx.save();
+                ctx.translate(150, 150);
+                ctx.rotate(arrowAngle);
+                ctx.beginPath();
+                ctx.moveTo(40, 0); ctx.lineTo(25, -12); ctx.lineTo(25, 12); ctx.closePath();
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.stroke(); ctx.fill();
+                ctx.restore();
+            } else if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
                 if (ball.x < 8 || ball.x > 292) ball.vx *= -1;
@@ -380,6 +400,7 @@
                 }
                 if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
                     ball.state = 'stopped';
+                    ball.vx = 0; ball.vy = 0; // Резко стопаем физику, но рисуем
                     const angle = Math.atan2(ball.y - 150, ball.x - 150);
                     const normalizedAngle = (angle + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
                     let checkAngle = 0, winner = arenaPlayers[0];
@@ -391,8 +412,10 @@
                     socket.emit('request_winner', { winnerId: winner.id });
                 }
             }
-            ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('⚽', Math.round(ball.x), Math.round(ball.y));
+            
+            // СВЕТЛЫЙ МЯЧ ⚪
+            ctx.font = '26px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('⚪', Math.round(ball.x), Math.round(ball.y));
         }
         requestAnimationFrame(draw);
     }
