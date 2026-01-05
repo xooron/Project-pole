@@ -47,6 +47,16 @@ io.on('connection', (socket) => {
         if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
     });
 
+    // Новая логика пополнения
+    socket.on('deposit_ton', (data) => {
+        const u = db.users[data.id];
+        const amt = parseFloat(data.amount);
+        if (u && amt >= 1) {
+            u.balance += amt;
+            io.emit('update_data', db.users);
+        }
+    });
+
     socket.on('request_winner', (data) => {
         if (gameStatus !== 'running') return;
         gameStatus = 'calculating';
@@ -55,7 +65,6 @@ io.on('connection', (socket) => {
         const winAmount = totalBank * 0.95;
         db.users[winner.id].balance += winAmount;
 
-        // Реферальные
         players.forEach(p => {
             const user = db.users[p.id];
             if (user.referredBy && db.users[user.referredBy]) {
@@ -96,7 +105,6 @@ function startCountdown() {
 function startGame() {
     gameStatus = 'running';
     const angle = Math.random() * Math.PI * 2;
-    // Скорость настроена под 17 секунд
     io.emit('start_game_sequence', {
         startX: 150, startY: 150,
         vx: Math.cos(angle) * 15, vy: Math.sin(angle) * 15
