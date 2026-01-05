@@ -25,7 +25,6 @@
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
         
-        /* HEADER */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { 
             background: #111814; padding: 8px 14px; border-radius: 50px; 
@@ -45,21 +44,17 @@
         .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
-
         .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
         .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; }
-
         .stat-group { margin-bottom: 15px; }
         .stat-title { font-size: 10px; color: #5a6b61; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
         .count-pill { background: rgba(255,255,255,0.03); border: 1px solid var(--border); width: fit-content; padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
-
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 18px; }
         .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
         .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-
         .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; }
 
         /* ARENA */
@@ -67,8 +62,22 @@
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         
-        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
+        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; box-shadow: 0 0 30px rgba(0,255,102,0.05); }
         #arena-canvas { width: 100%; height: 100%; display: block; }
+
+        /* WINNER PANEL */
+        #winner-panel {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon);
+            color: #fff; padding: 25px; border-radius: 30px;
+            text-align: center; z-index: 100; display: none; width: 85%;
+            backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0, 255, 102, 0.3);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
+        #winner-panel .win-mult { background: var(--neon); color: #000; padding: 4px 12px; border-radius: 10px; font-weight: 900; margin-bottom: 10px; display: inline-block; font-size: 18px; }
+        #winner-panel p { font-weight: 900; font-size: 26px; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; }
@@ -78,23 +87,10 @@
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
         .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
-        .p-user { font-size: 14px; font-weight: 800; color: #fff; }
-        .p-bet-info { display: flex; align-items: center; gap: 10px; }
-        .p-amount { font-size: 14px; font-weight: 800; }
-        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; margin-left: 10px; }
-
-        /* WINNER PANEL */
-        #winner-panel {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon);
-            color: #fff; padding: 25px; border-radius: 30px;
-            text-align: center; z-index: 100; display: none; width: 80%;
-            backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0, 255, 102, 0.2);
-        }
-        #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
-        #winner-panel h2 { font-weight: 900; font-size: 14px; color: var(--neon); margin-bottom: 10px; text-transform: uppercase; }
-        #winner-panel .win-mult { background: var(--neon); color: #000; padding: 4px 10px; border-radius: 8px; font-weight: 900; margin-bottom: 10px; display: inline-block; }
-        #winner-panel p { font-weight: 900; font-size: 24px; }
+        .p-user { font-size: 14px; font-weight: 800; }
+        .p-bet-info { display: flex; align-items: center; }
+        .p-amount { font-size: 14px; font-weight: 800; margin-right: 12px; } /* Убран притык */
+        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; }
 
         /* NAV */
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
@@ -138,9 +134,8 @@
                 <button class="b-btn" onclick="makeBet(5)">5.0</button>
                 <button class="b-btn" onclick="makeBet(10)">10</button>
                 <button class="b-btn" onclick="makeBet(50)">50</button>
-                <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">MAX</button>
+                <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">ALL IN</button>
             </div>
-
             <div class="players-list" id="players-list"></div>
         </section>
 
@@ -151,19 +146,16 @@
                 <span class="u-tag" id="u-tag">@username</span>
                 <div id="ton-connect-btn"></div>
             </div>
+            <!-- Рефералка -->
             <div class="glass-panel">
-                <p class="ref-text">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
+                <p class="ref-text">Получайте 10% от комиссий рефералов</p>
                 <div class="actions-row">
                     <button class="btn-sq" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
-                    <button class="btn-invite-wide" onclick="invite()">Пригласить друзей</button>
-                </div>
-                <div class="stat-group">
-                    <p class="stat-title">Твои рефералы</p>
-                    <div class="count-pill"><i class="fa-solid fa-user-group" style="color: #0098ea;"></i><span id="ref-count">0</span></div>
+                    <button class="btn-invite-wide" onclick="invite()">Пригласить</button>
                 </div>
                 <div class="stats-grid">
-                    <div class="stat-item"><span>Доступно к зачислению</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-pending">0.00</span></div></div>
-                    <div class="stat-item"><span>Всего зачислено</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-total">0.00</span></div></div>
+                    <div class="stat-item"><span>Доступно</span><div><span id="ref-pending">0.00</span></div></div>
+                    <div class="stat-item"><span>Всего</span><div><span id="ref-total">0.00</span></div></div>
                 </div>
                 <button class="btn-claim" onclick="claim()">Зачислить TON</button>
             </div>
@@ -188,19 +180,16 @@
     });
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
-    const startParam = tg.initDataUnsafe.start_param || null;
     const imgCache = {};
     
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 12, state: 'hidden', friction: 0.994 };
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 12, state: 'hidden', friction: 0.993 };
     let arrowAngle = 0;
     let arenaPlayers = [];
 
     socket.emit('user_joined', { 
-        id: userData.id, 
-        name: userData.first_name, 
-        username: userData.username, 
-        avatar: userData.photo_url,
-        refBy: startParam
+        id: userData.id, name: userData.first_name, 
+        username: userData.username, avatar: userData.photo_url,
+        refBy: tg.initDataUnsafe.start_param
     });
 
     function showTab(id, el) {
@@ -215,19 +204,16 @@
     }
 
     function copyRef() {
-        const link = `https://PvPField_bot/app?startapp=${userData.id}`;
-        navigator.clipboard.writeText(link);
-        tg.showAlert("Ссылка скопирована!");
+        navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`);
+        tg.showAlert("Скопировано!");
     }
 
     function invite() {
-        const link = `https://t.me/PvPField_bot/app?startapp=${userData.id}`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Играй со мной в PvPField!")}`);
+        const url = `https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`;
+        tg.openTelegramLink(url);
     }
 
-    function claim() {
-        socket.emit('claim_ref', { id: userData.id });
-    }
+    function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
     socket.on('update_data', (u) => {
         const me = u[userData.id];
@@ -236,7 +222,6 @@
             document.getElementById('u-nick').innerText = me.name;
             document.getElementById('u-tag').innerText = "@" + me.username;
             document.getElementById('u-ava').src = me.avatar || 'https://pixsafe.online/i/mglZT';
-            document.getElementById('ref-count').innerText = me.refCount;
             document.getElementById('ref-pending').innerText = me.refPending.toFixed(2);
             document.getElementById('ref-total').innerText = me.refTotal.toFixed(2);
         }
@@ -253,15 +238,13 @@
         ball.x = data.startX; 
         ball.y = data.startY;
         ball.state = 'spawning';
+        ball.vx = 0; ball.vy = 0;
         arrowAngle = 0;
 
-        // 2 секунды крутим стрелку
-        const spinInterval = setInterval(() => { arrowAngle += 0.15; }, 16);
-
+        // Через 2 секунды мяч летит
         setTimeout(() => {
-            clearInterval(spinInterval);
-            ball.vx = Math.cos(arrowAngle) * 7.5; // Скорость для ~10 сек полета
-            ball.vy = Math.sin(arrowAngle) * 7.5;
+            ball.vx = Math.cos(arrowAngle) * 8; // Начальная скорость
+            ball.vy = Math.sin(arrowAngle) * 8;
             ball.state = 'moving';
         }, 2000);
     });
@@ -272,11 +255,12 @@
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
         document.getElementById('win-sum').innerText = `+${data.bank.toFixed(2)} TON`;
         
-        const mult = data.winnerBet > 0 ? (data.bank / data.winnerBet).toFixed(1) : "0.0";
+        // Расчет икса без NaN
+        const mult = data.winnerBet > 0 ? (data.bank / data.winnerBet).toFixed(1) : "1.0";
         document.getElementById('win-x').innerText = `x${mult}`;
         
         panel.style.display = 'block';
-        setTimeout(() => { panel.style.display = 'none'; }, 3000);
+        setTimeout(() => { panel.style.display = 'none'; }, 4000);
     });
 
     socket.on('update_arena', (data) => {
@@ -289,7 +273,7 @@
     function updatePlayersList(players) {
         const list = document.getElementById('players-list');
         list.innerHTML = '';
-        players.sort((a, b) => b.amount - a.amount).forEach(p => {
+        players.sort((a,b) => b.amount - a.amount).forEach(p => {
             const row = document.createElement('div');
             row.className = 'player-row';
             row.innerHTML = `<img src="${p.avatar || 'https://pixsafe.online/i/mglZT'}" class="p-ava"><div class="p-info"><span class="p-user">@${p.username}</span><div class="p-bet-info"><span class="p-amount">${p.amount.toFixed(2)} TON</span><span class="p-percent">${p.chance.toFixed(1)}%</span></div></div>`;
@@ -302,34 +286,24 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
         
-        if(arenaPlayers.length === 0) {
-            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fillRect(0, 0, 300, 300);
-        } else {
-            let curX = 0;
-            arenaPlayers.forEach(p => {
-                let w = (p.chance / 100) * 300;
-                ctx.fillStyle = p.color; ctx.fillRect(curX, 0, w, 300);
-                const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
-                if (!imgCache[avaUrl]) {
-                    imgCache[avaUrl] = new Image(); imgCache[avaUrl].src = avaUrl;
-                } else if (imgCache[avaUrl].complete && w > 20) {
-                    ctx.save(); ctx.beginPath(); ctx.arc(curX + w/2, 150, 12, 0, Math.PI*2); ctx.clip();
-                    ctx.drawImage(imgCache[avaUrl], curX + w/2 - 12, 138, 24, 24); ctx.restore();
-                }
-                curX += w;
-            });
-        }
+        // Сектора
+        let curX = 0;
+        arenaPlayers.forEach(p => {
+            let w = (p.chance / 100) * 300;
+            ctx.fillStyle = p.color; ctx.fillRect(curX, 0, w, 300);
+            curX += w;
+        });
 
         if (ball.state !== 'hidden') {
             if (ball.state === 'spawning') {
-                // Рисуем стрелку вокруг мяча
+                arrowAngle += 0.1; // Крутим стрелку
                 ctx.save();
                 ctx.translate(ball.x, ball.y);
                 ctx.rotate(arrowAngle);
                 ctx.beginPath();
-                ctx.moveTo(25, 0); ctx.lineTo(15, -8); ctx.lineTo(15, 8); ctx.closePath();
-                ctx.fillStyle = var(--neon);
-                ctx.shadowBlur = 10; ctx.shadowColor = var(--neon);
+                ctx.moveTo(30, 0); ctx.lineTo(18, -10); ctx.lineTo(18, 10); ctx.closePath();
+                ctx.fillStyle = '#00ff66';
+                ctx.shadowBlur = 15; ctx.shadowColor = '#00ff66';
                 ctx.fill();
                 ctx.restore();
             }
@@ -337,15 +311,17 @@
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
+                
                 if (ball.x - ball.radius < 0 || ball.x + ball.radius > 300) ball.vx *= -1;
                 if (ball.y - ball.radius < 0 || ball.y + ball.radius > 300) ball.vy *= -1;
 
-                if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
+                // Если почти остановился (через ~10 сек)
+                if (Math.abs(ball.vx) < 0.06 && Math.abs(ball.vy) < 0.06 && ball.state === 'moving') {
                     ball.state = 'stopped';
                     socket.emit('request_winner', { finalX: ball.x });
                 }
             }
-            ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('⚽', ball.x, ball.y);
         }
         requestAnimationFrame(drawArena);
@@ -354,5 +330,3 @@
 </script>
 </body>
 </html>
-
-
