@@ -24,7 +24,6 @@ io.on('connection', (socket) => {
                 id: data.id, name: data.name, username: data.username, avatar: data.avatar, 
                 balance: 100.0, refCount: 0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy 
             };
-            if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
         io.emit('update_data', db.users);
         socket.emit('update_arena', { players, totalBank });
@@ -49,20 +48,13 @@ io.on('connection', (socket) => {
 
     socket.on('deposit_ton', (data) => {
         const u = db.users[data.id];
-        const amt = parseFloat(data.amount);
-        if (u && amt >= 1) {
-            u.balance += amt;
-            io.emit('update_data', db.users);
-        }
+        if (u && data.amount >= 1) { u.balance += parseFloat(data.amount); io.emit('update_data', db.users); }
     });
 
-    // Логика вывода
     socket.on('withdraw_ton', (data) => {
         const u = db.users[data.id];
         const amt = parseFloat(data.amount);
-        if (!u) return;
-
-        if (amt >= 1 && u.balance >= amt) {
+        if (u && amt >= 1 && u.balance >= amt) {
             u.balance -= amt;
             io.emit('update_data', db.users);
             socket.emit('withdraw_response', { success: true, message: "Успешно!" });
@@ -74,36 +66,18 @@ io.on('connection', (socket) => {
     socket.on('request_winner', (data) => {
         if (gameStatus !== 'running') return;
         gameStatus = 'calculating';
-        
         const winner = players.find(p => p.id === data.winnerId) || players[0];
         const winAmount = totalBank * 0.95;
-        db.users[winner.id].balance += winAmount;
-
-        players.forEach(p => {
-            const user = db.users[p.id];
-            if (user.referredBy && db.users[user.referredBy]) {
-                db.users[user.referredBy].refPending += (p.amount * 0.05) * 0.1;
-            }
-        });
-
+        if (db.users[winner.id]) db.users[winner.id].balance += winAmount;
         io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
         io.emit('update_data', db.users);
         setTimeout(resetGame, 4000);
-    });
-
-    socket.on('claim_ref', (data) => {
-        const u = db.users[data.id];
-        if (u && u.refPending > 0) {
-            u.balance += u.refPending; u.refTotal += u.refPending; u.refPending = 0;
-            io.emit('update_data', db.users);
-        }
     });
 });
 
 function updateChances() {
     totalBank = players.reduce((s, p) => s + p.amount, 0);
     players.forEach(p => p.chance = (p.amount / totalBank) * 100);
-    players.sort((a, b) => b.amount - a.amount);
 }
 
 function startCountdown() {
@@ -119,10 +93,7 @@ function startCountdown() {
 function startGame() {
     gameStatus = 'running';
     const angle = Math.random() * Math.PI * 2;
-    io.emit('start_game_sequence', {
-        startX: 150, startY: 150,
-        vx: Math.cos(angle) * 15, vy: Math.sin(angle) * 15
-    });
+    io.emit('start_game_sequence', { vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12 });
 }
 
 function resetGame() {
@@ -131,6 +102,4 @@ function resetGame() {
     io.emit('game_status', { status: 'waiting' });
 }
 
-server.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});
+server.listen(3000);
