@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Football Arena</title>
+    <title>PVP FIELD</title>
     
-    <!-- Скрипты -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
@@ -16,144 +15,160 @@
     <style>
         :root { 
             --neon: #00ff66; 
-            --panel: rgba(22, 28, 24, 0.96); 
-            --border: rgba(0, 255, 102, 0.15); 
-            --ton-blue: #0088cc;
+            --ton-blue: #0098ea;
+            --panel: rgba(15, 20, 18, 0.95); 
+            --border: rgba(0, 255, 102, 0.2); 
+            --bg: #030a05;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; }
         
-        body { 
-            background: radial-gradient(circle at top, #0a1a0f 0%, #000 100%);
-            color: #fff; height: 100vh; overflow: hidden; 
+        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
+        
+        /* ЗАГРУЗОЧНЫЙ ЭКРАН */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000 url('https://i.imgur.com/your-image-link-here.jpg') center/cover no-repeat;
+            z-index: 10000; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
         }
+        /* Используем предоставленное фото как фон для загрузки */
+        #loading-screen { background-image: url('https://img.freepik.com/free-vector/soccer-stadium-field-night-arena-light_107791-5374.jpg'); } /* Фолбек */
+
+        .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; background: radial-gradient(circle at top, #0d2b16 0%, #000 100%); }
         
-        .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; }
-        
-        .header { padding: 15px; display: flex; justify-content: flex-end; }
+        .header { padding: 15px; display: flex; justify-content: flex-end; z-index: 10; }
         .balance-pill { 
-            background: var(--panel); padding: 8px 16px; border-radius: 50px; 
-            border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; 
-            font-weight: 800; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            background: var(--panel); padding: 10px 18px; border-radius: 50px; 
+            border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; 
+            font-weight: 800; font-size: 15px; box-shadow: 0 0 20px rgba(0,255,102,0.15);
         }
 
         .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
         .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ПРОФИЛЬ */
-        .glass-panel { background: var(--panel); border-radius: 24px; padding: 20px; border: 1px solid var(--border); margin-bottom: 15px; }
+        /* ПРОФИЛЬ (СТИЛЬ КАК НА ФОТО) */
+        .glass-panel { background: var(--panel); border-radius: 28px; padding: 22px; border: 1px solid var(--border); margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .profile-card { text-align: center; }
-        .avatar-frame { 
-            width: 70px; height: 70px; margin: 0 auto 10px; border-radius: 50%; 
-            border: 2px solid var(--neon); padding: 4px; background: #000; overflow: hidden; 
-        }
+        .avatar-frame { width: 80px; height: 80px; margin: 0 auto 12px; border-radius: 50%; border: 3px solid var(--neon); padding: 5px; background: #000; overflow: hidden; box-shadow: 0 0 20px var(--neon); }
         .avatar-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .nick { font-size: 20px; font-weight: 800; color: #fff; }
-        .tag { font-size: 12px; color: var(--neon); opacity: 0.8; text-transform: lowercase; }
+        .nick { font-size: 22px; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .tag { font-size: 13px; color: var(--neon); opacity: 0.9; text-transform: lowercase; }
+        #ton-connect-btn { margin-top: 15px; display: flex; justify-content: center; }
 
-        /* WALLET */
-        #ton-connect-btn { display: flex; justify-content: center; margin-top: 15px; scale: 0.9; }
+        /* РЕФЕРАЛЬНАЯ СИСТЕМА (ИЗ СКРИНШОТА) */
+        .ref-title { font-size: 15px; font-weight: 800; line-height: 1.3; margin-bottom: 15px; text-align: left; color: #eee; }
+        .ref-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-ref-icon { width: 50px; height: 50px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .btn-ref-main { flex: 1; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff; font-weight: 800; font-size: 13px; }
 
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .stat-box { background: rgba(255, 255, 255, 0.03); border-radius: 16px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-label { font-size: 9px; color: #666; margin-bottom: 5px; display: block; }
-        .stat-val { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+        .stat-box { background: rgba(255, 255, 255, 0.02); border-radius: 18px; padding: 14px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-label { font-size: 10px; color: #666; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
+        .stat-val { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 
-        .btn-action { 
-            width: 100%; margin-top: 10px; background: #fff; color: #000; border: none; 
-            padding: 15px; border-radius: 16px; font-weight: 800; font-size: 13px;
-        }
+        .btn-claim { width: 100%; padding: 16px; border-radius: 16px; background: #fff; color: #000; border: none; font-weight: 800; margin-top: 15px; font-size: 14px; box-shadow: 0 5px 15px rgba(255,255,255,0.2); transition: 0.2s; }
+        .btn-claim:active { transform: scale(0.97); }
 
         /* АРЕНА */
-        .status-box { text-align: center; margin-bottom: 10px; }
-        #status-txt { font-size: 11px; color: var(--neon); font-weight: 800; letter-spacing: 1px; }
-        .bank-pill { background: var(--panel); padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border); display: inline-block; margin-top: 5px; }
+        .status-header { text-align: center; margin-bottom: 12px; }
+        #status-txt { font-size: 12px; color: var(--neon); font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon); }
+        .bank-pill { background: var(--panel); padding: 8px 25px; border-radius: 50px; border: 1px solid var(--border); display: inline-block; margin-top: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
 
         .stadium { 
-            width: 100%; aspect-ratio: 1/1.1; background: #020403; border: 3px solid #1a1a1a; 
-            border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: column; 
-            box-shadow: inset 0 0 50px #000;
+            width: 100%; aspect-ratio: 1/1.1; background: #010502; border: 3px solid #1a1a1a; 
+            border-radius: 35px; position: relative; overflow: hidden; display: flex; flex-direction: column; 
+            box-shadow: inset 0 0 60px #000, 0 0 30px rgba(0,255,102,0.05);
         }
-        .territory { width: 100%; transition: height 0.5s ease; position: relative; display: flex; align-items: center; justify-content: center; }
-        .t-ava { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #fff; opacity: 0.4; }
+        .territory { width: 100%; transition: height 0.6s ease; position: relative; display: flex; align-items: center; justify-content: center; }
+        .t-ava { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #fff; opacity: 0.5; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
         #ball { 
-            position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; 
-            z-index: 100; display: none; border: 2.5px solid #000; box-shadow: 0 0 10px #fff; 
+            position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; 
+            z-index: 100; display: none; border: 2.5px solid #000; box-shadow: 0 0 15px #fff; 
         }
         #arrow { 
-            position: absolute; width: 45px; height: 5px; background: #fff; border: 2px solid #000; 
+            position: absolute; width: 50px; height: 6px; background: #fff; border: 2px solid #000; 
             border-radius: 3px; transform-origin: left center; z-index: 99; display: none; 
         }
 
         /* КНОПКИ СТАВОК */
-        .bet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 15px; }
-        .bet-btn { background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 11px; transition: 0.2s; }
-        .bet-btn:active { background: var(--neon); color: #000; }
+        .bet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 20px; }
+        .bet-btn { background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 14px 0; border-radius: 14px; font-weight: 800; font-size: 12px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .bet-btn:active { background: var(--neon); color: #000; border-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
 
         .player-row { 
-            background: var(--panel); padding: 10px; border-radius: 15px; 
-            display: flex; align-items: center; gap: 10px; margin-bottom: 8px; border: 1px solid var(--border);
+            background: var(--panel); padding: 12px 18px; border-radius: 20px; 
+            display: flex; align-items: center; gap: 12px; margin-bottom: 10px; border: 1px solid var(--border);
         }
-        .p-img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+        .p-img { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
 
         .nav-dock { 
-            position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; 
-            background: rgba(10,15,12,0.98); border-radius: 40px; display: flex; align-items: center; 
-            border: 1px solid var(--border); backdrop-filter: blur(15px);
+            position: fixed; bottom: 20px; left: 20px; right: 20px; height: 80px; 
+            background: rgba(8,12,10,0.98); border-radius: 40px; display: flex; align-items: center; 
+            border: 1px solid var(--border); backdrop-filter: blur(20px); box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
-        .nav-link { flex: 1; text-align: center; color: #44554a; font-size: 10px; display: flex; flex-direction: column; align-items: center; background: none; border: none; font-weight: 800; }
-        .nav-link i { font-size: 22px; margin-bottom: 4px; }
-        .nav-link.active { color: var(--neon); }
+        .nav-link { flex: 1; text-align: center; color: #44554a; font-size: 10px; display: flex; flex-direction: column; align-items: center; background: none; border: none; font-weight: 800; transition: 0.3s; }
+        .nav-link i { font-size: 24px; margin-bottom: 5px; }
+        .nav-link.active { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
     </style>
 </head>
 <body>
 
+<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
+<div id="loading-screen">
+    <div style="position: absolute; bottom: 50px; color: #fff; font-weight: 800; letter-spacing: 5px;">ЗАГРУЗКА...</div>
+</div>
+
 <div class="app-container">
     <header class="header">
         <div class="balance-pill">
-            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px">
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px">
             <span id="user-bal">0.00</span>
         </div>
     </header>
 
     <main class="main-scroll">
-        <!-- PROFILE -->
+        <!-- ПРОФИЛЬ -->
         <section id="profile-page" class="page active">
             <div class="glass-panel profile-card">
                 <div class="avatar-frame"><img src="" id="u-ava" alt=""></div>
-                <h1 class="nick" id="u-nick">ЗАГРУЗКА...</h1>
+                <h1 class="nick" id="u-nick">...</h1>
                 <div class="tag" id="u-tag">@username</div>
                 <div id="ton-connect-btn"></div>
             </div>
             
             <div class="glass-panel">
-                <span class="stat-label">РЕФЕРАЛЬНАЯ СИСТЕМА</span>
+                <p class="ref-title">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
+                <div class="ref-actions">
+                    <button class="btn-ref-icon" onclick="copyRefLink()"><i class="fa-regular fa-copy"></i></button>
+                    <button class="btn-ref-main" onclick="inviteFriends()">Пригласить друзей</button>
+                </div>
+
+                <span class="stat-label">Твои рефералы</span>
+                <div class="stat-box" style="width: fit-content; min-width: 90px; margin-bottom: 15px;">
+                    <div class="stat-val"><i class="fa-solid fa-user-group" style="color:var(--ton-blue); font-size:15px"></i> <span id="ref-count">0</span></div>
+                </div>
+
                 <div class="stat-grid">
                     <div class="stat-box">
-                        <span class="stat-label">ДРУЗЬЯ</span>
-                        <div class="stat-val">
-                            <i class="fa-solid fa-user-group" style="color:var(--ton-blue); font-size:14px"></i>
-                            <b id="ref-count">0</b>
-                        </div>
+                        <span class="stat-label">Доступно к зачислению</span>
+                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:16px"> <span id="ref-pending">0.00</span></div>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">ДОСТУПНО</span>
-                        <div class="stat-val">
-                            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px">
-                            <b id="ref-pending">0.00</b>
-                        </div>
+                        <span class="stat-label">Всего зачислено</span>
+                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:16px"> <span id="ref-total">0.00</span></div>
                     </div>
                 </div>
-                <button class="btn-action" onclick="inviteFriends()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
+                <button class="btn-claim" onclick="claimRewards()">Зачислить TON</button>
             </div>
         </section>
 
-        <!-- ARENA -->
+        <!-- АРЕНА -->
         <section id="arena-page" class="page">
-            <div class="status-box">
+            <div class="status-header">
                 <div id="status-txt">ОЖИДАНИЕ СТАВОК</div>
                 <div class="bank-pill">БАНК: <b id="total-bank">0.00</b> TON</div>
             </div>
@@ -183,8 +198,15 @@
     tg.ready();
     tg.expand();
 
+    // ЗАГРУЗОЧНЫЙ ЭКРАН (3 секунды)
+    setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 500);
+    }, 3000);
+
     const socket = io();
-    const user = tg.initDataUnsafe.user || { id: 8888, first_name: "ИГРОК", username: "user" };
+    const user = tg.initDataUnsafe.user || { id: 9999, first_name: "ИГРОК", username: "user" };
 
     // TonConnect
     const tonConnectUI = new TonConnectUI.TonConnectUI({
@@ -196,7 +218,6 @@
         if (wallet) socket.emit('wallet_connected', { id: user.id, address: wallet.account.address });
     });
 
-    // Принудительная регистрация при коннекте сокета
     socket.on('connect', () => {
         socket.emit('user_joined', { 
             id: user.id, 
@@ -206,9 +227,8 @@
         });
     });
 
-    // Локальное обновление авы, чтобы не было дырок
-    const avatarImg = document.getElementById('u-ava');
-    avatarImg.src = user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}&background=00ff66&color=000`;
+    // Инициализация профиля сразу
+    document.getElementById('u-ava').src = user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}&background=00ff66&color=000`;
     document.getElementById('u-nick').innerText = user.first_name.toUpperCase();
     document.getElementById('u-tag').innerText = "@" + (user.username || "id" + user.id);
 
@@ -225,10 +245,18 @@
         tg.HapticFeedback.impactOccurred('medium');
     }
 
-    function inviteFriends() {
+    function copyRefLink() { 
         const link = `https://t.me/YOUR_BOT?start=${user.id}`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Играй со мной в Football Arena!`);
+        navigator.clipboard.writeText(link); 
+        tg.showAlert("Ссылка скопирована!"); 
     }
+    
+    function inviteFriends() { 
+        const link = `https://t.me/YOUR_BOT?start=${user.id}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Играй со мной!`); 
+    }
+    
+    function claimRewards() { socket.emit('claim_rewards', { id: user.id }); }
 
     socket.on('update_data', (data) => {
         const d = data.users[user.id];
@@ -236,6 +264,7 @@
             document.getElementById('user-bal').innerText = d.balance.toFixed(2);
             document.getElementById('ref-count').innerText = d.refCount;
             document.getElementById('ref-pending').innerText = d.refPending.toFixed(2);
+            document.getElementById('ref-total').innerText = d.refTotal.toFixed(2);
         }
     });
 
@@ -274,25 +303,21 @@
         const rot = setInterval(() => { angle += 15; arrow.style.transform = `rotate(${angle}deg)`; }, 30);
 
         setTimeout(() => {
-            clearInterval(rot);
-            arrow.style.display = 'none';
-            
+            clearInterval(rot); arrow.style.display = 'none';
             let px = stadium.clientWidth / 2, py = stadium.clientHeight / 2;
             let vx = Math.cos(angle * Math.PI / 180) * (14 + Math.random() * 4);
             let vy = Math.sin(angle * Math.PI / 180) * (14 + Math.random() * 4);
-            let friction = 0.992;
+            let friction = 0.985; // Физика остановки (~10 сек)
             let startTime = Date.now();
 
             function phys() {
                 vx *= friction; vy *= friction;
                 px += vx; py += vy;
-
-                if(px < 10 || px > stadium.clientWidth - 10) { vx *= -0.85; px = px < 10 ? 10 : stadium.clientWidth - 10; }
-                if(py < 10 || py > stadium.clientHeight - 10) { vy *= -0.85; py = py < 10 ? 10 : stadium.clientHeight - 10; }
-
+                if(px < 10 || px > stadium.clientWidth - 10) { vx *= -0.8; px = px < 10 ? 10 : stadium.clientWidth - 10; }
+                if(py < 10 || py > stadium.clientHeight - 10) { vy *= -0.8; py = py < 10 ? 10 : stadium.clientHeight - 10; }
                 ball.style.left = px + 'px'; ball.style.top = py + 'px';
 
-                if (Date.now() - startTime < 10000 && (Math.abs(vx) + Math.abs(vy) > 0.15)) {
+                if (Math.abs(vx) + Math.abs(vy) > 0.15) {
                     requestAnimationFrame(phys);
                 } else {
                     const territories = stadium.querySelectorAll('.territory');
