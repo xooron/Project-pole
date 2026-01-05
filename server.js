@@ -75,7 +75,7 @@ io.on('connection', (socket) => {
         });
         io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
         io.emit('update_data', db.users);
-        setTimeout(resetGame, 3000);
+        setTimeout(resetGame, 4000);
     });
 
     socket.on('claim_ref', (data) => {
