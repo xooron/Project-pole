@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const fs = require('fs'); // Модуль для сохранения файлов
 
 const app = express();
 const server = http.createServer(app);
@@ -11,47 +10,22 @@ const io = new Server(server);
 app.use(cors());
 app.use(express.static(__dirname));
 
-const DB_FILE = './database.json';
 let db = { users: {} };
-
-// Загрузка базы данных при старте
-if (fs.existsSync(DB_FILE)) {
-    try {
-        db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-        console.log("Database loaded from file.");
-    } catch (e) {
-        console.error("Error loading database:", e);
-    }
-}
-
-// Функция сохранения базы
-function saveDB() {
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
-}
-
 let players = [];
 let totalBank = 0;
 let gameStatus = 'waiting';
+
 const COLORS = ['#00441b', '#4a004a', '#2e0052', '#00474f', '#5e4b00', '#5e1900', '#415e11'];
 
 io.on('connection', (socket) => {
     socket.on('user_joined', (data) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
-                id: data.id, 
-                name: data.name, 
-                username: data.username, 
-                avatar: data.avatar, 
-                balance: 0.0, // Баланс 0 для новых
-                refCount: 0, 
-                refPending: 0.0, 
-                refTotal: 0.0, 
-                referredBy: data.refBy 
+                id: data.id, name: data.name, username: data.username, avatar: data.avatar, 
+                balance: 0.0, // УСТАНОВЛЕНО 0 ПО УМОЛЧАНИЮ
+                refCount: 0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy 
             };
-            if (data.refBy && db.users[data.refBy]) {
-                db.users[data.refBy].refCount++;
-            }
-            saveDB();
+            if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
         io.emit('update_data', db.users);
         socket.emit('update_arena', { players, totalBank });
@@ -69,7 +43,6 @@ io.on('connection', (socket) => {
         else players.push({ id: u.id, username: u.username, avatar: u.avatar, amount, color: COLORS[players.length % COLORS.length] });
         
         updateChances();
-        saveDB();
         io.emit('update_data', db.users);
         io.emit('update_arena', { players, totalBank });
         if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
@@ -77,11 +50,7 @@ io.on('connection', (socket) => {
 
     socket.on('deposit_ton', (data) => {
         const u = db.users[data.id];
-        if (u && data.amount >= 1) { 
-            u.balance += parseFloat(data.amount); 
-            saveDB();
-            io.emit('update_data', db.users); 
-        }
+        if (u && data.amount >= 1) { u.balance += parseFloat(data.amount); io.emit('update_data', db.users); }
     });
 
     socket.on('withdraw_ton', (data) => {
@@ -89,7 +58,6 @@ io.on('connection', (socket) => {
         const amt = parseFloat(data.amount);
         if (u && amt >= 1 && u.balance >= amt) {
             u.balance -= amt;
-            saveDB();
             io.emit('update_data', db.users);
             socket.emit('withdraw_response', { success: true, message: "Успешно! Ожидайте выплату." });
         } else {
@@ -111,7 +79,6 @@ io.on('connection', (socket) => {
                 }
             });
         }
-        saveDB();
         io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
         io.emit('update_data', db.users);
         setTimeout(resetGame, 4000);
@@ -121,7 +88,6 @@ io.on('connection', (socket) => {
         const u = db.users[data.id];
         if (u && u.refPending > 0) {
             u.balance += u.refPending; u.refTotal += u.refPending; u.refPending = 0;
-            saveDB();
             io.emit('update_data', db.users);
         }
     });
@@ -154,4 +120,4 @@ function resetGame() {
     io.emit('game_status', { status: 'waiting' });
 }
 
-server.listen(3000, () => console.log('Server running on port 3000'));
+server.listen(3000);
