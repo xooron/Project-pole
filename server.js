@@ -22,17 +22,15 @@ io.on('connection', (socket) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
                 id: data.id, 
-                name: data.name, 
-                username: data.username,
+                name: data.name || "Игрок", 
+                username: data.username || "user",
                 avatar: data.avatar || `https://ui-avatars.com/api/?name=${data.name}&background=00ff66&color=000`,
-                balance: 10.0, // Начальный баланс 10 TON
+                balance: 10.0, // Даем 10 ТОН при первом входе
                 refCount: 0, 
-                refPending: 0, 
-                refTotal: 0, 
                 address: null 
             };
         }
-        socket.emit('update_data', { users: db.users, userId: data.id });
+        socket.emit('update_data', { users: db.users });
         io.emit('update_arena', { players, totalBank, status: gameStatus, timer });
     });
 
@@ -47,7 +45,7 @@ io.on('connection', (socket) => {
             } else {
                 players.push({ 
                     id: u.id, 
-                    username: u.username || u.name, 
+                    username: u.username, 
                     avatar: u.avatar, 
                     amount: data.amount, 
                     color: COLORS[players.length % COLORS.length] 
@@ -94,25 +92,21 @@ function startTimer() {
 
 function startGame() {
     gameStatus = 'playing';
-    const winningRandom = Math.random() * 360; // Случайный угол
-    const winningAngle = (winningRandom + 1440); // 4 полных круга + случайный угол для анимации стрелки
-    
-    // Определяем победителя по углу
-    const finalAngle = winningRandom; 
-    const winner = players.find(p => finalAngle >= p.startAngle && finalAngle < p.endAngle);
+    const winningRandomAngle = Math.random() * 360; 
+    const winner = players.find(p => winningRandomAngle >= p.startAngle && winningRandomAngle < p.endAngle);
 
-    io.emit('start_game_anim', { winningAngle, winner });
+    io.emit('start_game_anim', { winningAngle: winningRandomAngle, winner });
 
     setTimeout(() => {
         finishGame(winner);
-    }, 13000); // 2с ожидание + 10с полет + запас
+    }, 13000); // 2с стрелка + 10с полет + запас
 }
 
 function finishGame(winner) {
     if (winner) {
         const u = db.users[winner.id];
-        const profit = totalBank - winner.amount;
-        const commission = profit * 0.05;
+        const profit = totalBank - winner.amount; // Чистая прибыль (деньги других игроков)
+        const commission = profit * 0.05; // 5% от прибыли
         const winAmount = totalBank - commission;
         
         u.balance += winAmount;
