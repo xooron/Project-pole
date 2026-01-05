@@ -67,7 +67,7 @@
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         
-        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; box-shadow: 0 0 20px rgba(0, 255, 102, 0.05); }
+        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
 
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
@@ -79,29 +79,22 @@
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
         .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
         .p-user { font-size: 14px; font-weight: 800; color: #fff; }
+        .p-bet-info { display: flex; align-items: center; gap: 10px; }
         .p-amount { font-size: 14px; font-weight: 800; }
-        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; }
+        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; margin-left: 10px; }
 
-        /* WINNER PANEL STYLED */
+        /* WINNER PANEL */
         #winner-panel {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(13, 18, 15, 0.95); 
-            border: 2px solid var(--neon);
+            background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon);
             color: #fff; padding: 25px; border-radius: 30px;
             text-align: center; z-index: 100; display: none; width: 80%;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 50px rgba(0, 255, 102, 0.3);
-            animation: panelIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0, 255, 102, 0.2);
         }
-        @keyframes panelIn {
-            from { opacity: 0; transform: translate(-50%, -40%) scale(0.8); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-        #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; box-shadow: 0 0 15px var(--neon); }
-        #winner-panel h2 { font-weight: 900; font-size: 14px; color: var(--neon); text-transform: uppercase; margin-bottom: 5px; }
-        #winner-panel .win-user { font-size: 18px; font-weight: 800; margin-bottom: 10px; display: block; }
-        #winner-panel .win-multiplier { background: var(--neon); color: #000; padding: 4px 12px; border-radius: 10px; font-size: 16px; font-weight: 900; margin-bottom: 10px; display: inline-block; }
-        #winner-panel p { font-weight: 900; font-size: 26px; color: #fff; }
+        #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
+        #winner-panel h2 { font-weight: 900; font-size: 14px; color: var(--neon); margin-bottom: 10px; text-transform: uppercase; }
+        #winner-panel .win-mult { background: var(--neon); color: #000; padding: 4px 10px; border-radius: 8px; font-weight: 900; margin-bottom: 10px; display: inline-block; }
+        #winner-panel p { font-weight: 900; font-size: 24px; }
 
         /* NAV */
         .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
@@ -133,9 +126,8 @@
                 <canvas id="arena-canvas" width="300" height="300"></canvas>
                 <div id="winner-panel">
                     <img id="win-ava" src="">
-                    <h2 id="win-title">ПОБЕДИТЕЛЬ!</h2>
-                    <span class="win-user" id="win-name">@username</span>
-                    <div><span class="win-multiplier" id="win-x">x0.0</span></div>
+                    <h2 id="win-name">ПОБЕДИТЕЛЬ!</h2>
+                    <div><span class="win-mult" id="win-x">x0.0</span></div>
                     <p id="win-sum">0.00 TON</p>
                 </div>
             </div>
@@ -159,33 +151,20 @@
                 <span class="u-tag" id="u-tag">@username</span>
                 <div id="ton-connect-btn"></div>
             </div>
-
             <div class="glass-panel">
                 <p class="ref-text">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
                 <div class="actions-row">
                     <button class="btn-sq" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn-invite-wide" onclick="invite()">Пригласить друзей</button>
                 </div>
-
                 <div class="stat-group">
                     <p class="stat-title">Твои рефералы</p>
-                    <div class="count-pill">
-                        <i class="fa-solid fa-user-group" style="color: #0098ea;"></i>
-                        <span id="ref-count">0</span>
-                    </div>
+                    <div class="count-pill"><i class="fa-solid fa-user-group" style="color: #0098ea;"></i><span id="ref-count">0</span></div>
                 </div>
-
                 <div class="stats-grid">
-                    <div class="stat-item">
-                        <span>Доступно к зачислению</span>
-                        <div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-pending">0.00</span></div>
-                    </div>
-                    <div class="stat-item">
-                        <span>Всего зачислено</span>
-                        <div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-total">0.00</span></div>
-                    </div>
+                    <div class="stat-item"><span>Доступно к зачислению</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-pending">0.00</span></div></div>
+                    <div class="stat-item"><span>Всего зачислено</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-total">0.00</span></div></div>
                 </div>
-
                 <button class="btn-claim" onclick="claim()">Зачислить TON</button>
             </div>
         </section>
@@ -212,12 +191,8 @@
     const startParam = tg.initDataUnsafe.start_param || null;
     const imgCache = {};
     
-    // Мяч и физика
-    let ball = { 
-        x: 150, y: 150, vx: 0, vy: 0, 
-        radius: 12, state: 'hidden', 
-        friction: 0.993 // Настроено для полета ~10 секунд
-    };
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 12, state: 'hidden', friction: 0.994 };
+    let arrowAngle = 0;
     let arenaPlayers = [];
 
     socket.emit('user_joined', { 
@@ -275,9 +250,20 @@
     });
 
     socket.on('start_game_sequence', (data) => {
-        ball.x = data.startX; ball.y = data.startY;
-        ball.vx = data.vx; ball.vy = data.vy;
-        ball.state = 'moving';
+        ball.x = data.startX; 
+        ball.y = data.startY;
+        ball.state = 'spawning';
+        arrowAngle = 0;
+
+        // 2 секунды крутим стрелку
+        const spinInterval = setInterval(() => { arrowAngle += 0.15; }, 16);
+
+        setTimeout(() => {
+            clearInterval(spinInterval);
+            ball.vx = Math.cos(arrowAngle) * 7.5; // Скорость для ~10 сек полета
+            ball.vy = Math.sin(arrowAngle) * 7.5;
+            ball.state = 'moving';
+        }, 2000);
     });
 
     socket.on('announce_winner', (data) => {
@@ -286,18 +272,18 @@
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
         document.getElementById('win-sum').innerText = `+${data.bank.toFixed(2)} TON`;
         
-        // Расчет Икса
-        const multiplier = (data.bank / data.winnerBet).toFixed(1);
-        document.getElementById('win-x').innerText = `x${multiplier}`;
+        const mult = data.winnerBet > 0 ? (data.bank / data.winnerBet).toFixed(1) : "0.0";
+        document.getElementById('win-x').innerText = `x${mult}`;
         
         panel.style.display = 'block';
-        setTimeout(() => { panel.style.display = 'none'; }, 4000);
+        setTimeout(() => { panel.style.display = 'none'; }, 3000);
     });
 
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
         updatePlayersList(data.players);
+        if (data.players.length === 0) ball.state = 'hidden';
     });
 
     function updatePlayersList(players) {
@@ -316,16 +302,13 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
         
-        // Фон арены (сектора игроков)
         if(arenaPlayers.length === 0) {
-            ctx.fillStyle = 'rgba(255,255,255,0.03)';
-            ctx.fillRect(0, 0, 300, 300);
+            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fillRect(0, 0, 300, 300);
         } else {
             let curX = 0;
             arenaPlayers.forEach(p => {
                 let w = (p.chance / 100) * 300;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(curX, 0, w, 300);
+                ctx.fillStyle = p.color; ctx.fillRect(curX, 0, w, 300);
                 const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
                 if (!imgCache[avaUrl]) {
                     imgCache[avaUrl] = new Image(); imgCache[avaUrl].src = avaUrl;
@@ -337,34 +320,33 @@
             });
         }
 
-        // Отрисовка футбольного мяча
         if (ball.state !== 'hidden') {
+            if (ball.state === 'spawning') {
+                // Рисуем стрелку вокруг мяча
+                ctx.save();
+                ctx.translate(ball.x, ball.y);
+                ctx.rotate(arrowAngle);
+                ctx.beginPath();
+                ctx.moveTo(25, 0); ctx.lineTo(15, -8); ctx.lineTo(15, 8); ctx.closePath();
+                ctx.fillStyle = var(--neon);
+                ctx.shadowBlur = 10; ctx.shadowColor = var(--neon);
+                ctx.fill();
+                ctx.restore();
+            }
+
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
-                
-                // Отскоки от стенок
-                if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -1; }
-                if (ball.x + ball.radius > 300) { ball.x = 300 - ball.radius; ball.vx *= -1; }
-                if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -1; }
-                if (ball.y + ball.radius > 300) { ball.y = 300 - ball.radius; ball.vy *= -1; }
+                if (ball.x - ball.radius < 0 || ball.x + ball.radius > 300) ball.vx *= -1;
+                if (ball.y - ball.radius < 0 || ball.y + ball.radius > 300) ball.vy *= -1;
 
-                // Плавная остановка (если скорость стала мизерной)
                 if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
                     ball.state = 'stopped';
                     socket.emit('request_winner', { finalX: ball.x });
-                    setTimeout(() => { ball.state = 'hidden'; }, 1000);
                 }
             }
-
-            // Рисуем мяч через эмодзи для простоты и красоты
-            ctx.font = '24px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('⚽', ball.x, ball.y);
-            ctx.shadowBlur = 0;
         }
         requestAnimationFrame(drawArena);
     }
