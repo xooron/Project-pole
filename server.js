@@ -11,7 +11,7 @@ app.use(express.static(__dirname));
 let db = { users: {} };
 let players = [];
 let totalBank = 0;
-let gameStatus = 'waiting'; // waiting, counting, playing
+let gameStatus = 'waiting'; 
 let timer = 13;
 let timerId = null;
 
@@ -20,7 +20,7 @@ const COLORS = ['#00ff66', '#ff0066', '#00ccff', '#ffcc00', '#9900ff', '#ff6600'
 io.on('connection', (socket) => {
     socket.on('user_joined', (data) => {
         if (!db.users[data.id]) {
-            db.users[data.id] = { id: data.id, name: data.name, username: data.username, balance: 100.0, refBy: data.refBy, refCount: 0, refPending: 0 };
+            db.users[data.id] = { id: data.id, name: data.name, username: data.username, balance: 50.0, refBy: data.refBy, refCount: 0, refPending: 0 };
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
         broadcastData();
@@ -34,12 +34,11 @@ io.on('connection', (socket) => {
 
             let p = players.find(x => x.id === data.id);
             if (p) p.amount += data.amount;
-            else players.push({ id: user.id, username: user.username, avatar: `https://ui-avatars.com/api/?name=${user.name}&background=00ff66`, amount: data.amount, color: COLORS[players.length % COLORS.length] });
+            else players.push({ id: user.id, username: user.username, avatar: `https://ui-avatars.com/api/?name=${user.name}&background=00ff66&color=000`, amount: data.amount, color: COLORS[players.length % COLORS.length] });
 
             calculate();
             broadcastData();
 
-            // Таймер запускается только когда 2 и более игрока
             if (players.length >= 2 && gameStatus === 'waiting') {
                 startCountdown();
             }
@@ -76,6 +75,7 @@ function startCountdown() {
 
 function startGame() {
     gameStatus = 'playing';
+    // Сервер заранее считает победителя по шансам, но анимация на клиенте выглядит как рандом
     const rand = Math.random() * 100;
     let curr = 0, winner = players[0];
     for (const p of players) {
@@ -89,7 +89,7 @@ function startGame() {
         db.users[winner.id].balance += totalBank;
         players = []; totalBank = 0; gameStatus = 'waiting';
         broadcastData();
-    }, 15000);
+    }, 16000); 
 }
 
 function broadcastData() {
