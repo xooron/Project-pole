@@ -96,9 +96,10 @@ function startCountdown() {
 function startGame() {
     gameStatus = 'running';
     const angle = Math.random() * Math.PI * 2;
+    // Скорость настроена под 17 секунд
     io.emit('start_game_sequence', {
         startX: 150, startY: 150,
-        vx: Math.cos(angle) * 11, vy: Math.sin(angle) * 11
+        vx: Math.cos(angle) * 15, vy: Math.sin(angle) * 15
     });
 }
 
