@@ -74,9 +74,12 @@ io.on('connection', (socket) => {
         
         const fee = totalBank * 0.05;
         const winAmount = totalBank - fee;
+        
+        // Запоминаем ставку победителя для расчета икса
+        const winnerBet = winner.amount;
+
         db.users[winner.id].balance += winAmount;
 
-        // Реферальная логика: 10% от комиссии (fee) идет пригласителю
         players.forEach(p => {
             const user = db.users[p.id];
             if (user.referredBy && db.users[user.referredBy]) {
@@ -86,15 +89,15 @@ io.on('connection', (socket) => {
         });
         
         gameStatus = 'finished';
-        io.emit('announce_winner', { winner, bank: winAmount });
+        io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winnerBet });
         io.emit('update_data', db.users);
-        setTimeout(resetGame, 3000);
+        setTimeout(resetGame, 5000);
     });
 });
 
 function startCountdown() {
     gameStatus = 'countdown';
-    let timer = 15;
+    let timer = 10; // Сократил до 10 для динамики
     const interval = setInterval(() => {
         timer--;
         io.emit('game_status', { status: 'countdown', timer });
@@ -105,9 +108,13 @@ function startCountdown() {
 function startGame() {
     gameStatus = 'running';
     io.emit('game_status', { status: 'running' });
+    
+    // vx и vy настроены так, чтобы мяч летал достаточно долго
     io.emit('start_game_sequence', {
-        startX: Math.random() * 200 + 50, startY: Math.random() * 200 + 50,
-        vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12
+        startX: Math.random() * 200 + 50, 
+        startY: Math.random() * 100 + 100,
+        vx: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 3 + 4), 
+        vy: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 3 + 4)
     });
 }
 
