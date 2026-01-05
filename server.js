@@ -33,7 +33,7 @@ io.on('connection', (socket) => {
     socket.on('place_bet', (data) => {
         if (gameStatus !== 'waiting' && gameStatus !== 'countdown') return;
         const u = db.users[data.id];
-        let amount = data.amount === 'max' ? u.balance : parseFloat(data.amount);
+        let amount = data.amount === 'max' ? (u ? u.balance : 0) : parseFloat(data.amount);
         if (!u || u.balance < amount || amount <= 0) return;
 
         u.balance -= amount;
@@ -47,7 +47,6 @@ io.on('connection', (socket) => {
         if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
     });
 
-    // Новая логика пополнения
     socket.on('deposit_ton', (data) => {
         const u = db.users[data.id];
         const amt = parseFloat(data.amount);
@@ -117,4 +116,6 @@ function resetGame() {
     io.emit('game_status', { status: 'waiting' });
 }
 
-server.listen(3000);
+server.listen(3000, () => {
+    console.log('Server running on port 3000');
+});
