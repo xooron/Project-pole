@@ -22,7 +22,6 @@
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
         
-        /* РОВНЫЙ ПЛЮСИК */
         .add-bal-btn { 
             background: var(--neon); color: #000; border: none; border-radius: 50%; 
             width: 22px; height: 22px; cursor: pointer; 
@@ -243,7 +242,7 @@
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995 };
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995, winnerRequested: false };
     let arrowAngle = 0;
     let arenaPlayers = [];
     let luckyUsedThisRound = false;
@@ -294,6 +293,7 @@
     socket.on('start_game_sequence', (data) => {
         ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0; 
         ball.state = 'spawning';
+        ball.winnerRequested = false;
         arrowAngle = 0;
         luckyUsedThisRound = false;
         showGoals = Math.random() < 0.3;
@@ -304,7 +304,6 @@
     });
 
     socket.on('announce_winner', (data) => {
-        // Мяч НЕ пропадает резко, просто остается в состоянии 'stopped'
         const panel = document.getElementById('winner-panel');
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
@@ -393,29 +392,34 @@
             } else if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
+                
                 if (ball.x < 8 || ball.x > 292) ball.vx *= -1;
                 if (ball.y < 8 || ball.y > 292) {
                     if (showGoals && ball.x > 115 && ball.x < 185) triggerLucky();
                     ball.vy *= -1;
                 }
+
                 if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
                     ball.state = 'stopped';
-                    ball.vx = 0; ball.vy = 0; // Резко стопаем физику, но рисуем
-                    const angle = Math.atan2(ball.y - 150, ball.x - 150);
-                    const normalizedAngle = (angle + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
-                    let checkAngle = 0, winner = arenaPlayers[0];
-                    for(let p of arenaPlayers) {
-                        const slice = (p.chance / 100) * (Math.PI * 2);
-                        if(normalizedAngle >= checkAngle && normalizedAngle < checkAngle + slice) { winner = p; break; }
-                        checkAngle += slice;
+                    ball.vx = 0; ball.vy = 0; 
+                    if (!ball.winnerRequested) {
+                        ball.winnerRequested = true;
+                        const angle = Math.atan2(ball.y - 150, ball.x - 150);
+                        const normalizedAngle = (angle + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
+                        let checkAngle = 0, winner = arenaPlayers[0];
+                        for(let p of arenaPlayers) {
+                            const slice = (p.chance / 100) * (Math.PI * 2);
+                            if(normalizedAngle >= checkAngle && normalizedAngle < checkAngle + slice) { winner = p; break; }
+                            checkAngle += slice;
+                        }
+                        socket.emit('request_winner', { winnerId: winner.id });
                     }
-                    socket.emit('request_winner', { winnerId: winner.id });
                 }
             }
             
-            // СВЕТЛЫЙ МЯЧ ⚪
+            // МЯЧ ⚽
             ctx.font = '26px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('⚪', Math.round(ball.x), Math.round(ball.y));
+            ctx.fillText('⚽', Math.round(ball.x), Math.round(ball.y));
         }
         requestAnimationFrame(draw);
     }
