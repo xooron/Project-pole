@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PVP FIELD - TON</title>
+    <title>PVP FIELD</title>
     
-    <!-- Скрипты -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
@@ -16,112 +15,70 @@
     <style>
         :root { 
             --neon: #00ff66; 
-            --gold: #ffcc00;
-            --ton-blue: #0098ea;
-            --panel: rgba(18, 26, 21, 0.96); 
+            --panel: rgba(20, 25, 22, 0.98); 
             --border: rgba(0, 255, 102, 0.15); 
             --bg: #030805;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; }
-        
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
-        
+
         /* ЗАГРУЗОЧНЫЙ ЭКРАН */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000 url('https://pixsafe.online/i/mglZT') center/cover no-repeat;
-            z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-            padding-bottom: 100px; transition: opacity 0.8s ease;
+            z-index: 10000; display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 80px; transition: opacity 0.8s ease;
         }
-        .loading-bar-container { width: 60%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 20px; overflow: hidden; }
-        .loading-bar-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); animation: load 2.8s forwards; }
+        .loader-bar { width: 50%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; overflow: hidden; margin-bottom: 20px; }
+        .loader-progress { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); animation: load 2.8s forwards; }
         @keyframes load { to { width: 100%; } }
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; background: radial-gradient(circle at top, #0d2b16 0%, #000 100%); }
         
-        /* HEADER */
-        .header { padding: 15px 20px; display: flex; justify-content: flex-end; z-index: 10; }
-        .balance-pill { 
-            background: var(--panel); padding: 10px 18px; border-radius: 50px; 
-            border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; 
-            font-weight: 800; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
+        .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
+        .balance-pill { background: var(--panel); padding: 10px 15px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; }
 
         .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ПРОФИЛЬ (СТИЛЬ ИЗ ФОТО) */
-        .glass-panel { background: var(--panel); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
-        
-        .profile-card { text-align: center; position: relative; }
-        .avatar-container { position: relative; width: 90px; height: 90px; margin: 0 auto 15px; }
-        .avatar-frame { 
-            width: 100%; height: 100%; border-radius: 50%; 
-            border: 3px solid var(--neon); padding: 3px; background: #000; 
-            overflow: hidden; box-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
-        }
+        /* ПРОФИЛЬ */
+        .glass-panel { background: var(--panel); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 12px; }
+        .profile-card { text-align: center; }
+        .avatar-frame { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 3px solid var(--neon); padding: 3px; background: #000; box-shadow: 0 0 20px rgba(0,255,102,0.3); }
         .avatar-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        
-        .nick { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 1px; margin-bottom: 4px; }
-        .tag { font-size: 13px; color: var(--neon); opacity: 0.7; text-transform: lowercase; margin-bottom: 20px; }
-        
-        /* Кнопка TON Connect */
-        #ton-connect-btn { display: flex; justify-content: center; }
-        #ton-connect-btn button { width: 100% !important; border-radius: 16px !important; }
+        .nick { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+        .tag { font-size: 13px; color: var(--neon); opacity: 0.8; text-transform: lowercase; margin-bottom: 15px; }
 
-        /* РЕФЕРАЛЫ */
-        .ref-title { font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 20px; color: #ccc; text-align: left; text-transform: none; }
-        .ref-actions { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-ref-icon { width: 50px; height: 50px; border-radius: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; font-size: 18px; cursor: pointer; }
-        .btn-ref-main { flex: 1; border-radius: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; font-weight: 800; font-size: 13px; cursor: pointer; }
+        /* РЕФЕРАЛЫ (СТИЛЬ КАК НА ФОТО) */
+        .ref-title { font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 15px; color: #eee; text-align: left; text-transform: none; }
+        .ref-actions { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-ref-icon { width: 50px; height: 50px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .btn-ref-main { flex: 1; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff; font-weight: 800; font-size: 13px; }
 
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .stat-box { background: rgba(255, 255, 255, 0.03); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-label { font-size: 10px; color: #777; margin-bottom: 6px; display: block; }
-        .stat-val { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .stat-box { background: rgba(255, 255, 255, 0.02); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-label { font-size: 10px; color: #666; margin-bottom: 5px; display: block; }
+        .stat-val { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
 
-        .btn-claim { 
-            width: 100%; padding: 18px; border-radius: 18px; background: #fff; 
-            color: #000; border: none; font-weight: 800; margin-top: 15px; font-size: 14px; 
-            box-shadow: 0 4px 15px rgba(255,255,255,0.2); transition: 0.2s;
-        }
-        .btn-claim:active { transform: scale(0.98); }
+        .btn-claim { width: 100%; padding: 18px; border-radius: 18px; background: #fff; color: #000; border: none; font-weight: 800; margin-top: 15px; font-size: 14px; }
 
-        /* АРЕНА */
-        .status-header { text-align: center; margin-bottom: 15px; }
-        #status-txt { font-size: 12px; color: var(--neon); font-weight: 800; letter-spacing: 2px; }
-        .bank-pill { background: var(--panel); padding: 8px 25px; border-radius: 50px; border: 1px solid var(--border); display: inline-block; margin-top: 8px; }
-
-        .stadium { 
-            width: 100%; aspect-ratio: 1/1.1; background: #010402; border: 2px solid #1a1a1a; 
-            border-radius: 35px; position: relative; overflow: hidden; display: flex; flex-direction: column; 
-            box-shadow: inset 0 0 40px #000;
-        }
-        .territory { width: 100%; transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; align-items: center; justify-content: center; }
-        .t-ava { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff; opacity: 0.5; }
-
-        #ball { position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; z-index: 100; display: none; box-shadow: 0 0 15px #fff; }
-
-        .nav-dock { 
-            position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; 
-            background: rgba(10, 15, 12, 0.95); border-radius: 35px; display: flex; align-items: center; 
-            border: 1px solid var(--border); backdrop-filter: blur(15px); z-index: 1000;
-        }
-        .nav-link { flex: 1; text-align: center; color: #44554a; font-size: 10px; display: flex; flex-direction: column; align-items: center; background: none; border: none; font-weight: 800; transition: 0.3s; }
+        /* НАВИГАЦИЯ */
+        .nav-dock { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(8,12,10,0.98); border-radius: 35px; display: flex; align-items: center; border: 1px solid var(--border); backdrop-filter: blur(20px); }
+        .nav-link { flex: 1; text-align: center; color: #44554a; font-size: 10px; display: flex; flex-direction: column; align-items: center; background: none; border: none; font-weight: 800; }
         .nav-link i { font-size: 22px; margin-bottom: 4px; }
         .nav-link.active { color: var(--neon); }
+
+        /* КНОПКА ТОН */
+        #ton-connect-btn { display: flex; justify-content: center; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<!-- ЗАГРУЗОЧНЫЙ ЭКРАН (3 секунды) -->
 <div id="loading-screen">
-    <div class="loading-bar-container">
-        <div class="loading-bar-fill"></div>
-    </div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
 </div>
 
 <div class="app-container">
@@ -133,65 +90,45 @@
     </header>
 
     <main class="main-scroll">
-        <!-- ПРОФИЛЬ -->
         <section id="profile-page" class="page active">
             <div class="glass-panel profile-card">
-                <div class="avatar-container">
-                    <div class="avatar-frame">
-                        <img src="" id="u-ava" alt="avatar">
-                    </div>
-                </div>
-                <h1 class="nick" id="u-nick">...</h1>
+                <div class="avatar-frame"><img src="" id="u-ava"></div>
+                <h1 class="nick" id="u-nick">ЗАГРУЗКА...</h1>
                 <div class="tag" id="u-tag">@username</div>
-                
-                <!-- Контейнер для TON CONNECT -->
                 <div id="ton-connect-btn"></div>
             </div>
             
             <div class="glass-panel">
-                <p class="ref-title">Приглашайте друзей и получайте 10% от каждой их ставки в игре.</p>
+                <p class="ref-title">Приглашайте друзей и получайте 10% от их игровых взносов на свой баланс.</p>
                 <div class="ref-actions">
-                    <button class="btn-ref-icon" onclick="copyRefLink()"><i class="fa-regular fa-copy"></i></button>
-                    <button class="btn-ref-main" onclick="inviteFriends()">Пригласить друзей</button>
+                    <button class="btn-ref-icon" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
+                    <button class="btn-ref-main" onclick="invite()">Пригласить друзей</button>
                 </div>
 
-                <span class="stat-label">Ваша команда</span>
-                <div class="stat-box" style="width: fit-content; min-width: 100px; margin-bottom: 15px;">
-                    <div class="stat-val"><i class="fa-solid fa-user-group" style="color:var(--ton-blue); font-size:14px"></i> <span id="ref-count">0</span></div>
+                <span class="stat-label">Твои рефералы</span>
+                <div class="stat-box" style="width: fit-content; min-width: 90px; margin-bottom: 12px;">
+                    <div class="stat-val"><i class="fa-solid fa-user-group" style="color:#0098ea; font-size:14px"></i> <span id="ref-count">0</span></div>
                 </div>
 
                 <div class="stat-grid">
                     <div class="stat-box">
-                        <span class="stat-label">Доступно к выводу</span>
-                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:16px"> <span id="ref-pending">0.00</span></div>
+                        <span class="stat-label">Доступно</span>
+                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px"> <span id="ref-pending">0.00</span></div>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">Всего заработано</span>
-                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:16px"> <span id="ref-total">0.00</span></div>
+                        <span class="stat-label">Всего</span>
+                        <div class="stat-val"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px"> <span id="ref-total">0.00</span></div>
                     </div>
                 </div>
-                <button class="btn-claim" onclick="claimRewards()">Зачислить на баланс</button>
+                <button class="btn-claim" onclick="claim()">Зачислить TON</button>
             </div>
         </section>
 
-        <!-- АРЕНА -->
         <section id="arena-page" class="page">
-            <div class="status-header">
-                <div id="status-txt">ОЖИДАНИЕ СТАВОК</div>
-                <div class="bank-pill">БАНК: <b id="total-bank" style="color: var(--neon);">0.00</b> TON</div>
+            <div style="text-align:center; padding-top:50px;">
+                <h2 style="color:var(--neon)">АРЕНА СКОРО</h2>
+                <p style="opacity:0.5; font-size:12px">Раздел в разработке</p>
             </div>
-            <div class="stadium" id="stadium">
-                <div id="ball"></div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px;">
-                <button class="btn-ref-icon" style="width: 100%; font-size: 12px; font-weight: 800;" onclick="makeBet(0.1)">0.1</button>
-                <button class="btn-ref-icon" style="width: 100%; font-size: 12px; font-weight: 800;" onclick="makeBet(0.5)">0.5</button>
-                <button class="btn-ref-icon" style="width: 100%; font-size: 12px; font-weight: 800;" onclick="makeBet(1)">1.0</button>
-                <button class="btn-ref-icon" style="width: 100%; font-size: 12px; font-weight: 800;" onclick="makeBet(5)">5.0</button>
-            </div>
-            
-            <div id="player-list" style="margin-top:20px"></div>
         </section>
     </main>
 
@@ -205,10 +142,8 @@
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    tg.backgroundColor = '#030805';
-    tg.headerColor = '#030805';
 
-    // 1. ЗАГРУЗОЧНЫЙ ЭКРАН (3 секунды)
+    // 3 СЕКУНДЫ ЗАГРУЗКИ
     setTimeout(() => {
         const loader = document.getElementById('loading-screen');
         loader.style.opacity = '0';
@@ -216,43 +151,23 @@
     }, 3000);
 
     const socket = io();
-    
-    // 2. ПОЛУЧЕНИЕ ДАННЫХ ИЗ ТЕЛЕГРАМ
-    const urlParams = new URLSearchParams(window.location.search);
-    const user = tg.initDataUnsafe.user || { id: 0, first_name: "Admin", username: "admin" };
+    const userData = tg.initDataUnsafe.user || { id: 12345, first_name: "Игрок", username: "player" };
 
-    document.getElementById('u-nick').innerText = user.first_name;
-    document.getElementById('u-tag').innerText = user.username ? "@" + user.username : "id" + user.id;
-    
-    // Загрузка аватарки
-    const avatarImg = document.getElementById('u-ava');
-    if (user.photo_url) {
-        avatarImg.src = user.photo_url;
-    } else {
-        avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}&background=00ff66&color=000&bold=true`;
-    }
-
-    // 3. ИНИЦИАЛИЗАЦИЯ TON CONNECT
+    // TON CONNECT
     const tonConnectUI = new TonConnectUI.TonConnectUI({
-        manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp/main/public/tonconnect-manifest.json', // Замените на свой манифест
+        manifestUrl: window.location.origin + '/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-btn'
     });
 
-    // Следим за подключением кошелька
-    tonConnectUI.onStatusChange(wallet => {
-        if (wallet) {
-            console.log('Wallet connected:', wallet.account.address);
-            socket.emit('wallet_connected', { id: user.id, address: wallet.account.address });
-        }
-    });
+    // Данные в профиль
+    document.getElementById('u-nick').innerText = userData.first_name.toUpperCase();
+    document.getElementById('u-tag').innerText = "@" + (userData.username || "user");
+    document.getElementById('u-ava').src = userData.photo_url || `https://ui-avatars.com/api/?name=${userData.first_name}&background=00ff66&color=000`;
 
-    // Регистрация на сервере
     socket.emit('user_joined', { 
-        id: user.id, 
-        name: user.first_name, 
-        username: user.username || `id${user.id}`,
-        avatar: avatarImg.src,
-        refBy: tg.initDataUnsafe.start_param 
+        id: userData.id, 
+        name: userData.first_name, 
+        username: userData.username 
     });
 
     function showTab(id, el) {
@@ -260,76 +175,27 @@
         document.getElementById(id + '-page').classList.add('active');
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         el.classList.add('active');
-        tg.HapticFeedback.impactOccurred('light');
     }
 
-    function inviteFriends() {
-        const botUsername = 'YOUR_BOT_USERNAME'; // ЗАМЕНИТЕ НА ВАШЕГО БОТА
-        const link = `https://t.me/${botUsername}?start=${user.id}`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Заходи в PVP Field! 100 TON бонусом!`);
-    }
-
-    function copyRefLink() {
-        const botUsername = 'YOUR_BOT_USERNAME'; 
-        const link = `https://t.me/${botUsername}?start=${user.id}`;
+    function copyRef() {
+        const link = `https://t.me/твой_бот?start=${userData.id}`;
         navigator.clipboard.writeText(link);
         tg.showAlert("Ссылка скопирована!");
     }
 
-    function makeBet(amt) {
-        if(!tonConnectUI.connected) return tg.showPopup({ message: "Сначала подключите TON кошелек!" });
-        socket.emit('place_bet', { id: user.id, amount: amt });
-        tg.HapticFeedback.notificationOccurred('success');
+    function invite() {
+        const link = `https://t.me/твой_бот?start=${userData.id}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}`);
     }
 
-    function claimRewards() { socket.emit('claim_rewards', { id: user.id }); }
-
-    // Обновление UI данных пользователя
     socket.on('update_data', (data) => {
-        const d = data.users[user.id];
+        const d = data.users[userData.id];
         if(d) {
             document.getElementById('user-bal').innerText = d.balance.toFixed(2);
             document.getElementById('ref-count').innerText = d.refCount;
             document.getElementById('ref-pending').innerText = d.refPending.toFixed(2);
             document.getElementById('ref-total').innerText = d.refTotal.toFixed(2);
         }
-    });
-
-    // Обновление Арены
-    socket.on('update_arena', (state) => {
-        document.getElementById('total-bank').innerText = state.totalBank.toFixed(2);
-        const stadium = document.getElementById('stadium');
-        const list = document.getElementById('player-list');
-        
-        // Очистка кроме мяча
-        stadium.querySelectorAll('.territory').forEach(t => t.remove());
-        list.innerHTML = '';
-
-        state.players.forEach(p => {
-            // Добавляем зону на поле
-            const t = document.createElement('div');
-            t.className = 'territory';
-            t.style.height = (p.amount / state.totalBank * 100) + '%';
-            t.style.backgroundColor = p.color;
-            t.innerHTML = `<img src="${p.avatar}" class="t-ava">`;
-            stadium.appendChild(t);
-
-            // Добавляем в список внизу
-            list.innerHTML += `
-                <div style="background:var(--panel); padding:12px; border-radius:18px; display:flex; align-items:center; gap:12px; margin-bottom:10px; border:1px solid ${p.color}33">
-                    <img src="${p.avatar}" style="width:35px; height:35px; border-radius:50%">
-                    <div style="flex:1">
-                        <div style="font-size:13px; font-weight:800">${p.username}</div>
-                        <div style="font-size:10px; color:#666">Шанс: ${p.chance}%</div>
-                    </div>
-                    <div style="font-weight:800; color:var(--neon)">${p.amount} TON</div>
-                </div>
-            `;
-        });
-    });
-
-    socket.on('timer_tick', (sec) => {
-        document.getElementById('status-txt').innerText = "МАТЧ НАЧНЕТСЯ ЧЕРЕЗ: " + sec + "С";
     });
 </script>
 </body>
