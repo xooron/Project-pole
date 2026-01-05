@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Arena Game</title>
+    <title>Arena Football</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -24,26 +24,6 @@
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PROFILE */
-        .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .profile-main { text-align: center; }
-        .avatar-wrap { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #000; }
-        .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
-        .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
-        .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
-        .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; }
-        .stat-group { margin-bottom: 15px; }
-        .stat-title { font-size: 10px; color: #5a6b61; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
-        .count-pill { background: rgba(255,255,255,0.03); border: 1px solid var(--border); width: fit-content; padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 18px; }
-        .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
-        .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
-
         /* ARENA */
         .arena-info { text-align: center; margin-bottom: 20px; }
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
@@ -62,30 +42,35 @@
         #winner-panel .win-mult { background: var(--neon); color: #000; padding: 4px 12px; border-radius: 10px; font-weight: 900; margin-bottom: 10px; display: inline-block; font-size: 18px; }
         #winner-panel p { font-weight: 900; font-size: 26px; }
 
+        /* BETS & LIST */
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; cursor: pointer; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
-        .players-list { display: flex; flex-direction: column; gap: 10px; }
-        .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
-        .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+        .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .p-ava { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--border); }
         .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
-        .p-user { font-size: 14px; font-weight: 800; color: #fff; }
         .p-bet-info { display: flex; align-items: center; gap: 12px; }
-        .p-amount { font-size: 14px; font-weight: 800; }
-        .p-percent { font-size: 11px; color: var(--neon); font-weight: 800; }
+        .p-percent { color: var(--neon); font-weight: 800; font-size: 11px; }
 
-        .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; align-items: center; }
+        /* PROFILE */
+        .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .avatar-wrap { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; }
+        .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; }
+        .u-nick { font-size: 22px; font-weight: 800; text-align: center; text-transform: uppercase; }
+        .actions-row { display: flex; gap: 10px; margin: 20px 0; }
+        .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; }
+        .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; }
+        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border-radius: 18px; font-weight: 900; margin-top: 15px; text-transform: uppercase; }
+
+        .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: #080b09; border-radius: 35px; border: 1px solid var(--border); display: flex; }
         .nav-btn { flex: 1; text-align: center; color: #3d4a42; font-size: 10px; font-weight: 800; background: none; border: none; }
-        .nav-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
+        .nav-btn i { font-size: 20px; display: block; margin-bottom: 4px; }
         .nav-btn.active { color: var(--neon); }
-        #ton-connect-btn { display: flex; justify-content: center; padding-top: 5px; }
     </style>
 </head>
 <body onclick="startMusic()">
 
-<audio id="stadium-bg" loop>
-    <source src="https://www.soundjay.com/misc/sounds/stadium-ambience-1.mp3" type="audio/mpeg">
-</audio>
+<audio id="stadium-bg" loop><source src="https://www.soundjay.com/misc/sounds/stadium-ambience-1.mp3" type="audio/mpeg"></audio>
 
 <div class="app-container">
     <header class="header">
@@ -102,7 +87,7 @@
                 <canvas id="arena-canvas" width="300" height="300"></canvas>
                 <div id="winner-panel">
                     <img id="win-ava" src="">
-                    <h2 id="win-title">ПОБЕДИТЕЛЬ!</h2>
+                    <h2>ПОБЕДИТЕЛЬ!</h2>
                     <div id="win-name" style="font-weight: 800; margin-bottom: 5px;">@username</div>
                     <div><span class="win-mult" id="win-x">x0.0</span></div>
                     <p id="win-sum">0.00 TON</p>
@@ -116,29 +101,24 @@
                 <button class="b-btn" onclick="makeBet(50)">50</button>
                 <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">MAX</button>
             </div>
-            <div class="players-list" id="players-list"></div>
+            <div id="players-list"></div>
         </section>
 
         <section id="profile-page" class="page">
             <div class="glass-panel profile-main">
                 <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
                 <h1 class="u-nick" id="u-nick">ИГРОК</h1>
-                <span class="u-tag" id="u-tag">@username</span>
-                <div id="ton-connect-btn"></div>
+                <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-top:10px;"></div>
             </div>
             <div class="glass-panel">
-                <p class="ref-text">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
+                <p class="ref-text">Приглашайте рефералов и получайте 10%</p>
                 <div class="actions-row">
                     <button class="btn-sq" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn-invite-wide" onclick="invite()">Пригласить друзей</button>
                 </div>
-                <div class="stat-group">
-                    <p class="stat-title">Твои рефералы</p>
-                    <div class="count-pill"><i class="fa-solid fa-user-group" style="color: #0098ea;"></i><span id="ref-count">0</span></div>
-                </div>
                 <div class="stats-grid">
-                    <div class="stat-item"><span>Доступно к зачислению</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-pending">0.00</span></div></div>
-                    <div class="stat-item"><span>Всего зачислено</span><div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-total">0.00</span></div></div>
+                    <div class="stat-item"><span>Доступно</span><div id="ref-pending">0.00</div></div>
+                    <div class="stat-item"><span>Всего</span><div id="ref-total">0.00</div></div>
                 </div>
                 <button class="btn-claim" onclick="claim()">Зачислить TON</button>
             </div>
@@ -172,18 +152,12 @@
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
-    
-    // Мяч еще меньше (r:7), время 15 сек (friction: 0.9958)
     let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 7, state: 'hidden', friction: 0.9958 };
     let arrowAngle = 0;
     let arenaPlayers = [];
-    let territoryGrid = []; // Сетка 15x15
+    let territoryGrid = [];
 
-    socket.emit('user_joined', { 
-        id: userData.id, name: userData.first_name, 
-        username: userData.username, avatar: userData.photo_url,
-        refBy: tg.initDataUnsafe.start_param
-    });
+    socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
     function showTab(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -193,7 +167,7 @@
     }
 
     function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
-    function copyRef() { navigator.clipboard.writeText(`https://t.me/БОТ/app?startapp=${userData.id}`); tg.showAlert("Ссылка скопирована!"); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/БОТ/app?startapp=${userData.id}`); tg.showAlert("Скопировано!"); }
     function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/БОТ/app?startapp=${userData.id}`); }
     function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
@@ -202,9 +176,7 @@
         if(me) {
             document.getElementById('user-bal').innerText = me.balance.toFixed(2);
             document.getElementById('u-nick').innerText = me.name;
-            document.getElementById('u-tag').innerText = "@" + me.username;
             document.getElementById('u-ava').src = me.avatar || 'https://pixsafe.online/i/mglZT';
-            document.getElementById('ref-count').innerText = me.refCount;
             document.getElementById('ref-pending').innerText = me.refPending.toFixed(2);
             document.getElementById('ref-total').innerText = me.refTotal.toFixed(2);
         }
@@ -222,8 +194,7 @@
         ball.vx = 0; ball.vy = 0; ball.state = 'spawning';
         arrowAngle = 0;
         setTimeout(() => {
-            ball.vx = Math.cos(arrowAngle) * 11; // Побыстрее старт
-            ball.vy = Math.sin(arrowAngle) * 11;
+            ball.vx = data.vx; ball.vy = data.vy;
             ball.state = 'moving';
         }, 2000);
     });
@@ -233,8 +204,7 @@
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
         document.getElementById('win-sum').innerText = `+${data.bank.toFixed(2)} TON`;
-        const xVal = data.winnerBet > 0 ? (data.bank / data.winnerBet).toFixed(1) : "1.0";
-        document.getElementById('win-x').innerText = `x${xVal}`;
+        document.getElementById('win-x').innerText = `x${(data.bank / data.winnerBet).toFixed(1)}`;
         panel.style.display = 'block';
         setTimeout(() => { panel.style.display = 'none'; }, 4000);
     });
@@ -242,53 +212,35 @@
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
-        generateTerritoryGrid(data.players);
+        generateGrid(data.players, data.seed);
         updatePlayersList(data.players);
         if (data.players.length === 0) ball.state = 'hidden';
     });
 
-    // Генерация случайной сетки (детерминированная)
-    function generateTerritoryGrid(players) {
-        if (!players || players.length === 0) { territoryGrid = []; return; }
-        const grid = [];
-        const size = 15; // 15x15 квадратов
-        const totalCells = size * size;
-        
-        // Создаем массив ID согласно шансам
+    function generateGrid(players, seedValue) {
+        if (!players.length) { territoryGrid = []; return; }
+        const size = 15; const total = size * size;
         let pool = [];
         players.forEach(p => {
-            let cellsCount = Math.floor((p.chance / 100) * totalCells);
-            for(let i=0; i<cellsCount; i++) pool.push(p.id);
+            let count = Math.floor((p.chance / 100) * total);
+            for(let i=0; i<count; i++) pool.push(p.id);
         });
-        while(pool.length < totalCells) pool.push(players[0].id);
-
-        // Перемешиваем детерминировано (чтобы у всех одинаково)
-        let seed = 123;
-        function pseudoRandom() {
-            seed = (seed * 9301 + 49297) % 233280;
-            return seed / 233280;
-        }
-
+        while(pool.length < total) pool.push(players[0].id);
+        
+        let s = seedValue;
+        function rnd() { s = (s * 9301 + 49297) % 233280; return s / 233280; }
         for (let i = pool.length - 1; i > 0; i--) {
-            const j = Math.floor(pseudoRandom() * (i + 1));
+            const j = Math.floor(rnd() * (i + 1));
             [pool[i], pool[j]] = [pool[j], pool[i]];
         }
-
-        for(let y=0; y<size; y++) {
-            grid[y] = [];
-            for(let x=0; x<size; x++) {
-                grid[y][x] = pool[y * size + x];
-            }
-        }
-        territoryGrid = grid;
+        territoryGrid = pool;
     }
 
     function updatePlayersList(players) {
         const list = document.getElementById('players-list');
         list.innerHTML = '';
         players.sort((a,b) => b.amount - a.amount).forEach(p => {
-            const row = document.createElement('div');
-            row.className = 'player-row';
+            const row = document.createElement('div'); row.className = 'player-row';
             row.innerHTML = `<img src="${p.avatar || 'https://pixsafe.online/i/mglZT'}" class="p-ava"><div class="p-info"><span class="p-user">@${p.username}</span><div class="p-bet-info"><span class="p-amount">${p.amount.toFixed(2)} TON</span><span class="p-percent">${p.chance.toFixed(1)}%</span></div></div>`;
             list.appendChild(row);
         });
@@ -299,35 +251,20 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
         
-        if (territoryGrid.length > 0) {
-            const cellSize = 20; // 300 / 15
-            for(let y=0; y<15; y++) {
-                for(let x=0; x<15; x++) {
-                    const ownerId = territoryGrid[y][x];
-                    const player = arenaPlayers.find(p => p.id === ownerId);
-                    ctx.fillStyle = player ? player.color : '#111';
-                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                }
+        if (territoryGrid.length) {
+            for(let i=0; i<225; i++) {
+                const p = arenaPlayers.find(pl => pl.id === territoryGrid[i]);
+                ctx.fillStyle = p ? p.color : '#111';
+                ctx.fillRect((i % 15) * 20, Math.floor(i / 15) * 20, 20, 20);
             }
-            
-            // Аватарки в центре (по одной для каждого игрока)
             arenaPlayers.forEach(p => {
-                const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
-                if (!imgCache[avaUrl]) {
-                    imgCache[avaUrl] = new Image(); imgCache[avaUrl].src = avaUrl;
-                } else if (imgCache[avaUrl].complete) {
-                    // Ищем первый попавшийся квадрат игрока для аватарки (или центр)
-                    let found = false;
-                    for(let y=7; y<15 && !found; y++) {
-                        for(let x=0; x<15 && !found; x++) {
-                            if (territoryGrid[y][x] === p.id) {
-                                ctx.save(); ctx.beginPath();
-                                ctx.arc(x * 20 + 10, y * 20 + 10, 8, 0, Math.PI*2);
-                                ctx.clip(); ctx.drawImage(imgCache[avaUrl], x * 20 + 2, y * 20 + 2, 16, 16);
-                                ctx.restore();
-                                found = true;
-                            }
-                        }
+                const ava = p.avatar || 'https://pixsafe.online/i/mglZT';
+                if (!imgCache[ava]) { imgCache[ava] = new Image(); imgCache[ava].src = ava; }
+                else if (imgCache[ava].complete) {
+                    let idx = territoryGrid.indexOf(p.id);
+                    if(idx !== -1) {
+                        ctx.save(); ctx.beginPath(); ctx.arc((idx % 15) * 20 + 10, Math.floor(idx / 15) * 20 + 10, 8, 0, Math.PI*2);
+                        ctx.clip(); ctx.drawImage(imgCache[ava], (idx % 15) * 20 + 2, Math.floor(idx / 15) * 20 + 2, 16, 16); ctx.restore();
                     }
                 }
             });
@@ -335,24 +272,18 @@
 
         if (ball.state !== 'hidden') {
             if (ball.state === 'spawning') {
-                arrowAngle += 0.12;
-                ctx.save(); ctx.translate(ball.x, ball.y); ctx.rotate(arrowAngle);
+                arrowAngle += 0.12; ctx.save(); ctx.translate(ball.x, ball.y); ctx.rotate(arrowAngle);
                 ctx.beginPath(); ctx.moveTo(35, 0); ctx.lineTo(22, -10); ctx.lineTo(22, 10); ctx.closePath();
-                ctx.fillStyle = '#00ff66'; ctx.shadowBlur = 15; ctx.shadowColor = '#00ff66';
-                ctx.fill(); ctx.restore();
-            }
-            if (ball.state === 'moving') {
-                ball.x += ball.vx; ball.y += ball.vy;
-                ball.vx *= ball.friction; ball.vy *= ball.friction;
-                if (ball.x - ball.radius < 0 || ball.x + ball.radius > 300) ball.vx *= -1;
-                if (ball.y - ball.radius < 0 || ball.y + ball.radius > 300) ball.vy *= -1;
-                if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
-                    ball.state = 'stopped';
-                    socket.emit('request_winner', { finalX: ball.x, finalY: ball.y });
+                ctx.fillStyle = '#00ff66'; ctx.shadowBlur = 15; ctx.shadowColor = '#00ff66'; ctx.fill(); ctx.restore();
+            } else if (ball.state === 'moving') {
+                ball.x += ball.vx; ball.y += ball.vy; ball.vx *= ball.friction; ball.vy *= ball.friction;
+                if (ball.x < 7 || ball.x > 293) ball.vx *= -1; if (ball.y < 7 || ball.y > 293) ball.vy *= -1;
+                if (Math.abs(ball.vx) < 0.01 && Math.abs(ball.vy) < 0.01) {
+                    ball.vx = 0; ball.vy = 0; ball.state = 'stopped';
+                    socket.emit('request_winner', { x: ball.x, y: ball.y });
                 }
             }
-            ctx.font = '18px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('⚽', ball.x, ball.y);
+            ctx.font = '18px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⚽', ball.x, ball.y);
         }
         requestAnimationFrame(drawArena);
     }
