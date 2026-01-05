@@ -7,131 +7,93 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(cors());
-app.use(express.static(__dirname));
+app.use(cors()); app.use(express.static(__dirname));
 
 let db = { users: {} };
 let players = [];
 let totalBank = 0;
 let gameStatus = 'waiting';
+let currentSeed = 123;
 
 const COLORS = ['#00ff66', '#00ccff', '#ff0066', '#ffcc00', '#aa00ff'];
 
 io.on('connection', (socket) => {
     socket.on('user_joined', (data) => {
         if (!db.users[data.id]) {
-            db.users[data.id] = { 
-                id: data.id, name: data.name, username: data.username, avatar: data.avatar, 
-                balance: 100.0, refCount: 0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy 
-            };
-            if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
+            db.users[data.id] = { id: data.id, name: data.name, username: data.username, avatar: data.avatar, balance: 100.0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy };
         }
         io.emit('update_data', db.users);
-        socket.emit('update_arena', { players, totalBank });
+        socket.emit('update_arena', { players, totalBank, seed: currentSeed });
     });
 
     socket.on('place_bet', (data) => {
         if (gameStatus !== 'waiting' && gameStatus !== 'countdown') return;
         const u = db.users[data.id];
-        if (!u || u.balance < data.amount) return;
-        let amount = data.amount === 'max' ? u.balance : parseFloat(data.amount);
-        
-        u.balance -= amount;
+        if (!u || u.balance < (data.amount === 'max' ? u.balance : data.amount)) return;
+        let amt = data.amount === 'max' ? u.balance : parseFloat(data.amount);
+        u.balance -= amt;
         let p = players.find(x => x.id === data.id);
-        if (p) p.amount += amount;
-        else players.push({ id: u.id, username: u.username, avatar: u.avatar, amount, color: COLORS[players.length % COLORS.length] });
+        if (p) p.amount += amt;
+        else players.push({ id: u.id, username: u.username, avatar: u.avatar, amount: amt, color: COLORS[players.length % COLORS.length] });
         
-        calculateChances();
+        totalBank = players.reduce((s, p) => s + p.amount, 0);
+        players.forEach(p => p.chance = (p.amount / totalBank) * 100);
         io.emit('update_data', db.users);
-        io.emit('update_arena', { players, totalBank });
+        io.emit('update_arena', { players, totalBank, seed: currentSeed });
         if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
     });
 
     socket.on('request_winner', (data) => {
         if (gameStatus !== 'running') return;
         gameStatus = 'calculating';
-
-        // Генерация той же сетки на сервере для проверки победителя
-        const winnerId = getOwnerAt(data.finalX, data.finalY);
+        const winnerId = getOwnerAt(data.x, data.y);
         const winner = players.find(p => p.id === winnerId) || players[0];
-
-        const fee = totalBank * 0.05;
-        const winAmount = totalBank - fee;
-        db.users[winner.id].balance += winAmount;
-
-        players.forEach(p => {
-            const user = db.users[p.id];
-            if (user.referredBy && db.users[user.referredBy]) {
-                db.users[user.referredBy].refPending += (p.amount * 0.05) * 0.1;
-            }
-        });
-
-        io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
+        const winAmt = totalBank * 0.95;
+        db.users[winner.id].balance += winAmt;
+        io.emit('announce_winner', { winner, bank: winAmt, winnerBet: winner.amount });
         io.emit('update_data', db.users);
         setTimeout(resetGame, 4000);
     });
-
-    socket.on('claim_ref', (data) => {
-        const u = db.users[data.id];
-        if (u && u.refPending > 0) {
-            u.balance += u.refPending; u.refTotal += u.refPending; u.refPending = 0;
-            io.emit('update_data', db.users);
-        }
-    });
 });
 
-function calculateChances() {
-    totalBank = players.reduce((s, p) => s + p.amount, 0);
-    players.forEach(p => p.chance = (p.amount / totalBank) * 100);
-}
-
 function getOwnerAt(x, y) {
-    const size = 15;
-    const totalCells = size * size;
-    const gridX = Math.floor(x / 20);
-    const gridY = Math.floor(y / 20);
-    
+    const gx = Math.floor(x / 20), gy = Math.floor(y / 20);
+    const size = 15; const total = 225;
     let pool = [];
     players.forEach(p => {
-        let cellsCount = Math.floor((p.chance / 100) * totalCells);
-        for(let i=0; i<cellsCount; i++) pool.push(p.id);
+        let count = Math.floor((p.chance / 100) * total);
+        for(let i=0; i<count; i++) pool.push(p.id);
     });
-    while(pool.length < totalCells) pool.push(players[0].id);
-
-    let seed = 123;
-    function pseudoRandom() {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
-    }
+    while(pool.length < total) pool.push(players[0].id);
+    let s = currentSeed;
+    function rnd() { s = (s * 9301 + 49297) % 233280; return s / 233280; }
     for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(pseudoRandom() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
+        const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-
-    const idx = Math.min(gridY * size + gridX, totalCells - 1);
-    return pool[idx];
+    return pool[Math.min(gy * 15 + gx, 224)];
 }
 
 function startCountdown() {
-    gameStatus = 'countdown';
-    let timer = 10;
-    const interval = setInterval(() => {
-        timer--;
-        io.emit('game_status', { status: 'countdown', timer });
-        if (timer <= 0) { clearInterval(interval); startGame(); }
+    gameStatus = 'countdown'; let timer = 10;
+    const inv = setInterval(() => {
+        timer--; io.emit('game_status', { status: 'countdown', timer });
+        if (timer <= 0) { clearInterval(inv); startGame(); }
     }, 1000);
 }
 
 function startGame() {
     gameStatus = 'running';
-    io.emit('game_status', { status: 'running' });
-    io.emit('start_game_sequence', { startX: Math.random()*150+75, startY: Math.random()*150+75 });
+    const ang = Math.random() * Math.PI * 2;
+    io.emit('start_game_sequence', { 
+        startX: Math.random() * 100 + 100, startY: Math.random() * 100 + 100,
+        vx: Math.cos(ang) * 10.5, vy: Math.sin(ang) * 10.5 
+    });
 }
 
 function resetGame() {
-    players = []; totalBank = 0; gameStatus = 'waiting';
-    io.emit('update_arena', { players, totalBank });
+    players = []; totalBank = 0; gameStatus = 'waiting'; currentSeed = Math.floor(Math.random() * 1000);
+    io.emit('update_arena', { players, totalBank, seed: currentSeed });
     io.emit('game_status', { status: 'waiting' });
 }
 
-server.listen(3000, () => console.log('Server started'));
+server.listen(3000);
