@@ -29,12 +29,12 @@ io.on('connection', (socket) => {
                 db.users[data.refBy].refCount++;
             }
         }
-        io.emit('update_data', db.users);
+        socket.emit('update_data', db.users);
         io.emit('update_arena', { players, totalBank });
     });
 
     socket.on('place_bet', (data) => {
-        if (gameStatus === 'running') return;
+        if (gameStatus !== 'waiting' && gameStatus !== 'countdown') return;
         const u = db.users[data.id];
         if (!u) return;
         let amount = data.amount === 'max' ? u.balance : parseFloat(data.amount);
@@ -64,6 +64,8 @@ io.on('connection', (socket) => {
 
     socket.on('request_winner', (data) => {
         if (gameStatus !== 'running') return;
+        gameStatus = 'calculating';
+        
         let curX = 0;
         let winner = players[0];
         for (let p of players) {
@@ -74,10 +76,7 @@ io.on('connection', (socket) => {
         
         const fee = totalBank * 0.05;
         const winAmount = totalBank - fee;
-        
-        // Запоминаем ставку победителя для расчета икса
         const winnerBet = winner.amount;
-
         db.users[winner.id].balance += winAmount;
 
         players.forEach(p => {
@@ -88,16 +87,15 @@ io.on('connection', (socket) => {
             }
         });
         
-        gameStatus = 'finished';
-        io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winnerBet });
+        io.emit('announce_winner', { winner, bank: winAmount, winnerBet });
         io.emit('update_data', db.users);
-        setTimeout(resetGame, 5000);
+        setTimeout(resetGame, 3000); // 3 секунды на показ победителя и очистка
     });
 });
 
 function startCountdown() {
     gameStatus = 'countdown';
-    let timer = 10; // Сократил до 10 для динамики
+    let timer = 10;
     const interval = setInterval(() => {
         timer--;
         io.emit('game_status', { status: 'countdown', timer });
@@ -108,13 +106,9 @@ function startCountdown() {
 function startGame() {
     gameStatus = 'running';
     io.emit('game_status', { status: 'running' });
-    
-    // vx и vy настроены так, чтобы мяч летал достаточно долго
     io.emit('start_game_sequence', {
         startX: Math.random() * 200 + 50, 
-        startY: Math.random() * 100 + 100,
-        vx: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 3 + 4), 
-        vy: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 3 + 4)
+        startY: Math.random() * 200 + 50
     });
 }
 
