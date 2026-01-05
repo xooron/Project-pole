@@ -19,7 +19,7 @@ app.get('/tonconnect-manifest.json', (req, res) => {
 let db = { users: {} };
 let players = [];
 let totalBank = 0;
-const COLORS = ['#00ff66', '#00ccff', '#ff0066', '#ffcc00', '#aa00ff'];
+const COLORS = ['#00ff66', '#00ccff', '#ff0066', '#ff0066', '#aa00ff'];
 
 io.on('connection', (socket) => {
     socket.on('user_joined', (data) => {
@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
                 players.push({ 
                     id: u.id, 
                     username: u.username, 
-                    avatar: u.avatar, // Добавлено сохранение аватарки игрока
+                    avatar: u.avatar,
                     amount: amount, 
                     color: COLORS[players.length % COLORS.length] 
                 });
@@ -67,4 +67,4 @@ function calculateChances() {
     });
 }
 
-server.listen(3000, () => console.log('Server started on port 3000 (with Avatars Support)'));
+server.listen(3000, () => console.log('Server running on port 3000'));
