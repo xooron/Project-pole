@@ -7,7 +7,6 @@
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <!-- Подключаем последнюю версию TonConnect -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
@@ -26,7 +25,6 @@
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
         
-        /* HEADER BALANCE */
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { 
             background: #111814; padding: 8px 14px; border-radius: 50px; 
@@ -39,7 +37,6 @@
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* PROFILE CARD (LIKE IMAGE) */
         .glass-panel { 
             background: var(--card); border-radius: 28px; padding: 25px; 
             border: 1px solid var(--border); margin-bottom: 15px; 
@@ -54,7 +51,6 @@
         .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
 
-        /* REFERRAL BLOCK */
         .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
         .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; }
@@ -75,20 +71,17 @@
             text-transform: uppercase;
         }
 
-        /* ARENA */
         .arena-info { text-align: center; margin-bottom: 20px; }
         .arena-label { color: var(--neon); font-weight: 800; font-size: 12px; display: block; margin-bottom: 5px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         
-        .canvas-box { position: relative; width: 260px; height: 260px; margin: 0 auto 30px; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
-        #arena-canvas { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .canvas-box { position: relative; width: 260px; height: 260px; margin: 0 auto 30px; border: 2px solid var(--border); border-radius: 20px; overflow: hidden; background: #000; }
+        #arena-canvas { width: 100%; height: 100%; }
 
-        /* BET BUTTONS */
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; transition: 0.2s; }
         .b-btn:active { background: var(--neon); color: #000; border-color: var(--neon); }
 
-        /* NAVIGATION */
         .nav-bar { 
             position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; 
             background: #080b09; border-radius: 35px; border: 1px solid var(--border); 
@@ -112,10 +105,9 @@
     </header>
 
     <main class="main-scroll">
-        <!-- АРЕНА -->
         <section id="arena-page" class="page active">
             <div class="arena-info">
-                <span class="arena-label" id="timer-text">ОЖИДАНИЕ...</span>
+                <span class="arena-label" id="timer-text">АРЕНА БИТВЫ</span>
                 <div class="arena-bank"><span id="total-bank">0.00</span> TON</div>
             </div>
             
@@ -133,13 +125,11 @@
             </div>
         </section>
 
-        <!-- ПРОФИЛЬ -->
         <section id="profile-page" class="page">
             <div class="glass-panel profile-main">
                 <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
                 <h1 class="u-nick" id="u-nick">ИГРОК</h1>
                 <span class="u-tag" id="u-tag">@username</span>
-                <!-- КНОПКА КОШЕЛЬКА -->
                 <div id="ton-connect-btn"></div>
             </div>
 
@@ -149,7 +139,6 @@
                     <button class="btn-sq" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn-invite-wide" onclick="invite()">Пригласить друзей</button>
                 </div>
-
                 <div class="stat-group">
                     <p class="stat-title">Твои рефералы</p>
                     <div class="count-pill">
@@ -157,7 +146,6 @@
                         <span id="ref-count">0</span>
                     </div>
                 </div>
-
                 <div class="stats-grid">
                     <div class="stat-item">
                         <span>Доступно к зачислению</span>
@@ -168,7 +156,6 @@
                         <div><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="16"> <span id="ref-total">0.00</span></div>
                     </div>
                 </div>
-
                 <button class="btn-claim" onclick="claim()">Зачислить TON</button>
             </div>
         </section>
@@ -192,6 +179,7 @@
     });
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
+    const imgCache = {}; // Кэш для аватарок
 
     socket.emit('user_joined', { 
         id: userData.id, 
@@ -235,7 +223,7 @@
         ctx.clearRect(0,0,300,300);
         
         if(players.length === 0) {
-            ctx.fillStyle = 'rgba(255,255,255,0.05)';
+            ctx.fillStyle = 'rgba(255,255,255,0.03)';
             ctx.fillRect(0, 0, 300, 300);
             return;
         }
@@ -243,8 +231,38 @@
         let currentX = 0;
         players.forEach(p => {
             const width = (p.chance / 100) * 300;
+            
+            // Отрисовка территории
             ctx.fillStyle = p.color;
             ctx.fillRect(currentX, 0, width, 300);
+
+            // Отрисовка аватарки в центре территории
+            const avaUrl = p.avatar || 'https://pixsafe.online/i/mglZT';
+            if (!imgCache[avaUrl]) {
+                imgCache[avaUrl] = new Image();
+                imgCache[avaUrl].src = avaUrl;
+                imgCache[avaUrl].onload = () => drawArena(players);
+            } else if (imgCache[avaUrl].complete) {
+                const size = Math.min(width * 0.6, 40); // Размер аватарки
+                if (size > 5) {
+                    const centerX = currentX + width / 2;
+                    const centerY = 150;
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+                    ctx.clip();
+                    ctx.drawImage(imgCache[avaUrl], centerX - size / 2, centerY - size / 2, size, size);
+                    ctx.restore();
+                    
+                    // Ободок аватарки
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
             currentX += width;
         });
     }
