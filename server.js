@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
         }
         socket.emit('update_data', { users: db.users });
-        broadcastArena();
+        io.emit('update_arena', { players, totalBank, status: gameStatus });
     });
 
     socket.on('wallet_connected', (data) => {
@@ -95,8 +95,7 @@ function startTimer() {
     }, 1000);
 }
 
-function broadcastArena() {
-    io.emit('update_arena', { players, totalBank, status: gameStatus });
-}
+function broadcastArena() { io.emit('update_arena', { players, totalBank, status: gameStatus }); }
 
-server.listen(3000, () => console.log('Server started on 3000'));
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
