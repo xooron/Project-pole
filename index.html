@@ -441,6 +441,12 @@
                 ctx.arc(150, 150, 250, startAngle, startAngle + sliceAngle);
                 ctx.fillStyle = p.color;
                 ctx.fill();
+                
+                // --- ДОБАВЛЕНА ОБВОДКА ---
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                // -------------------------
 
                 const midAngle = startAngle + sliceAngle / 2;
                 const dist = 70;
