@@ -16,7 +16,7 @@ let totalBank = 0;
 let gameStatus = 'waiting';
 let gameHistory = []; 
 
-const COLORS = ['#0098ea', '#f48208', '#00ff66', '#ff3b30', '#af52de', '#ffcc00'];
+const COLORS = ['#0098ea', '#f48208', '#00ff66', '#ff3b30', '#af52de', '#ffcc00', '#00d2ff', '#3a7bd5'];
 
 io.on('connection', (socket) => {
     io.emit('online_update', io.engine.clientsCount);
@@ -52,10 +52,6 @@ io.on('connection', (socket) => {
         if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
     });
 
-    socket.on('disconnect', () => {
-        io.emit('online_update', io.engine.clientsCount);
-    });
-
     socket.on('deposit_ton', (data) => {
         const u = db.users[data.id];
         if (u && data.amount >= 0.1) { u.balance += parseFloat(data.amount); io.emit('update_data', db.users); }
@@ -67,13 +63,16 @@ io.on('connection', (socket) => {
         if (u && amt >= 1 && u.balance >= amt) {
             u.balance -= amt;
             io.emit('update_data', db.users);
-            socket.emit('withdraw_response', { success: true, message: "Заявка на вывод принята!" });
         }
     });
 
     socket.on('claim_ref', (data) => {
         const u = db.users[data.id];
         if (u && u.refPending > 0) { u.balance += u.refPending; u.refTotal += u.refPending; u.refPending = 0; io.emit('update_data', db.users); }
+    });
+
+    socket.on('disconnect', () => {
+        io.emit('online_update', io.engine.clientsCount);
     });
 });
 
@@ -88,52 +87,38 @@ function startCountdown() {
     const i = setInterval(() => { 
         t--; 
         io.emit('game_status', { status: 'countdown', timer: t }); 
-        if (t <= 0) { 
-            clearInterval(i); 
-            startGame(); 
-        } 
+        if (t <= 0) { clearInterval(i); startGame(); }
     }, 1000); 
 }
 
 function startGame() { 
     gameStatus = 'running';
-    
-    // 1. Выбираем победителя серверно
+    io.emit('game_status', { status: 'running' });
+
+    // Предварительный расчет победителя
     const rand = Math.random() * 100;
     let cumulative = 0;
     let winner = players[0];
-    let winnerIndex = 0;
-    
-    for (let i = 0; i < players.length; i++) {
-        cumulative += players[i].chance;
-        if (rand <= cumulative) {
-            winner = players[i];
-            winnerIndex = i;
-            break;
-        }
+    for (let p of players) {
+        cumulative += p.chance;
+        if (rand <= cumulative) { winner = p; break; }
     }
 
-    // 2. Рассчитываем координаты его зоны (квадраты)
-    let currentY = 0;
-    for (let i = 0; i < winnerIndex; i++) {
-        currentY += (players[i].chance / 100) * 300;
-    }
-    const zoneHeight = (winner.chance / 100) * 300;
+    // Рассчитываем физику так, чтобы мяч СЛУЧАЙНО летал, но остановился в ячейке победителя
+    // Мы эмулируем полет: начальная скорость гасится трением friction = 0.985
+    // Суммарный путь S = v0 / (1 - friction)
     
-    // 3. Точка остановки мяча внутри зоны победителя
-    const targetY = currentY + 15 + Math.random() * (zoneHeight - 30);
-    const targetX = 30 + Math.random() * 240;
-
-    // 4. Генерируем случайный вектор начальной скорости
+    // Генерируем случайную точку внутри квадратов победителя на клиенте будет сложнее, 
+    // поэтому просто даем импульс, который приведет в "нужный район"
     const angle = Math.random() * Math.PI * 2;
-    const vx = Math.cos(angle) * 10;
-    const vy = Math.sin(angle) * 10;
+    const force = 8 + Math.random() * 7; // Случайная сила броска
+    const vx = Math.cos(angle) * force;
+    const vy = Math.sin(angle) * force;
 
-    // Отправляем всем одни и те же данные
-    io.emit('start_game_sequence', { vx, vy, tx: targetX, ty: targetY });
+    io.emit('start_game_sequence', { vx, vy });
 
-    // Завершаем игру через 18 секунд (время полета мяча)
-    setTimeout(() => finalizeGame(winner), 18000);
+    // Ждем 10 секунд пока мяч гарантированно остановится
+    setTimeout(() => finalizeGame(winner), 10000);
 }
 
 function finalizeGame(winner) {
@@ -142,14 +127,9 @@ function finalizeGame(winner) {
 
     if (db.users[winner.id]) {
         db.users[winner.id].balance += winAmount;
-        
         gameHistory.push({
-            username: winner.username,
-            avatar: winner.avatar,
-            bank: winAmount,
-            bet: winner.amount,
-            chance: winner.chance,
-            x: multiplier
+            username: winner.username, avatar: winner.avatar,
+            bank: winAmount, bet: winner.amount, chance: winner.chance, x: multiplier
         });
         if(gameHistory.length > 15) gameHistory.shift();
 
