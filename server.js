@@ -95,7 +95,6 @@ function startGame() {
     gameStatus = 'running';
     io.emit('game_status', { status: 'running' });
 
-    // Выбор победителя
     const rand = Math.random() * 100;
     let cumulative = 0;
     let winner = players[0];
@@ -104,7 +103,6 @@ function startGame() {
         if (rand <= cumulative) { winner = p; break; }
     }
 
-    // Сила и угол подбираются так, чтобы мяч летал 15 секунд с учетом трения 0.992
     const angle = Math.random() * Math.PI * 2;
     const force = 12 + Math.random() * 4; 
     const vx = Math.cos(angle) * force;
@@ -112,7 +110,6 @@ function startGame() {
 
     io.emit('start_game_sequence', { vx, vy });
     
-    // Раунд теперь длится 15 секунд
     setTimeout(() => finalizeGame(winner), 15000); 
 }
 
