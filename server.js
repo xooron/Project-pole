@@ -59,9 +59,9 @@ io.on('connection', (socket) => {
         if (u && amt >= 1 && u.balance >= amt) {
             u.balance -= amt;
             io.emit('update_data', db.users);
-            socket.emit('withdraw_response', { success: true, message: "Успешно! Ожидайте выплату." });
+            socket.emit('withdraw_response', { success: true, message: "Заявка на вывод принята!" });
         } else {
-            socket.emit('withdraw_response', { success: false, message: "Не хватает средств!" });
+            socket.emit('withdraw_response', { success: false, message: "Недостаточно средств!" });
         }
     });
 
@@ -86,38 +86,13 @@ io.on('connection', (socket) => {
 
     socket.on('claim_ref', (data) => {
         const u = db.users[data.id];
-        if (u && u.refPending > 0) {
-            u.balance += u.refPending; u.refTotal += u.refPending; u.refPending = 0;
-            io.emit('update_data', db.users);
-        }
+        if (u && u.refPending > 0) { u.balance += u.refPending; u.refPending = 0; io.emit('update_data', db.users); }
     });
 });
 
-function updateChances() {
-    totalBank = players.reduce((s, p) => s + p.amount, 0);
-    players.forEach(p => p.chance = (p.amount / totalBank) * 100);
-}
-
-function startCountdown() {
-    gameStatus = 'countdown';
-    let timer = 10;
-    const interval = setInterval(() => {
-        timer--;
-        io.emit('game_status', { status: 'countdown', timer });
-        if (timer <= 0) { clearInterval(interval); startGame(); }
-    }, 1000);
-}
-
-function startGame() {
-    gameStatus = 'running';
-    const angle = Math.random() * Math.PI * 2;
-    io.emit('start_game_sequence', { vx: Math.cos(angle) * 11, vy: Math.sin(angle) * 11 });
-}
-
-function resetGame() {
-    players = []; totalBank = 0; gameStatus = 'waiting';
-    io.emit('update_arena', { players, totalBank });
-    io.emit('game_status', { status: 'waiting' });
-}
+function updateChances() { totalBank = players.reduce((s, p) => s + p.amount, 0); players.forEach(p => p.chance = (p.amount / totalBank) * 100); }
+function startCountdown() { gameStatus = 'countdown'; let t = 10; const i = setInterval(() => { t--; io.emit('game_status', { status: 'countdown', timer: t }); if (t <= 0) { clearInterval(i); startGame(); } }, 1000); }
+function startGame() { gameStatus = 'running'; const angle = Math.random()*Math.PI*2; io.emit('start_game_sequence', { vx: Math.cos(angle)*11, vy: Math.sin(angle)*11 }); }
+function resetGame() { players = []; totalBank = 0; gameStatus = 'waiting'; io.emit('update_arena', { players, totalBank }); io.emit('game_status', { status: 'waiting' }); }
 
 server.listen(3000);
