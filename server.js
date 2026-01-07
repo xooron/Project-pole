@@ -104,20 +104,16 @@ function startGame() {
         if (rand <= cumulative) { winner = p; break; }
     }
 
-    // Рассчитываем физику так, чтобы мяч СЛУЧАЙНО летал, но остановился в ячейке победителя
-    // Мы эмулируем полет: начальная скорость гасится трением friction = 0.985
-    // Суммарный путь S = v0 / (1 - friction)
-    
-    // Генерируем случайную точку внутри квадратов победителя на клиенте будет сложнее, 
-    // поэтому просто даем импульс, который приведет в "нужный район"
+    // Параметры выстрела (vx, vy)
     const angle = Math.random() * Math.PI * 2;
-    const force = 8 + Math.random() * 7; // Случайная сила броска
+    const force = 9 + Math.random() * 6; 
     const vx = Math.cos(angle) * force;
     const vy = Math.sin(angle) * force;
 
+    // Клиент получит импульс и запустит стадию 2с ожидания + стрелка + полет
     io.emit('start_game_sequence', { vx, vy });
 
-    // Ждем 10 секунд пока мяч гарантированно остановится
+    // Ждем время полета мяча (около 8 сек) + 2 сек ожидания в центре = 10 сек
     setTimeout(() => finalizeGame(winner), 10000);
 }
 
@@ -131,7 +127,7 @@ function finalizeGame(winner) {
             username: winner.username, avatar: winner.avatar,
             bank: winAmount, bet: winner.amount, chance: winner.chance, x: multiplier
         });
-        if(gameHistory.length > 15) gameHistory.shift();
+        if(gameHistory.length > 20) gameHistory.shift();
 
         players.forEach(p => {
             const betUser = db.users[p.id];
@@ -144,7 +140,7 @@ function finalizeGame(winner) {
     io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
     io.emit('update_data', db.users);
     io.emit('history_update', gameHistory);
-    setTimeout(resetGame, 4000);
+    setTimeout(resetGame, 4500);
 }
 
 function resetGame() { 
