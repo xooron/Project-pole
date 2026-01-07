@@ -22,7 +22,7 @@ io.on('connection', (socket) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
                 id: data.id, name: data.name, username: data.username, avatar: data.avatar, 
-                balance: 0.0, // УСТАНОВЛЕНО 0 ПО УМОЛЧАНИЮ
+                balance: 0.0, 
                 refCount: 0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy 
             };
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
