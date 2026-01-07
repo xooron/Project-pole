@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
                 id: data.id, name: data.name, username: data.username, avatar: data.avatar, 
-                balance: 100.0, // Начисляем 100 TON каждому новому игроку
+                balance: 100.0,
                 refCount: 0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy 
             };
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
@@ -114,7 +114,7 @@ io.on('connection', (socket) => {
 
 function updateChances() { totalBank = players.reduce((s, p) => s + p.amount, 0); players.forEach(p => p.chance = (p.amount / totalBank) * 100); }
 function startCountdown() { gameStatus = 'countdown'; let t = 15; const i = setInterval(() => { t--; io.emit('game_status', { status: 'countdown', timer: t }); if (t <= 0) { clearInterval(i); startGame(); } }, 1000); }
-function startGame() { gameStatus = 'running'; const angle = Math.random()*Math.PI*2; io.emit('start_game_sequence', { vx: Math.cos(angle)*12, vy: Math.sin(angle)*12 }); }
+function startGame() { gameStatus = 'running'; const angle = Math.random()*Math.PI*2; io.emit('start_game_sequence', { vx: Math.cos(angle)*10, vy: Math.sin(angle)*10 }); }
 function resetGame() { players = []; totalBank = 0; gameStatus = 'waiting'; io.emit('update_arena', { players, totalBank }); io.emit('game_status', { status: 'waiting' }); }
 
 server.listen(3000, () => console.log('Server running on port 3000'));
