@@ -118,7 +118,8 @@
         /* АРЕНА */
         .arena-info { text-align: center; margin-bottom: 20px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
-        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 50%; overflow: hidden; background: #000; }
+        /* ИЗМЕНЕНО: border-radius: 20px вместо 50% */
+        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 20px; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
         
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
@@ -321,7 +322,8 @@
     }
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.99, winnerRequested: false };
+    // ИЗМЕНЕНО: friction поставлен на 0.9965 для полета 18+ секунд
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.9965, winnerRequested: false };
     let arenaPlayers = [];
     const playerImages = {};
 
@@ -429,14 +431,12 @@
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * (Math.PI * 2);
                 
-                // Рисуем сегмент
                 ctx.beginPath();
                 ctx.moveTo(150, 150);
                 ctx.arc(150, 150, 150, currentAngle, currentAngle + sliceAngle);
                 ctx.fillStyle = p.color;
                 ctx.fill();
 
-                // Рисуем аватарку в сегменте
                 const midAngle = currentAngle + sliceAngle / 2;
                 const dist = 100;
                 const ax = 150 + Math.cos(midAngle) * dist;
@@ -454,10 +454,9 @@
                 currentAngle += sliceAngle;
             });
         } else {
-            ctx.beginPath();
-            ctx.arc(150, 150, 150, 0, Math.PI*2);
+            // Фон пустой арены теперь квадратный
             ctx.fillStyle = '#111';
-            ctx.fill();
+            ctx.fillRect(0, 0, 300, 300);
         }
 
         if (ball.state !== 'hidden') {
@@ -472,7 +471,6 @@
                     ball.state = 'stopped';
                     if (!ball.winnerRequested) {
                         ball.winnerRequested = true;
-                        // Определяем победителя по углу остановки
                         const dx = ball.x - 150;
                         const dy = ball.y - 150;
                         let angle = Math.atan2(dy, dx);
