@@ -49,7 +49,8 @@
             background: #fff; color: #000; border: none; border-radius: 50%; 
             width: 28px; height: 28px; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; 
-            font-weight: 900; font-size: 20px; padding: 0; line-height: 0; /* Изменено для центровки плюса */
+            font-weight: 900; font-size: 22px; padding: 0; 
+            line-height: 1; /* Центрирование плюсика */
         }
 
         /* ИСТОРИЯ ИГР ПАНЕЛЬ */
@@ -85,12 +86,7 @@
         }
         .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Центрирование адреса кошелька */
-        #ton-connect-btn {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
+        #ton-connect-btn { display: flex; justify-content: center; width: 100%; }
         #ton-connect-btn div, #ton-connect-btn button {
             width: 100% !important; height: 55px !important; border-radius: 18px !important;
             background-color: var(--blue) !important; color: white !important;
@@ -122,7 +118,7 @@
         /* АРЕНА */
         .arena-info { text-align: center; margin-bottom: 20px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
-        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
+        .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 50%; overflow: hidden; background: #000; }
         #arena-canvas { width: 100%; height: 100%; display: block; }
         
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
@@ -139,7 +135,7 @@
         .nav-btn.active { color: var(--blue); }
 
         /* ДОПОЛНИТЕЛЬНО */
-        #winner-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 2px solid var(--blue); color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; }
+        #winner-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); border: 2px solid var(--blue); color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; }
         .player-row { background: #242424; padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; }
         .p-info { flex: 1; display: flex; justify-content: space-between; }
@@ -147,21 +143,17 @@
 </head>
 <body onclick="handleFirstInteraction()">
 
-<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
 <div id="loading-screen">
     <div class="loader-logo">PVP FIELD</div>
     <div class="loader-bar"><div class="loader-progress"></div></div>
 </div>
 
-<!-- ИСТОРИЯ -->
 <div id="history-panel">
     <div class="history-header">
         <h2 style="font-weight: 800;">ИСТОРИЯ ИГР</h2>
         <i class="fa-solid fa-xmark" style="font-size: 24px;" onclick="toggleHistory()"></i>
     </div>
-    <div class="history-list" id="history-content">
-        <!-- Сюда попадут данные из сокетов -->
-    </div>
+    <div class="history-list" id="history-content"></div>
 </div>
 
 <audio id="stadium-bg" loop preload="auto">
@@ -225,7 +217,7 @@
                 <p class="ref-title">Приглашайте рефералов и получайте 10% от их игровой комиссии</p>
                 <div class="ref-actions">
                     <button class="btn-copy" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
-                    <button class="btn-invite-new" onclick="invite()">Пригласить друзей</button>
+                    <button class="btn-invite-new" onclick="invite()">Приглашить друзей</button>
                 </div>
                 <p class="ref-stat-label">Твои рефералы</p>
                 <div class="ref-count-box">
@@ -259,7 +251,6 @@
     </nav>
 </div>
 
-<!-- ОКНА ДЕПОЗИТА/ВЫВОДА -->
 <div id="deposit-panel">
     <div class="dep-box">
         <h2>ПОПОЛНЕНИЕ</h2>
@@ -284,7 +275,6 @@
     const socket = io();
     tg.ready(); tg.expand();
 
-    // ЗАГРУЗКА
     setTimeout(() => {
         const ls = document.getElementById('loading-screen');
         ls.style.opacity = '0';
@@ -331,8 +321,9 @@
     }
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995, winnerRequested: false };
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.99, winnerRequested: false };
     let arenaPlayers = [];
+    const playerImages = {};
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
@@ -343,7 +334,7 @@
     socket.on('history_update', (history) => {
         const list = document.getElementById('history-content');
         list.innerHTML = '';
-        history.reverse().forEach(h => {
+        [...history].reverse().forEach(h => {
             const item = document.createElement('div');
             item.className = 'history-item';
             item.innerHTML = `
@@ -371,6 +362,13 @@
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
+        arenaPlayers.forEach(p => {
+            if (!playerImages[p.id]) {
+                const img = new Image();
+                img.src = p.avatar || 'https://pixsafe.online/i/mglZT';
+                playerImages[p.id] = img;
+            }
+        });
         updatePlayersList(data.players);
     });
 
@@ -425,39 +423,79 @@
         if(!canvas) return;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
+        
         if (arenaPlayers.length > 0) {
             let currentAngle = -Math.PI / 2;
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * (Math.PI * 2);
-                ctx.beginPath(); ctx.moveTo(150, 150);
-                ctx.arc(150, 150, 400, currentAngle, currentAngle + sliceAngle);
-                ctx.fillStyle = p.color; ctx.fill();
+                
+                // Рисуем сегмент
+                ctx.beginPath();
+                ctx.moveTo(150, 150);
+                ctx.arc(150, 150, 150, currentAngle, currentAngle + sliceAngle);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+
+                // Рисуем аватарку в сегменте
+                const midAngle = currentAngle + sliceAngle / 2;
+                const dist = 100;
+                const ax = 150 + Math.cos(midAngle) * dist;
+                const ay = 150 + Math.sin(midAngle) * dist;
+
+                if (playerImages[p.id] && playerImages[p.id].complete) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(ax, ay, 20, 0, Math.PI * 2);
+                    ctx.clip();
+                    ctx.drawImage(playerImages[p.id], ax - 20, ay - 20, 40, 40);
+                    ctx.restore();
+                }
+
                 currentAngle += sliceAngle;
             });
+        } else {
+            ctx.beginPath();
+            ctx.arc(150, 150, 150, 0, Math.PI*2);
+            ctx.fillStyle = '#111';
+            ctx.fill();
         }
-        if (ball.state !== 'hidden' && ball.state !== 'stopped') {
+
+        if (ball.state !== 'hidden') {
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
-                if (ball.x < 8 || ball.x > 292) ball.vx *= -1;
-                if (ball.y < 8 || ball.y > 292) ball.vy *= -1;
-                if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
+                
+                if (ball.x < 15 || ball.x > 285) ball.vx *= -1;
+                if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
+                
+                if (Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1) {
                     ball.state = 'stopped';
                     if (!ball.winnerRequested) {
                         ball.winnerRequested = true;
-                        const angle = Math.atan2(ball.y - 150, ball.x - 150);
-                        const nAngle = (angle + Math.PI/2 + Math.PI*2) % (Math.PI*2);
-                        let check = 0, winner = arenaPlayers[0];
+                        // Определяем победителя по углу остановки
+                        const dx = ball.x - 150;
+                        const dy = ball.y - 150;
+                        let angle = Math.atan2(dy, dx);
+                        if (angle < -Math.PI/2) angle += Math.PI * 2;
+                        
+                        let current = -Math.PI / 2;
+                        let winnerId = arenaPlayers[0].id;
                         for(let p of arenaPlayers) {
-                            let slice = (p.chance / 100) * (Math.PI*2);
-                            if(nAngle >= check && nAngle < check + slice) { winner = p; break; }
-                            check += slice;
+                            let step = (p.chance / 100) * (Math.PI * 2);
+                            if (angle >= current && angle < current + step) {
+                                winnerId = p.id;
+                                break;
+                            }
+                            current += step;
                         }
-                        socket.emit('request_winner', { winnerId: winner.id });
+                        socket.emit('request_winner', { winnerId });
                     }
                 }
             }
-            ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.fillText('⚽', ball.x, ball.y);
+            ctx.font = '24px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⚽', ball.x, ball.y);
         }
         requestAnimationFrame(draw);
     }
