@@ -95,7 +95,6 @@ function startGame() {
     gameStatus = 'running';
     io.emit('game_status', { status: 'running' });
 
-    // Предварительный расчет победителя
     const rand = Math.random() * 100;
     let cumulative = 0;
     let winner = players[0];
@@ -104,16 +103,12 @@ function startGame() {
         if (rand <= cumulative) { winner = p; break; }
     }
 
-    // Параметры выстрела (vx, vy)
     const angle = Math.random() * Math.PI * 2;
     const force = 9 + Math.random() * 6; 
     const vx = Math.cos(angle) * force;
     const vy = Math.sin(angle) * force;
 
-    // Клиент получит импульс и запустит стадию 2с ожидания + стрелка + полет
     io.emit('start_game_sequence', { vx, vy });
-
-    // Ждем время полета мяча (около 8 сек) + 2 сек ожидания в центре = 10 сек
     setTimeout(() => finalizeGame(winner), 10000);
 }
 
@@ -128,13 +123,6 @@ function finalizeGame(winner) {
             bank: winAmount, bet: winner.amount, chance: winner.chance, x: multiplier
         });
         if(gameHistory.length > 20) gameHistory.shift();
-
-        players.forEach(p => {
-            const betUser = db.users[p.id];
-            if (betUser && betUser.referredBy && db.users[betUser.referredBy]) {
-                db.users[betUser.referredBy].refPending += (p.amount * 0.05) * 0.1;
-            }
-        });
     }
 
     io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
