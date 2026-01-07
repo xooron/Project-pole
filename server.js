@@ -52,41 +52,6 @@ io.on('connection', (socket) => {
         if (players.length >= 2 && gameStatus === 'waiting') startCountdown();
     });
 
-    socket.on('request_winner', (data) => {
-        if (gameStatus !== 'running') return;
-        gameStatus = 'calculating';
-        const winner = players.find(p => p.id === data.winnerId) || players[0];
-        const winAmount = totalBank * 0.95;
-        const multiplier = (winAmount / winner.amount).toFixed(1);
-
-        if (db.users[winner.id]) {
-            db.users[winner.id].balance += winAmount;
-            
-            const historyEntry = {
-                username: winner.username,
-                avatar: winner.avatar,
-                bank: winAmount,
-                bet: winner.amount,
-                chance: winner.chance,
-                x: multiplier
-            };
-            gameHistory.push(historyEntry);
-            if(gameHistory.length > 15) gameHistory.shift();
-
-            players.forEach(p => {
-                const betUser = db.users[p.id];
-                if (betUser && betUser.referredBy && db.users[betUser.referredBy]) {
-                    db.users[betUser.referredBy].refPending += (p.amount * 0.05) * 0.1;
-                }
-            });
-        }
-
-        io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
-        io.emit('update_data', db.users);
-        io.emit('history_update', gameHistory);
-        setTimeout(resetGame, 4000);
-    });
-
     socket.on('disconnect', () => {
         io.emit('online_update', io.engine.clientsCount);
     });
@@ -112,9 +77,102 @@ io.on('connection', (socket) => {
     });
 });
 
-function updateChances() { totalBank = players.reduce((s, p) => s + p.amount, 0); players.forEach(p => p.chance = (p.amount / totalBank) * 100); }
-function startCountdown() { gameStatus = 'countdown'; let t = 15; const i = setInterval(() => { t--; io.emit('game_status', { status: 'countdown', timer: t }); if (t <= 0) { clearInterval(i); startGame(); } }, 1000); }
-function startGame() { gameStatus = 'running'; const angle = Math.random()*Math.PI*2; io.emit('start_game_sequence', { vx: Math.cos(angle)*10, vy: Math.sin(angle)*10 }); }
-function resetGame() { players = []; totalBank = 0; gameStatus = 'waiting'; io.emit('update_arena', { players, totalBank }); io.emit('game_status', { status: 'waiting' }); }
+function updateChances() { 
+    totalBank = players.reduce((s, p) => s + p.amount, 0); 
+    players.forEach(p => p.chance = (p.amount / totalBank) * 100); 
+}
+
+function startCountdown() { 
+    gameStatus = 'countdown'; 
+    let t = 15; 
+    const i = setInterval(() => { 
+        t--; 
+        io.emit('game_status', { status: 'countdown', timer: t }); 
+        if (t <= 0) { 
+            clearInterval(i); 
+            startGame(); 
+        } 
+    }, 1000); 
+}
+
+function startGame() { 
+    gameStatus = 'running';
+    
+    // 1. Выбираем победителя серверно
+    const rand = Math.random() * 100;
+    let cumulative = 0;
+    let winner = players[0];
+    let winnerIndex = 0;
+    
+    for (let i = 0; i < players.length; i++) {
+        cumulative += players[i].chance;
+        if (rand <= cumulative) {
+            winner = players[i];
+            winnerIndex = i;
+            break;
+        }
+    }
+
+    // 2. Рассчитываем координаты его зоны (квадраты)
+    let currentY = 0;
+    for (let i = 0; i < winnerIndex; i++) {
+        currentY += (players[i].chance / 100) * 300;
+    }
+    const zoneHeight = (winner.chance / 100) * 300;
+    
+    // 3. Точка остановки мяча внутри зоны победителя
+    const targetY = currentY + 15 + Math.random() * (zoneHeight - 30);
+    const targetX = 30 + Math.random() * 240;
+
+    // 4. Генерируем случайный вектор начальной скорости
+    const angle = Math.random() * Math.PI * 2;
+    const vx = Math.cos(angle) * 10;
+    const vy = Math.sin(angle) * 10;
+
+    // Отправляем всем одни и те же данные
+    io.emit('start_game_sequence', { vx, vy, tx: targetX, ty: targetY });
+
+    // Завершаем игру через 18 секунд (время полета мяча)
+    setTimeout(() => finalizeGame(winner), 18000);
+}
+
+function finalizeGame(winner) {
+    const winAmount = totalBank * 0.95;
+    const multiplier = (winAmount / winner.amount).toFixed(1);
+
+    if (db.users[winner.id]) {
+        db.users[winner.id].balance += winAmount;
+        
+        gameHistory.push({
+            username: winner.username,
+            avatar: winner.avatar,
+            bank: winAmount,
+            bet: winner.amount,
+            chance: winner.chance,
+            x: multiplier
+        });
+        if(gameHistory.length > 15) gameHistory.shift();
+
+        players.forEach(p => {
+            const betUser = db.users[p.id];
+            if (betUser && betUser.referredBy && db.users[betUser.referredBy]) {
+                db.users[betUser.referredBy].refPending += (p.amount * 0.05) * 0.1;
+            }
+        });
+    }
+
+    io.emit('announce_winner', { winner, bank: winAmount, winnerBet: winner.amount });
+    io.emit('update_data', db.users);
+    io.emit('history_update', gameHistory);
+    setTimeout(resetGame, 4000);
+}
+
+function resetGame() { 
+    players = []; 
+    totalBank = 0; 
+    gameStatus = 'waiting'; 
+    io.emit('update_arena', { players, totalBank }); 
+    io.emit('game_status', { status: 'waiting' }); 
+}
 
 server.listen(3000, () => console.log('Server running on port 3000'));
