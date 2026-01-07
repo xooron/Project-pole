@@ -14,19 +14,18 @@ let db = { users: {} };
 let players = [];
 let totalBank = 0;
 let gameStatus = 'waiting';
-let gameHistory = []; // Хранение истории
+let gameHistory = []; 
 
 const COLORS = ['#0098ea', '#f48208', '#00ff66', '#ff3b30', '#af52de', '#ffcc00'];
 
 io.on('connection', (socket) => {
-    // Рассылка текущего онлайна при подключении/отключении
     io.emit('online_update', io.engine.clientsCount);
     
     socket.on('user_joined', (data) => {
         if (!db.users[data.id]) {
             db.users[data.id] = { 
                 id: data.id, name: data.name, username: data.username, avatar: data.avatar, 
-                balance: 0.0, 
+                balance: 100.0, // Начисляем 100 TON каждому новому игроку
                 refCount: 0, refPending: 0.0, refTotal: 0.0, referredBy: data.refBy 
             };
             if (data.refBy && db.users[data.refBy]) db.users[data.refBy].refCount++;
@@ -63,7 +62,6 @@ io.on('connection', (socket) => {
         if (db.users[winner.id]) {
             db.users[winner.id].balance += winAmount;
             
-            // Сохраняем в историю
             const historyEntry = {
                 username: winner.username,
                 avatar: winner.avatar,
@@ -93,7 +91,6 @@ io.on('connection', (socket) => {
         io.emit('online_update', io.engine.clientsCount);
     });
 
-    // Остальные обработчики без изменений...
     socket.on('deposit_ton', (data) => {
         const u = db.users[data.id];
         if (u && data.amount >= 0.1) { u.balance += parseFloat(data.amount); io.emit('update_data', db.users); }
