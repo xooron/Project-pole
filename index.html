@@ -13,37 +13,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
-        :root { --neon: #00ff66; --bg: #0d0d0d; --card: #0d120f; --border: rgba(0, 255, 102, 0.12); --blue: #0095ff; }
+        :root { --neon: #00ff66; --bg: #030805; --card: #0d120f; --border: rgba(0, 255, 102, 0.12); --blue: #0095ff; --orange: #ff8c00; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #0d0d0d; color: #fff; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
 
-        /* НОВЫЙ ЗАГРУЗОЧНЫЙ ЭКРАН КАК НА ФОТО */
+        /* 1. ЗАГРУЗОЧНЫЙ ЭКРАН (КАК НА ФОТО) */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #0d0d0d; z-index: 9999; display: flex; flex-direction: column;
             align-items: center; justify-content: center; transition: 0.8s ease;
         }
-        .loader-logo { 
-            font-size: 42px; 
-            font-weight: 800; 
-            color: var(--blue); 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            margin-bottom: 10px;
-        }
-        .loader-bar { 
-            width: 220px; 
-            height: 4px; 
-            background: #222; 
-            border-radius: 2px; 
-            overflow: hidden; 
-        }
-        .loader-progress { 
-            width: 0%; 
-            height: 100%; 
-            background: var(--blue); 
-            animation: load 3s linear forwards; 
-        }
+        .loader-logo { font-size: 42px; font-weight: 800; color: var(--blue); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .loader-bar { width: 240px; height: 5px; background: #1a1a1a; border-radius: 10px; overflow: hidden; }
+        .loader-progress { width: 0%; height: 100%; background: var(--blue); animation: load 3s linear forwards; box-shadow: 0 0 10px var(--blue); }
         @keyframes load { to { width: 100%; } }
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
@@ -51,15 +33,10 @@
         .header { padding: 15px 20px; display: flex; justify-content: flex-end; }
         .balance-pill { background: #111814; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
         
-        .add-bal-btn { 
-            background: var(--neon); color: #000; border: none; border-radius: 50%; 
-            width: 22px; height: 22px; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; 
-            margin-left: 5px; padding: 0; font-weight: 900; font-size: 16px;
-        }
+        .add-bal-btn { background: var(--neon); color: #000; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 5px; padding: 0; font-weight: 900; font-size: 16px; }
 
         #deposit-panel, #withdraw-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .dep-box { width: 85%; padding: 30px; text-align: center; }
+        .dep-box { width: 85%; padding: 30px; text-align: center; background: #111; border-radius: 30px; border: 1px solid var(--border); }
         .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 16px; font-weight: 800; text-align: center; margin: 10px 0; outline: none; }
 
         .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
@@ -70,18 +47,44 @@
         .sound-controls { position: absolute; top: 10px; left: 10px; display: flex; gap: 8px; z-index: 200; }
         .snd-btn { background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); }
 
-        /* PROFILE */
+        /* 2. ДИЗАЙН ПРОФИЛЯ (КАК НА ФОТО) */
         .glass-panel { background: var(--card); border-radius: 28px; padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .profile-main { text-align: center; }
-        .avatar-wrap { width: 85px; height: 85px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--neon); padding: 3px; background: #000; }
-        .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .profile-main { text-align: center; background: #141414; padding: 40px 20px; }
+        .avatar-wrap { 
+            width: 105px; height: 105px; margin: 0 auto 30px; border-radius: 50%; 
+            border: 3px solid var(--blue); padding: 0; background: #000; overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 149, 255, 0.3);
+        }
+        .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        
+        #ton-connect-btn div, #ton-connect-btn button {
+            width: 100% !important; height: 60px !important; border-radius: 100px !important;
+            background-color: var(--blue) !important; color: white !important;
+            font-weight: 700 !important; font-size: 20px !important; border: none !important;
+        }
+        .btn-withdraw-new { 
+            width: 100%; height: 60px; background: var(--orange); color: #fff; border: none; 
+            border-radius: 100px; font-weight: 700; font-size: 20px; cursor: pointer; margin-top: 15px; 
+        }
+
+        .u-nick { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-top: 15px; }
         .u-tag { color: var(--neon); font-size: 13px; margin-bottom: 15px; display: block; }
 
-        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
-        .btn-withdraw-alt { background: #ff4500; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; margin-top: 10px; }
+        .actions-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-sq { width: 50px; height: 50px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .btn-invite-wide { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; }
+        .ref-text { font-size: 14px; font-weight: 800; text-align: left; margin-bottom: 15px; text-transform: uppercase; line-height: 1.3; }
+        .stat-group { margin-bottom: 15px; }
+        .stat-title { font-size: 10px; color: #5a6b61; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
+        .count-pill { background: rgba(255,255,255,0.03); border: 1px solid var(--border); width: fit-content; padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 18px; text-align: left; }
+        .stat-item span { font-size: 9px; color: #5a6b61; display: block; margin-bottom: 4px; text-transform: uppercase; }
+        .stat-item div { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
 
-        /* ARENA */
+        .btn-claim { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 18px; font-weight: 900; font-size: 14px; margin-top: 20px; text-transform: uppercase; cursor: pointer; }
+
+        /* 3. КНОПКИ СТАВОК (КАПСУЛЫ КАК НА ФОТО) */
         .arena-info { text-align: center; margin-bottom: 20px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
@@ -89,20 +92,14 @@
         #winner-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon); color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; backdrop-filter: blur(15px); }
         #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
 
-        /* КНОПКИ СТАВОК (КАПСУЛЫ С СИНЕЙ ОБВОДКОЙ) */
         .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
         .b-btn { 
-            background: #0d120f; 
-            border: 1.5px solid #0084ff; 
-            padding: 12px 5px; 
-            border-radius: 100px; 
-            color: #fff; 
-            font-weight: 800; 
-            font-size: 16px; 
-            cursor: pointer; 
-            text-transform: uppercase;
-            box-shadow: inset 0 0 10px rgba(0, 132, 255, 0.1);
+            background: #0d120f; border: 2px solid #0084ff; padding: 14px 5px; 
+            border-radius: 100px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; 
+            text-transform: uppercase; box-shadow: inset 0 0 10px rgba(0, 132, 255, 0.2), 0 0 5px rgba(0, 132, 255, 0.1); 
+            transition: transform 0.1s;
         }
+        .b-btn:active { transform: scale(0.96); }
 
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
@@ -116,13 +113,12 @@
 </head>
 <body onclick="handleFirstInteraction()">
 
-<!-- ЗАГРУЗОЧНЫЙ ЭКРАН (КАК НА ФОТО) -->
+<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
 <div id="loading-screen">
     <div class="loader-logo">PVP FIELD</div>
     <div class="loader-bar"><div class="loader-progress"></div></div>
 </div>
 
-<!-- ЗВУК -->
 <audio id="stadium-bg" loop preload="auto">
     <source src="https://assets.mixkit.co/sfx/preview/mixkit-stadium-crowd-ambience-455.mp3" type="audio/mpeg">
 </audio>
@@ -156,7 +152,7 @@
                     <p id="win-sum">0.00 TON</p>
                 </div>
             </div>
-            <!-- СТАВКИ КАК НА ФОТО -->
+            <!-- КНОПКИ СТАВОК -->
             <div class="bet-grid">
                 <button class="b-btn" onclick="makeBet(0.5)">0.5 TON</button>
                 <button class="b-btn" onclick="makeBet(1.0)">1 TON</button>
@@ -171,12 +167,20 @@
         <section id="profile-page" class="page">
             <div class="glass-panel profile-main">
                 <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
+                <!-- КНОПКИ КОШЕЛЬКА И ВЫВОДА КАК НА ФОТО -->
+                <div id="ton-connect-btn"></div>
+                <button class="btn-withdraw-new" onclick="openWithdraw()">Вывод средств</button>
+                
                 <h1 class="u-nick" id="u-nick">ИГРОК</h1>
                 <span class="u-tag" id="u-tag">@username</span>
-                <div id="ton-connect-btn"></div>
-                <button class="btn-withdraw-alt" onclick="openWithdraw()">ВЫВОД СРЕДСТВ</button>
             </div>
+            
             <div class="glass-panel">
+                <p class="ref-text">Приглашайте рефералов и получайте 10% от их игровых комиссий</p>
+                <div class="actions-row">
+                    <button class="btn-sq" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
+                    <button class="btn-invite-wide" onclick="invite()">Пригласить друзей</button>
+                </div>
                 <div class="stat-group">
                     <p class="stat-title">Твои рефералы</p>
                     <div class="count-pill"><i class="fa-solid fa-user-group" style="color: #0098ea;"></i><span id="ref-count">0</span></div>
@@ -196,23 +200,22 @@
     </nav>
 </div>
 
-<!-- ОКНА ПОПОЛНЕНИЯ/ВЫВОДА -->
 <div id="deposit-panel">
-    <div class="glass-panel dep-box">
-        <h2 style="font-weight: 900;">ПОПОЛНЕНИЕ</h2>
+    <div class="dep-box">
+        <h2 style="font-weight: 900; margin-bottom: 10px;">ПОПОЛНЕНИЕ</h2>
         <input type="number" id="dep-amt" class="dep-input" placeholder="0.00" min="1">
-        <button class="btn-claim" onclick="processDeposit()">ПОПОЛНИТЬ</button>
-        <button class="btn-claim" style="background:none; color:#fff; border:1px solid var(--border); margin-top:10px;" onclick="closeDeposit()">ОТМЕНА</button>
+        <button class="btn-withdraw-new" style="background:var(--blue); margin-top:5px;" onclick="processDeposit()">ПОПОЛНИТЬ</button>
+        <button class="btn-withdraw-new" style="background:none; border:1px solid #333; margin-top:10px;" onclick="closeDeposit()">ОТМЕНА</button>
     </div>
 </div>
 
 <div id="withdraw-panel">
-    <div class="glass-panel dep-box">
-        <h2 style="font-weight: 900;">ВЫВОД TON</h2>
-        <input type="number" id="wit-amt" class="dep-input" placeholder="Сумма (мин. 1)" min="1">
+    <div class="dep-box">
+        <h2 style="font-weight: 900; margin-bottom: 10px;">ВЫВОД TON</h2>
+        <input type="number" id="wit-amt" class="dep-input" placeholder="Сумма" min="1">
         <input type="text" id="wit-addr" class="dep-input" placeholder="Адрес кошелька">
-        <button class="btn-claim" onclick="processWithdraw()">ВЫВЕСТИ</button>
-        <button class="btn-claim" style="background:none; color:#fff; border:1px solid var(--border); margin-top:10px;" onclick="closeWithdraw()">ОТМЕНА</button>
+        <button class="btn-withdraw-new" onclick="processWithdraw()">ВЫВЕСТИ</button>
+        <button class="btn-withdraw-new" style="background:none; border:1px solid #333; margin-top:10px;" onclick="closeWithdraw()">ОТМЕНА</button>
     </div>
 </div>
 
@@ -228,7 +231,6 @@
         setTimeout(() => ls.style.display = 'none', 800);
     }, 3000);
 
-    // ЗВУК
     let musicStarted = false;
     function handleFirstInteraction() {
         if (!musicStarted) {
@@ -257,10 +259,8 @@
     function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
     async function processDeposit() {
         const amt = parseFloat(document.getElementById('dep-amt').value);
-        if (!amt || amt < 1) { tg.showAlert("Мин. 1 TON"); return; }
-        if (!tonConnectUI.connected) { tg.showAlert("Подключите кошелек!"); return; }
-        const nanoAmount = (amt * 1000000000).toString();
-        const transaction = { validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: myAddress, amount: nanoAmount }] };
+        if (!amt || amt < 1 || !tonConnectUI.connected) { tg.showAlert("Подключите кошелек и введите сумму!"); return; }
+        const transaction = { validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: myAddress, amount: (amt * 1000000000).toString() }] };
         try { closeDeposit(); await tonConnectUI.sendTransaction(transaction); socket.emit('deposit_ton', { id: userData.id, amount: amt }); } catch (e) {}
     }
 
@@ -276,7 +276,7 @@
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     const imgCache = {};
     let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995, winnerRequested: false };
-    let arrowAngle = 0, arenaPlayers = [], luckyUsedThisRound = false, showGoals = false;
+    let arrowAngle = 0, arenaPlayers = [];
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
@@ -302,8 +302,6 @@
     socket.on('start_game_sequence', (data) => {
         ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0; 
         ball.state = 'spawning'; ball.winnerRequested = false;
-        arrowAngle = 0; luckyUsedThisRound = false;
-        showGoals = Math.random() < 0.3;
         setTimeout(() => { ball.vx = data.vx; ball.vy = data.vy; ball.state = 'moving'; }, 2000);
     });
 
@@ -333,6 +331,8 @@
     }
 
     function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Копировано!"); }
+    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`); }
     function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
     function updatePlayersList(players) {
@@ -383,7 +383,7 @@
                 if (ball.x < 8 || ball.x > 292) ball.vx *= -1;
                 if (ball.y < 8 || ball.y > 292) ball.vy *= -1;
                 if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
-                    ball.state = 'stopped'; ball.vx = 0; ball.vy = 0; 
+                    ball.state = 'stopped';
                     if (!ball.winnerRequested) {
                         ball.winnerRequested = true;
                         const angle = Math.atan2(ball.y - 150, ball.x - 150);
