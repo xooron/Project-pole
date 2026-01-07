@@ -44,12 +44,12 @@
         .history-btn { color: #fff; font-size: 22px; margin-left: 15px; opacity: 0.8; cursor: pointer; transition: 0.2s; }
         .history-btn:active { transform: scale(0.9); opacity: 1; }
         
-        .balance-pill { background: #242424; padding: 4px 4px 4px 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
+        .balance-pill { background: #242424; padding: 4px; padding-left: 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
         .add-bal-btn { 
             background: #fff; color: #000; border: none; border-radius: 50%; 
             width: 28px; height: 28px; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 900; font-size: 22px; padding: 0; 
+            display: grid; place-items: center;
+            font-weight: 900; font-size: 20px; padding: 0; 
             line-height: 1;
         }
 
@@ -321,9 +321,9 @@
     }
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
-    let ball = { x: 150, y: 150, tx: 150, ty: 150, vx: 0, vy: 0, state: 'hidden', friction: 0.9965 };
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, state: 'hidden', friction: 0.985 };
     let arenaPlayers = [];
-    const playerImages = {};
+    let gridMap = []; // Хранит информацию о цветах ячеек 10x10
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
@@ -362,19 +362,29 @@
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
-        arenaPlayers.forEach(p => {
-            if (!playerImages[p.id]) {
-                const img = new Image();
-                img.src = p.avatar || 'https://pixsafe.online/i/mglZT';
-                playerImages[p.id] = img;
-            }
-        });
+        generateGrid(data.players);
         updatePlayersList(data.players);
     });
 
+    function generateGrid(players) {
+        gridMap = Array(100).fill('#111');
+        if (players.length === 0) return;
+        
+        let currentIdx = 0;
+        players.forEach(p => {
+            let cellsCount = Math.round(p.chance);
+            for(let i=0; i<cellsCount && currentIdx < 100; i++) {
+                gridMap[currentIdx++] = p.color;
+            }
+        });
+        // Заполняем остаток последним игроком
+        while(currentIdx < 100) {
+            gridMap[currentIdx++] = players[players.length-1].color;
+        }
+    }
+
     socket.on('start_game_sequence', (data) => {
         ball.x = 150; ball.y = 150;
-        ball.tx = data.tx; ball.ty = data.ty;
         ball.vx = data.vx; ball.vy = data.vy;
         ball.state = 'moving';
     });
@@ -425,48 +435,35 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,300,300);
         
-        if (arenaPlayers.length > 0) {
-            let currentY = 0;
-            arenaPlayers.forEach(p => {
-                const height = (p.chance / 100) * 300;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(0, currentY, 300, height);
-
-                // Отрисовка аватарки в центре зоны
-                if (playerImages[p.id] && playerImages[p.id].complete) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(150, currentY + height/2, 20, 0, Math.PI * 2);
-                    ctx.clip();
-                    ctx.drawImage(playerImages[p.id], 130, currentY + height/2 - 20, 40, 40);
-                    ctx.restore();
-                }
-                currentY += height;
-            });
-        } else {
-            ctx.fillStyle = '#111';
-            ctx.fillRect(0, 0, 300, 300);
+        // Рисуем сетку 10x10
+        const cellSize = 30;
+        for(let i=0; i<100; i++) {
+            const x = (i % 10) * cellSize;
+            const y = Math.floor(i / 10) * cellSize;
+            ctx.fillStyle = gridMap[i] || '#111';
+            ctx.fillRect(x, y, cellSize, cellSize);
+            // Легкая обводка квадратов для красоты
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.strokeRect(x, y, cellSize, cellSize);
         }
 
         if (ball.state === 'moving') {
             ball.x += ball.vx; ball.y += ball.vy;
             ball.vx *= ball.friction; ball.vy *= ball.friction;
             
-            // Отскоки от стенок
-            if (ball.x < 15 || ball.x > 285) ball.vx *= -1;
-            if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
+            // Отскоки
+            if (ball.x < 10 || ball.x > 290) ball.vx *= -1;
+            if (ball.y < 10 || ball.y > 290) ball.vy *= -1;
             
-            // Плавное притяжение к финальной точке при низкой скорости
-            const speed = Math.sqrt(ball.vx**2 + ball.vy**2);
-            if (speed < 1.5) {
-                ball.x += (ball.tx - ball.x) * 0.05;
-                ball.y += (ball.ty - ball.y) * 0.05;
-            }
-
             ctx.font = '24px serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('⚽', ball.x, ball.y);
+
+            // Если мяч почти остановился
+            if (Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05) {
+                ball.vx = 0; ball.vy = 0;
+            }
         }
         
         requestAnimationFrame(draw);
