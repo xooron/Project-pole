@@ -85,8 +85,23 @@
         #winner-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(13, 18, 15, 0.98); border: 2px solid var(--neon); color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; backdrop-filter: blur(15px); }
         #winner-panel img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon); margin-bottom: 15px; }
 
-        .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .b-btn { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
+        /* ИЗМЕНЕННЫЕ КНОПКИ СТАВОК (1 в 1 как на фото) */
+        .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .b-btn { 
+            background: #0d120f; 
+            border: 2px solid #0084ff; 
+            padding: 14px 5px; 
+            border-radius: 100px; 
+            color: #fff; 
+            font-weight: 800; 
+            font-size: 16px; 
+            cursor: pointer; 
+            text-transform: uppercase;
+            box-shadow: inset 0 0 10px rgba(0, 132, 255, 0.2), 0 0 15px rgba(0, 132, 255, 0.3);
+            transition: transform 0.1s;
+        }
+        .b-btn:active { transform: scale(0.95); }
+
         .player-row { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .p-ava { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
@@ -139,13 +154,14 @@
                     <p id="win-sum">0.00 TON</p>
                 </div>
             </div>
+            <!-- СЕКЦИЯ СТАВОК КАК НА ФОТО -->
             <div class="bet-grid">
-                <button class="b-btn" onclick="makeBet(0.5)">0.5</button>
-                <button class="b-btn" onclick="makeBet(1.0)">1.0</button>
-                <button class="b-btn" onclick="makeBet(5.0)">5.0</button>
-                <button class="b-btn" onclick="makeBet(10)">10</button>
-                <button class="b-btn" onclick="makeBet(50)">50</button>
-                <button class="b-btn" style="background:var(--neon); color:#000" onclick="makeBet('max')">MAX</button>
+                <button class="b-btn" onclick="makeBet(0.5)">0.5 TON</button>
+                <button class="b-btn" onclick="makeBet(1.0)">1 TON</button>
+                <button class="b-btn" onclick="makeBet(5.0)">5 TON</button>
+                <button class="b-btn" onclick="makeBet(10)">10 TON</button>
+                <button class="b-btn" onclick="makeBet(50)">50 TON</button>
+                <button class="b-btn" onclick="makeBet('max')">MAX</button>
             </div>
             <div class="players-list" id="players-list"></div>
         </section>
