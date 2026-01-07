@@ -38,13 +38,34 @@
 
         .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
         
-        /* ВЕРХНЯЯ ПАНЕЛЬ КАК НА ФОТО */
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .online-pill { background: #242424; padding: 8px 16px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-weight: 800; color: #00ff66; font-size: 18px; }
-        .history-btn { color: #fff; font-size: 20px; margin-left: 10px; opacity: 0.8; }
+        .history-btn { color: #fff; font-size: 22px; margin-left: 15px; opacity: 0.8; cursor: pointer; transition: 0.2s; }
+        .history-btn:active { transform: scale(0.9); opacity: 1; }
         
         .balance-pill { background: #242424; padding: 4px 4px 4px 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
-        .add-bal-btn { background: #fff; color: #000; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; }
+        .add-bal-btn { 
+            background: #fff; color: #000; border: none; border-radius: 50%; 
+            width: 28px; height: 28px; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; font-size: 20px; padding: 0; line-height: 1;
+        }
+
+        /* ИСТОРИЯ ИГР ПАНЕЛЬ */
+        #history-panel { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); z-index: 2000; display: none; flex-direction: column; 
+            padding: 20px; backdrop-filter: blur(10px);
+        }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .history-list { flex: 1; overflow-y: auto; }
+        .history-item { 
+            background: #242424; border-radius: 15px; padding: 12px; margin-bottom: 10px; 
+            display: flex; align-items: center; gap: 12px; border-left: 4px solid var(--blue);
+        }
+        .h-info { flex: 1; font-size: 13px; }
+        .h-info b { color: var(--blue); }
 
         #deposit-panel, #withdraw-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .dep-box { width: 85%; padding: 30px; text-align: center; background: #111; border-radius: 30px; border: 1px solid var(--border); }
@@ -55,7 +76,7 @@
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ПРОФИЛЬ (КАК НА ФОТО) */
+        /* ПРОФИЛЬ */
         .profile-card { background: #2b2b2b; border-radius: 35px; padding: 30px 20px; margin-bottom: 15px; text-align: center; }
         .avatar-wrap { 
             width: 100px; height: 100px; margin: 0 auto 25px; border-radius: 50%; 
@@ -74,7 +95,7 @@
             border-radius: 18px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 12px; 
         }
 
-        /* РЕФЕРАЛЫ (КАК НА ФОТО) */
+        /* РЕФЕРАЛЫ */
         .ref-card { background: #242424; border-radius: 35px; padding: 25px; margin-bottom: 15px; }
         .ref-title { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 20px; }
         
@@ -91,7 +112,7 @@
 
         .btn-claim-ton { width: 100%; height: 60px; background: #fff; color: #000; border-radius: 20px; border: none; font-weight: 800; font-size: 20px; cursor: pointer; }
 
-        /* АРЕНА (ОСТАВЛЕНО БЕЗ ИЗМЕНЕНИЙ ЛОГИКИ) */
+        /* АРЕНА */
         .arena-info { text-align: center; margin-bottom: 20px; }
         .arena-bank { font-size: 34px; font-weight: 900; }
         .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 24px; overflow: hidden; background: #000; }
@@ -125,6 +146,17 @@
     <div class="loader-bar"><div class="loader-progress"></div></div>
 </div>
 
+<!-- ИСТОРИЯ -->
+<div id="history-panel">
+    <div class="history-header">
+        <h2 style="font-weight: 800;">ИСТОРИЯ ИГР</h2>
+        <i class="fa-solid fa-xmark" style="font-size: 24px;" onclick="toggleHistory()"></i>
+    </div>
+    <div class="history-list" id="history-content">
+        <!-- Сюда попадут данные из сокетов -->
+    </div>
+</div>
+
 <audio id="stadium-bg" loop preload="auto">
     <source src="https://assets.mixkit.co/sfx/preview/mixkit-stadium-crowd-ambience-455.mp3" type="audio/mpeg">
 </audio>
@@ -134,9 +166,9 @@
         <div style="display: flex; align-items: center;">
             <div class="online-pill">
                 <i class="fa-solid fa-user-group"></i>
-                <span>314</span>
+                <span id="online-count">1</span>
             </div>
-            <i class="fa-solid fa-clock-rotate-left history-btn"></i>
+            <i class="fa-solid fa-clock-rotate-left history-btn" onclick="toggleHistory()"></i>
         </div>
         <div class="balance-pill">
             <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="22"> 
@@ -146,7 +178,6 @@
     </header>
 
     <main class="main-scroll">
-        <!-- СТРАНИЦА АРЕНЫ -->
         <section id="arena-page" class="page active">
             <div class="arena-info">
                 <span id="timer-text" style="color: var(--text-gray); font-weight: 800;">ОЖИДАНИЕ...</span>
@@ -173,7 +204,6 @@
             <div class="players-list" id="players-list"></div>
         </section>
 
-        <!-- СТРАНИЦА ПРОФИЛЯ -->
         <section id="profile-page" class="page">
             <div class="profile-card">
                 <div class="avatar-wrap">
@@ -186,18 +216,15 @@
             
             <div class="ref-card">
                 <p class="ref-title">Приглашайте рефералов и получайте 10% от их игровой комиссии</p>
-                
                 <div class="ref-actions">
                     <button class="btn-copy" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn-invite-new" onclick="invite()">Пригласить друзей</button>
                 </div>
-
                 <p class="ref-stat-label">Твои рефералы</p>
                 <div class="ref-count-box">
                     <i class="fa-solid fa-user-group" style="color: var(--blue);"></i>
                     <span id="ref-count">0</span>
                 </div>
-
                 <div class="stats-row">
                     <div class="stat-box">
                         <p class="ref-stat-label">Доступно к зачислению</p>
@@ -208,7 +235,6 @@
                         <div class="val"><span id="ref-total">0.00</span> TON</div>
                     </div>
                 </div>
-
                 <button class="btn-claim-ton" onclick="claim()">Зачислить TON</button>
             </div>
         </section>
@@ -291,14 +317,38 @@
         const addr = document.getElementById('wit-addr').value;
         if (amt >= 1 && addr.length > 10) socket.emit('withdraw_ton', { id: userData.id, amount: amt, address: addr });
     }
-    socket.on('withdraw_response', (res) => { tg.showAlert(res.message); if (res.success) closeWithdraw(); });
+    
+    function toggleHistory() {
+        const hp = document.getElementById('history-panel');
+        hp.style.display = (hp.style.display === 'flex') ? 'none' : 'flex';
+    }
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
-    const imgCache = {};
     let ball = { x: 150, y: 150, vx: 0, vy: 0, radius: 8, state: 'hidden', friction: 0.995, winnerRequested: false };
     let arenaPlayers = [];
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
+
+    socket.on('online_update', (count) => {
+        document.getElementById('online-count').innerText = count;
+    });
+
+    socket.on('history_update', (history) => {
+        const list = document.getElementById('history-content');
+        list.innerHTML = '';
+        history.reverse().forEach(h => {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <img src="${h.avatar || 'https://pixsafe.online/i/mglZT'}" class="p-ava">
+                <div class="h-info">
+                    <b>@${h.username}</b> победил <b>${h.bank.toFixed(2)} TON</b><br>
+                    Ставка: ${h.bet.toFixed(1)} | Шанс: ${h.chance.toFixed(1)}% | Множитель: x${h.x}
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    });
 
     socket.on('update_data', (u) => {
         const me = u[userData.id];
