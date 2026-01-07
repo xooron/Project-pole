@@ -431,18 +431,17 @@
         ctx.clearRect(0, 0, 300, 300);
 
         if (arenaPlayers.length > 0) {
+            // ОТРИСОВКА ТЕРРИТОРИЙ (когда есть ставки)
             let startAngle = 0;
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * Math.PI * 2;
                 
-                // Рисуем сектор с идеально ровными краями
                 ctx.beginPath();
                 ctx.moveTo(150, 150);
-                ctx.arc(150, 150, 250, startAngle, startAngle + sliceAngle); // Радиус больше канваса для заполнения углов
+                ctx.arc(150, 150, 250, startAngle, startAngle + sliceAngle);
                 ctx.fillStyle = p.color;
                 ctx.fill();
 
-                // Рисуем аватарку игрока в центре его сектора
                 const midAngle = startAngle + sliceAngle / 2;
                 const dist = 70;
                 const ax = 150 + Math.cos(midAngle) * dist;
@@ -459,12 +458,32 @@
                     ctx.lineWidth = 2;
                     ctx.stroke();
                 }
-
                 startAngle += sliceAngle;
             });
         } else {
+            // ОТРИСОВКА ОЖИДАНИЯ (твоё поле)
             ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, 300, 300);
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 2;
+
+            // Центральная линия
+            ctx.beginPath();
+            ctx.moveTo(0, 150);
+            ctx.lineTo(300, 150);
+            ctx.stroke();
+
+            // Центральный круг
+            ctx.beginPath();
+            ctx.arc(150, 150, 45, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Углы
+            ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI / 2); ctx.stroke(); // Лево-верх
+            ctx.beginPath(); ctx.arc(300, 0, 35, Math.PI / 2, Math.PI); ctx.stroke(); // Право-верх
+            ctx.beginPath(); ctx.arc(0, 300, 35, 1.5 * Math.PI, 0); ctx.stroke(); // Лево-низ
+            ctx.beginPath(); ctx.arc(300, 300, 35, Math.PI, 1.5 * Math.PI); ctx.stroke(); // Право-низ
         }
 
         if (ball.state !== 'hidden') {
