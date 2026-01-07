@@ -331,7 +331,8 @@
     let arrow = { angle: 0, visible: false };
     
     let arenaPlayers = [];
-    let gridMap = Array(100).fill('#111');
+    let voronoiSeeds = []; // Точки-якоря для деления территории
+    let playerAvatars = {}; // Кеш загруженных аватарок для канваса
 
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
@@ -372,46 +373,48 @@
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
-        generateRandomGrid(data.players);
+        generateTerritories(data.players);
         updatePlayersList(data.players);
     });
 
-    // Красивое распределение по всему квадрату
-    function generateRandomGrid(players) {
-        let cells = [];
-        for(let i=0; i<100; i++) cells.push(i);
-        
-        // Перемешиваем индексы ячеек (Fisher-Yates)
-        for (let i = cells.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [cells[i], cells[j]] = [cells[j], cells[i]];
-        }
-
-        gridMap = Array(100).fill('#111');
+    // ГЕНЕРАЦИЯ ГЕОМЕТРИЧЕСКИХ ТЕРРИТОРИЙ (VORONOI-LIKE)
+    function generateTerritories(players) {
+        voronoiSeeds = [];
         if (players.length === 0) return;
 
-        let currentCellIdx = 0;
-        players.forEach(p => {
-            let count = Math.round(p.chance);
-            for(let i=0; i<count && currentCellIdx < 100; i++) {
-                gridMap[cells[currentCellIdx++]] = p.color;
+        // Распределяем якоря в зависимости от шансов. 
+        // Больше шансов -> якорь ближе к центру или больше якорей.
+        players.forEach((p, idx) => {
+            // Подгружаем аватарку для канваса
+            if (!playerAvatars[p.id]) {
+                const img = new Image();
+                img.src = p.avatar || 'https://pixsafe.online/i/mglZT';
+                playerAvatars[p.id] = img;
+            }
+
+            // Создаем точки-якоря пропорционально весу (шансу)
+            let seedCount = Math.max(1, Math.floor(p.chance / 10));
+            for(let i=0; i<seedCount; i++) {
+                let angle = Math.random() * Math.PI * 2;
+                let dist = idx === 0 ? Math.random() * 50 : 50 + Math.random() * 100;
+                voronoiSeeds.push({
+                    x: 150 + Math.cos(angle) * dist,
+                    y: 150 + Math.sin(angle) * dist,
+                    color: p.color,
+                    playerId: p.id,
+                    isMain: i === 0
+                });
             }
         });
-        // Остаток забиваем цветом последнего игрока
-        while(currentCellIdx < 100) {
-            gridMap[cells[currentCellIdx++]] = players[players.length-1].color;
-        }
     }
 
     socket.on('start_game_sequence', (data) => {
-        // Мяч появляется в центре и стоит 2 сек
         ball.x = 150; ball.y = 150;
         ball.vx = 0; ball.vy = 0;
         ball.state = 'ready';
         arrow.visible = true;
         arrow.targetAngle = Math.atan2(data.vy, data.vx);
         
-        // Через 2 секунды мяч летит
         setTimeout(() => {
             arrow.visible = false;
             ball.vx = data.vx;
@@ -430,7 +433,7 @@
         panel.style.display = 'block';
         setTimeout(() => { 
             panel.style.display = 'none';
-            ball.state = 'hidden'; // Только когда окно закрылось, мяч убираем
+            ball.state = 'hidden';
         }, 4000);
     });
 
@@ -467,61 +470,72 @@
         const canvas = document.getElementById('arena-canvas');
         if(!canvas) return;
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0,0,300,300);
         
-        // Рисуем сетку 10x10
-        const cellSize = 30;
-        for(let i=0; i<100; i++) {
-            const x = (i % 10) * cellSize;
-            const y = Math.floor(i / 10) * cellSize;
-            ctx.fillStyle = gridMap[i] || '#111';
-            ctx.fillRect(x, y, cellSize, cellSize);
-            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-            ctx.strokeRect(x, y, cellSize, cellSize);
+        if (voronoiSeeds.length > 0) {
+            // Рисуем территории попиксельно (упрощенная диаграмма Вороного)
+            // Для производительности на мобилках используем сетку 5x5 для закрашивания
+            const step = 5;
+            for(let x=0; x<300; x+=step) {
+                for(let y=0; y<300; y+=step) {
+                    let minDist = 9999;
+                    let bestSeed = voronoiSeeds[0];
+                    for(let s of voronoiSeeds) {
+                        let d = Math.hypot(x-s.x, y-s.y);
+                        if (d < minDist) { minDist = d; bestSeed = s; }
+                    }
+                    ctx.fillStyle = bestSeed.color;
+                    ctx.fillRect(x, y, step, step);
+                }
+            }
+
+            // Рисуем аватарки игроков на их "главных" семенах
+            arenaPlayers.forEach(p => {
+                let mainSeed = voronoiSeeds.find(s => s.playerId === p.id && s.isMain);
+                if (mainSeed && playerAvatars[p.id]) {
+                    let size = 20 + (p.chance / 100) * 50; // Размер зависит от шанса
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(mainSeed.x, mainSeed.y, size/2, 0, Math.PI*2);
+                    ctx.closePath();
+                    ctx.clip();
+                    ctx.drawImage(playerAvatars[p.id], mainSeed.x - size/2, mainSeed.y - size/2, size, size);
+                    ctx.restore();
+                    // Белая обводка аватара
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+        } else {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0,0,300,300);
         }
 
         if (ball.state !== 'hidden') {
-            // Рисуем стрелку прицеливания
             if (arrow.visible) {
-                arrow.angle += 0.15; // Вращение стрелки
+                arrow.angle += 0.15;
                 ctx.save();
                 ctx.translate(150, 150);
                 ctx.rotate(arrow.angle);
                 ctx.beginPath();
-                ctx.moveTo(30, 0);
-                ctx.lineTo(50, 0);
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 4;
-                ctx.lineCap = 'round';
+                ctx.moveTo(30, 0); ctx.lineTo(50, 0);
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.lineCap = 'round';
                 ctx.stroke();
-                // Наконечник
-                ctx.beginPath();
-                ctx.moveTo(50, 0);
-                ctx.lineTo(42, -5);
-                ctx.lineTo(42, 5);
-                ctx.fillStyle = 'white';
-                ctx.fill();
                 ctx.restore();
             }
 
-            // Физика движения
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
-                
-                // Отскоки
                 if (ball.x < 12 || ball.x > 288) ball.vx *= -1;
                 if (ball.y < 12 || ball.y > 288) ball.vy *= -1;
-                
                 if (Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1) {
-                    ball.vx = 0; ball.vy = 0;
-                    ball.state = 'stopped';
+                    ball.vx = 0; ball.vy = 0; ball.state = 'stopped';
                 }
             }
 
-            // Отрисовка мяча
             ctx.shadowBlur = 15;
-            ctx.shadowColor = 'rgba(255,255,255,0.5)';
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.font = '26px serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
