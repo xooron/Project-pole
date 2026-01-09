@@ -275,6 +275,10 @@
     const socket = io();
     tg.ready(); tg.expand();
 
+    // Загрузка изображения мяча
+    const ballImg = new Image();
+    ballImg.src = 'https://i.postimg.cc/m26p87zV/image.png';
+
     setTimeout(() => {
         const ls = document.getElementById('loading-screen');
         ls.style.opacity = '0';
@@ -444,7 +448,6 @@
                 ctx.fillStyle = p.color;
                 ctx.fill();
                 
-                // ОБВОДКА (только если игроков больше 1)
                 if (arenaPlayers.length > 1) {
                     ctx.strokeStyle = 'black';
                     ctx.lineWidth = 2.5; 
@@ -502,10 +505,9 @@
 
             ctx.shadowBlur = 15;
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.font = '28px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⚽', ball.x, ball.y);
+            // Замена эмодзи ⚽ на изображение
+            const ballSize = 32;
+            ctx.drawImage(ballImg, ball.x - ballSize/2, ball.y - ballSize/2, ballSize, ballSize);
             ctx.shadowBlur = 0;
         }
         
