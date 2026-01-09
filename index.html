@@ -275,10 +275,11 @@
     const socket = io();
     tg.ready(); tg.expand();
 
-    // ЗАГРУЗКА МЯЧА
+    // ЗАГРУЗКА МЯЧА (как на фото)
     const ballImg = new Image();
-    ballImg.crossOrigin = "anonymous"; // Важно для работы с canvas
-    ballImg.src = 'https://cdn-icons-png.flaticon.com/512/53/53254.png'; // Стабильная прямая ссылка на мяч
+    ballImg.crossOrigin = "anonymous";
+    // Используем качественное изображение классического футбольного мяча с тенями
+    ballImg.src = 'https://i.ibb.co/9H8vY3X/ball.png'; 
 
     setTimeout(() => {
         const ls = document.getElementById('loading-screen');
@@ -504,15 +505,14 @@
                 if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
             }
 
-            // ОТРИСОВКА КАРТИНКИ МЯЧА
-            const ballSize = 30;
+            // ОТРИСОВКА КАРТИНКИ МЯЧА (как на фото)
+            const ballSize = 34; // Немного увеличим для красоты
             ctx.save();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = 'rgba(0,0,0,0.6)';
             if(ballImg.complete) {
                 ctx.drawImage(ballImg, ball.x - ballSize/2, ball.y - ballSize/2, ballSize, ballSize);
             } else {
-                // Заглушка пока фото грузится
                 ctx.fillStyle = "#fff";
                 ctx.beginPath(); ctx.arc(ball.x, ball.y, 12, 0, Math.PI*2); ctx.fill();
             }
