@@ -503,11 +503,19 @@
                 if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
             }
 
+            // Отрисовка мяча как фото
             ctx.shadowBlur = 15;
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            // Замена эмодзи ⚽ на изображение
             const ballSize = 32;
-            ctx.drawImage(ballImg, ball.x - ballSize/2, ball.y - ballSize/2, ballSize, ballSize);
+            if (ballImg.complete) {
+                ctx.drawImage(ballImg, ball.x - ballSize/2, ball.y - ballSize/2, ballSize, ballSize);
+            } else {
+                // Запасной вариант пока грузится
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
             ctx.shadowBlur = 0;
         }
         
