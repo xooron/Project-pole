@@ -275,9 +275,10 @@
     const socket = io();
     tg.ready(); tg.expand();
 
-    // Загрузка изображения мяча
+    // ЗАГРУЗКА МЯЧА
     const ballImg = new Image();
-    ballImg.src = 'https://i.postimg.cc/m26p87zV/image.png';
+    ballImg.crossOrigin = "anonymous"; // Важно для работы с canvas
+    ballImg.src = 'https://cdn-icons-png.flaticon.com/512/53/53254.png'; // Стабильная прямая ссылка на мяч
 
     setTimeout(() => {
         const ls = document.getElementById('loading-screen');
@@ -503,20 +504,19 @@
                 if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
             }
 
-            // Отрисовка мяча как фото
-            ctx.shadowBlur = 15;
+            // ОТРИСОВКА КАРТИНКИ МЯЧА
+            const ballSize = 30;
+            ctx.save();
+            ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            const ballSize = 32;
-            if (ballImg.complete) {
+            if(ballImg.complete) {
                 ctx.drawImage(ballImg, ball.x - ballSize/2, ball.y - ballSize/2, ballSize, ballSize);
             } else {
-                // Запасной вариант пока грузится
+                // Заглушка пока фото грузится
                 ctx.fillStyle = "#fff";
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, 10, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(ball.x, ball.y, 12, 0, Math.PI*2); ctx.fill();
             }
-            ctx.shadowBlur = 0;
+            ctx.restore();
         }
         
         requestAnimationFrame(draw);
