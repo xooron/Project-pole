@@ -44,14 +44,13 @@
         
         .balance-pill { background: #242424; padding: 8px 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
         
-        /* КНОПКА ПОПОЛНЕНИЯ - ПЛЮСИК ВЫШЕ */
         .add-bal-btn { 
             background: #fff; color: #000; border: none; border-radius: 50%; 
             width: 32px; height: 32px; cursor: pointer; 
             display: flex; align-items: center; justify-content: center;
             font-weight: 900; font-size: 26px; padding: 0; 
             line-height: 0; margin-left: 10px;
-            padding-bottom: 5px; /* Смещаем плюсик вверх */
+            padding-bottom: 5px;
             box-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
         .add-bal-btn:active { transform: scale(0.9); }
@@ -278,10 +277,8 @@
     const socket = io();
     tg.ready(); tg.expand();
 
-    // ЗАГРУЗКА МЯЧА (Классический футбольный мяч)
     const ballImg = new Image();
     ballImg.crossOrigin = "anonymous";
-    // Ссылка на качественный футбольный мяч в стиле фото
     ballImg.src = 'https://i.ibb.co/9H8vY3X/ball.png'; 
 
     setTimeout(() => {
@@ -318,10 +315,25 @@
 
     function openWithdraw() { document.getElementById('withdraw-panel').style.display = 'flex'; }
     function closeWithdraw() { document.getElementById('withdraw-panel').style.display = 'none'; }
+    
+    // ОБНОВЛЕННАЯ ФУНКЦИЯ ВЫВОДА
     function processWithdraw() {
         const amt = parseFloat(document.getElementById('wit-amt').value);
         const addr = document.getElementById('wit-addr').value;
-        if (amt >= 1 && addr.length > 10) socket.emit('withdraw_ton', { id: userData.id, amount: amt, address: addr });
+        if (amt >= 1 && addr.length > 10) {
+            // Отправляем запрос на сервер
+            socket.emit('withdraw_ton', { 
+                id: userData.id, 
+                username: userData.username || userData.first_name, 
+                amount: amt, 
+                address: addr 
+            });
+            closeWithdraw();
+            // Выводим панель "Успешно"
+            tg.showAlert("Успешно отправлена заявка на вывод!");
+        } else {
+            tg.showAlert("Минимум 1 TON и корректный адрес!");
+        }
     }
     
     function toggleHistory() {
@@ -331,7 +343,8 @@
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, state: 'hidden', friction: 0.992, radius: 10 };
+    // МЯЧ ТЕПЕРЬ ВСЕГДА ВИДЕН (изменен state по умолчанию)
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, state: 'idle', friction: 0.992, radius: 10 };
     let arenaPlayers = [];
     let playerAvatars = {};
 
@@ -400,7 +413,8 @@
         panel.style.display = 'block';
         setTimeout(() => { 
             panel.style.display = 'none';
-            ball.state = 'hidden';
+            ball.state = 'idle';
+            ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0;
         }, 4000);
     });
 
@@ -479,7 +493,6 @@
             ctx.beginPath(); ctx.arc(300, 300, 35, Math.PI, 1.5 * Math.PI); ctx.stroke();
         }
 
-        // ОТРИСОВКА МЯЧА (Как на фото, но без черного круга)
         if (ball.state !== 'hidden') {
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
@@ -492,12 +505,10 @@
             ctx.save();
             ctx.translate(ball.x, ball.y);
             
-            // 1. Рисуем тень под мячом
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowOffsetY = 2;
 
-            // 2. Отрисовываем текстуру футбольного мяча
             if(ballImg.complete) {
                 ctx.drawImage(ballImg, -ballSize/2, -ballSize/2, ballSize, ballSize);
             } else {
@@ -505,14 +516,11 @@
                 ctx.beginPath(); ctx.arc(0, 0, ballSize/2, 0, Math.PI*2); ctx.fill();
             }
             
-            // Сбрасываем тени для плюсика
             ctx.shadowBlur = 0;
             ctx.shadowOffsetY = 0;
 
-            // 3. Рисуем белый плюсик поверх мяча (прямо в центре)
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
-            // Добавляем обводку плюсику, чтобы он не сливался с белыми частями мяча
             ctx.shadowBlur = 4;
             ctx.shadowColor = 'black';
             
