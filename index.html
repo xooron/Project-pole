@@ -84,9 +84,9 @@
     /* Plinko Styles */
     .plinko-container {
         width: 100%;
-        max-width: 360px;
+        max-width: 380px;
         aspect-ratio: 1/1.1;
-        background: linear-gradient(180deg, #2c2c2c 0%, #1a1a1a 100%);
+        background: #151515;
         margin: 10px auto;
         border-radius: 40px;
         position: relative;
@@ -102,7 +102,6 @@
         margin-top: 20px;
     }
 
-    /* Original Styles Cont. */
     .profile-card { background: #2b2b2b; border-radius: 35px; padding: 30px 20px; margin-bottom: 15px; text-align: center; }
     .avatar-wrap { 
         width: 100px; height: 100px; margin: 0 auto 25px; border-radius: 50%; 
@@ -313,7 +312,6 @@
     const socket = io();
     tg.ready(); tg.expand();
 
-    // Assets
     const ballImg = new Image();
     ballImg.crossOrigin = "anonymous";
     ballImg.src = 'https://i.ibb.co/3pS7fG7/ball-new.png'; 
@@ -465,15 +463,15 @@
     const pctx = plinkoCanvas.getContext('2d');
     let plinkoBalls = [];
     const pegs = [];
-    const rows = 9;
-    const spacing = 38;
+    const rows = 8;
+    const spacing = 42;
 
-    // Create Pegs
+    // Инициализация пинов (как на картинке)
     for (let i = 0; i < rows; i++) {
         const rowPegCount = i + 3;
         const rowWidth = (rowPegCount - 1) * spacing;
         const startX = (400 - rowWidth) / 2;
-        const y = 80 + i * spacing;
+        const y = 60 + i * spacing;
         for (let j = 0; j < rowPegCount; j++) {
             pegs.push({ x: startX + j * spacing, y: y });
         }
@@ -482,97 +480,79 @@
     function playPlinko(amt) {
         const curBal = parseFloat(document.getElementById('user-bal').innerText);
         if(curBal < amt) { tg.showAlert("Недостаточно баланса!"); return; }
-        
-        // Local balance deduct for smoothness
         document.getElementById('user-bal').innerText = (curBal - amt).toFixed(2);
         socket.emit('plinko_bet', { id: userData.id, amount: amt });
-        
-        // Spawn Ball
-        plinkoBalls.push({
-            x: 200 + (Math.random() * 4 - 2),
-            y: 35,
-            vx: 0,
-            vy: 0,
-            radius: 7,
-            bounced: false
-        });
+        plinkoBalls.push({ x: 200 + (Math.random() * 4 - 2), y: 20, vx: 0, vy: 0, radius: 8 });
     }
-
-    socket.on('plinko_result', (data) => {
-        // Result is handled when ball reaches bottom locally for better visuals
-    });
 
     function updatePlinko() {
         pctx.clearRect(0, 0, 400, 440);
 
-        // Draw Gate
-        pctx.strokeStyle = "white";
-        pctx.lineWidth = 4;
-        pctx.strokeRect(165, 10, 70, 40);
-        pctx.clearRect(167, 45, 66, 10);
+        // Рисуем лузы (как на фото пользователя)
+        const slotCount = 6;
+        const slotW = 400 / slotCount;
+        const slotH = 100;
+        const slotY = 440 - slotH;
+        const colors = ["#4a0a0a", "#0a4a0a", "#0a4a0a", "#0a4a0a", "#0a4a0a", "#4a0a0a"];
 
-        // Draw Pegs (Blue Glowing Dots)
-        pegs.forEach(peg => {
+        for (let i = 0; i < slotCount; i++) {
+            // Фон слота
+            pctx.fillStyle = colors[i];
+            pctx.fillRect(i * slotW, slotY, slotW, slotH);
+            
+            // Белые разделители (линии)
+            pctx.strokeStyle = "white";
+            pctx.lineWidth = 2;
             pctx.beginPath();
-            pctx.arc(peg.x, peg.y, 4, 0, Math.PI * 2);
-            pctx.fillStyle = "#00a2ff";
+            pctx.moveTo(i * slotW, slotY);
+            pctx.lineTo(i * slotW, 440);
+            pctx.stroke();
+            
+            // Последняя линия справа
+            if(i === slotCount - 1) {
+                pctx.beginPath();
+                pctx.moveTo((i+1) * slotW - 1, slotY);
+                pctx.lineTo((i+1) * slotW - 1, 440);
+                pctx.stroke();
+            }
+        }
+
+        // Рисуем светящиеся точки (пины)
+        pegs.forEach(p => {
             pctx.shadowBlur = 10;
             pctx.shadowColor = "#00a2ff";
+            pctx.fillStyle = "#00a2ff";
+            pctx.beginPath();
+            pctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
             pctx.fill();
             pctx.shadowBlur = 0;
         });
 
-        // Draw Bottom Slots (Lines and Glows)
-        const slotsCount = 6;
-        const slotWidth = spacing;
-        const startX = (400 - (slotsCount * slotWidth)) / 2;
-        for (let i = 0; i <= slotsCount; i++) {
-            const x = startX + i * slotWidth;
-            pctx.strokeStyle = "white";
-            pctx.lineWidth = 2;
-            pctx.beginPath();
-            pctx.moveTo(x, 380);
-            pctx.lineTo(x, 430);
-            pctx.stroke();
-
-            // Glows
-            if (i < slotsCount) {
-                pctx.save();
-                let color = (i === 0 || i === slotsCount - 1) ? "rgba(255, 0, 0, 0.3)" : "rgba(0, 255, 0, 0.3)";
-                pctx.fillStyle = color;
-                pctx.fillRect(x + 2, 380, slotWidth - 4, 50);
-                pctx.restore();
-            }
-        }
-
-        // Balls Logic
+        // Логика шариков
         plinkoBalls.forEach((b, idx) => {
-            b.vy += 0.25; // Gravity
+            b.vy += 0.25;
             b.x += b.vx;
             b.y += b.vy;
 
-            // Collision with Pegs
             pegs.forEach(p => {
                 const dx = b.x - p.x;
                 const dy = b.y - p.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < b.radius + 4) {
                     const angle = Math.atan2(dy, dx);
-                    const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.6; // Light bounce
+                    const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.6;
                     b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 2;
                     b.vy = Math.sin(angle) * speed;
                     b.y = p.y + Math.sin(angle) * (b.radius + 4.1);
                 }
             });
 
-            // Draw Ball
+            pctx.fillStyle = "white";
             pctx.beginPath();
             pctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-            pctx.fillStyle = "white";
             pctx.fill();
 
-            // Finish
-            if (b.y > 440) plinkoBalls.splice(idx, 1);
+            if (b.y > 450) plinkoBalls.splice(idx, 1);
         });
 
         requestAnimationFrame(updatePlinko);
