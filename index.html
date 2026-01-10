@@ -354,6 +354,10 @@
         const list = document.getElementById('history-content');
         list.innerHTML = '';
         [...history].reverse().forEach(h => {
+            // ЛОГИКА КОМИССИИ В ИСТОРИИ: Берем 20% только с прибыли (банк минус ставка победителя)
+            const profit = h.bank - h.bet;
+            const netBank = h.bank - (profit * 0.20);
+            
             const item = document.createElement('div');
             item.className = 'history-item';
             item.innerHTML = `
@@ -361,9 +365,9 @@
                 <div class="h-info">
                     <b>@${h.username}</b><br>
                     <span>Ставка: ${h.bet.toFixed(1)} TON</span><br>
-                    <span style="opacity:0.6; font-size:11px">Шанс: ${h.chance.toFixed(1)}% | x${h.x}</span>
+                    <span style="opacity:0.6; font-size:11px">Шанс: ${h.chance.toFixed(1)}% | x${(netBank / h.bet).toFixed(1)}</span>
                 </div>
-                <div class="h-res">+${h.bank.toFixed(2)}</div>
+                <div class="h-res">+${netBank.toFixed(2)}</div>
             `;
             list.appendChild(item);
         });
@@ -401,10 +405,15 @@
 
     socket.on('announce_winner', (data) => {
         const panel = document.getElementById('winner-panel');
+        
+        // ЛОГИКА КОМИССИИ: Вычитаем 20% из прибыли, но ставку победителя не трогаем
+        const totalProfit = data.bank - data.winnerBet;
+        const netWinAmount = data.bank - (totalProfit * 0.20);
+        
         document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
-        document.getElementById('win-sum').innerText = `${data.bank.toFixed(2)} TON`;
-        document.getElementById('win-x').innerText = `x${(data.bank / data.winnerBet).toFixed(1)}`;
+        document.getElementById('win-sum').innerText = `${netWinAmount.toFixed(2)} TON`;
+        document.getElementById('win-x').innerText = `x${(netWinAmount / data.winnerBet).toFixed(1)}`;
         
         panel.style.display = 'block';
         setTimeout(() => { 
@@ -451,7 +460,6 @@
 
         if (arenaPlayers.length > 0) {
             let startAngle = 0;
-            // Сначала закрашиваем все сектора
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * Math.PI * 2;
                 ctx.beginPath();
@@ -462,7 +470,6 @@
                 startAngle += sliceAngle;
             });
 
-            // Затем рисуем обводку поверх всех секторов (одинаковую)
             if (arenaPlayers.length > 1) {
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = 3;
@@ -478,7 +485,6 @@
                 });
             }
 
-            // Отрисовка аватарок
             let avatarAngle = 0;
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * Math.PI * 2;
@@ -519,20 +525,14 @@
             ctx.translate(ball.x, ball.y);
             
             if(ballImg.complete) {
-                // Рисуем картинку мяча
                 ctx.drawImage(ballImg, -ballSize/2, -ballSize/2, ballSize, ballSize);
-                
-                // ВЫРЕЗАЕМ ПРОЗРАЧНЫЙ ЦЕНТР
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
                 ctx.arc(0, 0, ballSize * 0.25, 0, Math.PI * 2); 
                 ctx.fill();
-                
-                // ВОЗВРАЩАЕМ РЕЖИМ ДЛЯ ПЛЮСИКА
                 ctx.globalCompositeOperation = 'source-over';
             }
 
-            // РИСУЕМ БЕЛЫЙ ПЛЮСИК
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
             ctx.shadowBlur = 4;
