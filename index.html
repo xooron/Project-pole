@@ -164,7 +164,7 @@
 </div>
 <div id="history-panel">
     <div class="history-header">
-        <h2 style="font-weight: 800; font-size: 24px; letter-spacing: 1px;">ИСТОРИЯ</h2>
+        <h2 style="font-weight: 800; font-size: 24px; letter-spacing: 1px;">ИСТОРИЯ ИГР PvP</h2>
         <i class="fa-solid fa-xmark" style="font-size: 28px; opacity: 0.6;" onclick="toggleHistory()"></i>
     </div>
     <div class="history-list" id="history-content"></div>
@@ -273,15 +273,15 @@
 <nav class="nav-bar">
     <button class="nav-btn active" onclick="showTab('arena', this)">
         <i class="fa-solid fa-trophy"></i>
-        АРЕНА
+        PvP
     </button>
     <button class="nav-btn" onclick="showTab('plinko', this)">
         <i class="fa-solid fa-meteor" style="transform: rotate(135deg);"></i>
-        PLINKO
+        Plinko
     </button>
     <button class="nav-btn" onclick="showTab('profile', this)">
         <i class="fa-solid fa-circle-user"></i>
-        ПРОФИЛЬ
+        Profile
     </button>
 </nav>
 </div>
@@ -451,7 +451,9 @@
     const pegs = [];
     const pinSpacing = 30; 
     const startY = 85;
-    const slotCount = 6;
+    
+    // --- ИЗМЕНЕНИЯ: 7 ячеек ---
+    const slotCount = 7; 
     const slotW = 400 / slotCount;
     const dividers = [];
     for(let i=1; i < slotCount; i++) dividers.push(i * slotW);
@@ -480,7 +482,7 @@
         plinkoBalls.push({ 
             x: 200 + (Math.random() * 6 - 3), y: 35, 
             vx: (Math.random() - 0.5) * 1.5, vy: 0, 
-            radius: 7, img: bImg, bet: amt, landed: false
+            radius: 7, img: bImg, landed: false, bet: amt
         });
     }
 
@@ -491,14 +493,19 @@
         pctx.strokeStyle = "white"; pctx.lineWidth = 3;
         pctx.strokeRect(175, 10, 50, 40);
 
-        const multipliers = ['0x', '3x', '0.5x', '0.5x', '3x', '0x'];
+        // Множители для 7 ячеек: 0x, 3x, 0.5x, 0.5x, 0.5x, 3x, 0x
+        const multipliers = ['0x', '3x', '0.5x', '0.5x', '0.5x', '3x', '0x'];
         const slotY = 380;
 
         for (let i = 0; i < slotCount; i++) {
             const xStart = i * slotW;
             let grad = pctx.createLinearGradient(0, slotY, 0, 440);
-            if(i === 0 || i === 5) { grad.addColorStop(0, "rgba(255,0,0,0)"); grad.addColorStop(1, "rgba(255,0,0,0.5)"); }
-            else { grad.addColorStop(0, "rgba(0,255,100,0)"); grad.addColorStop(1, "rgba(0,255,100,0.4)"); }
+            // Края (первая и последняя) красные
+            if(i === 0 || i === slotCount - 1) { 
+                grad.addColorStop(0, "rgba(255,0,0,0)"); grad.addColorStop(1, "rgba(255,0,0,0.5)"); 
+            } else { 
+                grad.addColorStop(0, "rgba(0,255,100,0)"); grad.addColorStop(1, "rgba(0,255,100,0.4)"); 
+            }
             pctx.fillStyle = grad; pctx.fillRect(xStart, slotY, slotW, 60);
             pctx.fillStyle = "white"; pctx.font = "bold 14px Sans-serif"; pctx.textAlign = "center";
             pctx.fillText(multipliers[i], xStart + slotW/2, 425);
@@ -541,7 +548,7 @@
                 if (b.y > 410) {
                     b.landed = true; b.vy = 0; b.vx = 0; b.y = 410;
                     const slotIdx = Math.floor(b.x / slotW);
-                    const mults = [0, 3, 0.5, 0.5, 3, 0];
+                    const mults = [0, 3, 0.5, 0.5, 0.5, 3, 0];
                     showPlinkoResult(mults[slotIdx], b.bet * mults[slotIdx], idx);
                 }
             }
