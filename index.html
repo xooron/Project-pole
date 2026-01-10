@@ -122,34 +122,13 @@
         border-radius: 18px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 12px; 
     }
 
-    .ref-card { background: #242424; border-radius: 35px; padding: 25px; margin-bottom: 15px; }
-    .ref-title { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 20px; }
-    
-    .ref-actions { display: flex; gap: 10px; margin-bottom: 20px; }
-    .btn-copy { width: 55px; height: 55px; background: var(--blue); border-radius: 15px; border: none; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; }
-    .btn-invite-new { flex: 1; height: 55px; background: transparent; border: 2px solid var(--blue); border-radius: 15px; color: #fff; font-weight: 700; font-size: 16px; }
-
-    .ref-stat-label { color: var(--text-gray); font-size: 12px; margin-bottom: 8px; }
-    .ref-count-box { border: 2px solid var(--blue); border-radius: 15px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; width: fit-content; margin-bottom: 20px; font-size: 18px; font-weight: 800; }
-
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .stat-box { border: 2px solid var(--blue); border-radius: 15px; padding: 15px 10px; text-align: center; }
-    .stat-box .val { font-size: 16px; font-weight: 800; margin-top: 5px; }
-
-    .btn-claim-ton { width: 100%; height: 60px; background: #fff; color: #000; border-radius: 20px; border: none; font-weight: 800; font-size: 20px; cursor: pointer; }
-
-    .arena-info { text-align: center; margin-bottom: 20px; }
-    .arena-bank { font-size: 34px; font-weight: 900; }
-    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-    #arena-canvas { width: 100%; height: 100%; display: block; }
-    
-    .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
-    .b-btn { 
-        background: #0d120f; border: 2px solid #0084ff; padding: 14px 5px; 
-        border-radius: 100px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; 
-        text-transform: uppercase; transition: 0.1s;
+    #plinko-res-panel {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.9); border: 2px solid var(--plinko-blue);
+        padding: 20px; border-radius: 25px; text-align: center; display: none; z-index: 100;
+        min-width: 200px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .b-btn:active { transform: scale(0.95); background: #0084ff; }
+    @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
     .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #242424; border-radius: 40px; display: flex; align-items: center; padding: 0 20px; z-index: 500; }
     .nav-btn { flex: 1; text-align: center; color: #555; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 700; font-size: 11px; }
@@ -161,6 +140,8 @@
     .player-row { background: #242424; padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
     .p-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
     .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+
+    .b-btn:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 </style>
 </head>
 <body onclick="handleFirstInteraction()">
@@ -226,14 +207,18 @@
     <section id="plinko-page" class="page">
         <div class="plinko-container">
             <canvas id="plinko-canvas" width="400" height="440"></canvas>
+            <div id="plinko-res-panel">
+                <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
+                <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
+            </div>
         </div>
         <div class="bet-grid-plinko">
-            <button class="b-btn" onclick="playPlinko(0.5)">0.5 TON</button>
-            <button class="b-btn" onclick="playPlinko(1)">1 TON</button>
-            <button class="b-btn" onclick="playPlinko(3)">3 TON</button>
-            <button class="b-btn" onclick="playPlinko(5)">5 TON</button>
-            <button class="b-btn" onclick="playPlinko(10)">10 TON</button>
-            <button class="b-btn" onclick="playPlinko(30)">30 TON</button>
+            <button class="b-btn plinko-fire" onclick="playPlinko(0.5)">0.5</button>
+            <button class="b-btn plinko-fire" onclick="playPlinko(1)">1</button>
+            <button class="b-btn plinko-fire" onclick="playPlinko(3)">3</button>
+            <button class="b-btn plinko-fire" onclick="playPlinko(5)">5</button>
+            <button class="b-btn plinko-fire" onclick="playPlinko(10)">10</button>
+            <button class="b-btn plinko-fire" onclick="playPlinko(30)">30</button>
         </div>
     </section>
 
@@ -245,30 +230,6 @@
             <div id="ton-connect-btn"></div>
             <button class="btn-withdraw-new" onclick="openWithdraw()">Вывод средств</button>
             <h2 id="u-nick" style="margin-top: 15px; display: none;">Игрок</h2>
-        </div>
-        
-        <div class="ref-card">
-            <p class="ref-title">Приглашайте рефералов и получайте 10% от их игровой комиссии</p>
-            <div class="ref-actions">
-                <button class="btn-copy" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
-                <button class="btn-invite-new" onclick="invite()">Приглашить друзей</button>
-            </div>
-            <p class="ref-stat-label">Твои рефералы</p>
-            <div class="ref-count-box">
-                <i class="fa-solid fa-user-group" style="color: var(--blue);"></i>
-                <span id="ref-count">0</span>
-            </div>
-            <div class="stats-row">
-                <div class="stat-box">
-                    <p class="ref-stat-label">Доступно к зачислению</p>
-                    <div class="val"><span id="ref-pending">0.00</span> TON</div>
-                </div>
-                <div class="stat-box">
-                    <p class="ref-stat-label">Всего зачислено</p>
-                    <div class="val"><span id="ref-total">0.00</span> TON</div>
-                </div>
-            </div>
-            <button class="btn-claim-ton" onclick="claim()">Зачислить TON</button>
         </div>
     </section>
 </main>
@@ -320,7 +281,7 @@
         const ls = document.getElementById('loading-screen');
         ls.style.opacity = '0';
         setTimeout(() => ls.style.display = 'none', 800);
-    }, 3000);
+    }, 2000);
 
     let musicStarted = false;
     function handleFirstInteraction() {
@@ -374,30 +335,15 @@
     let arenaPlayers = [];
     let playerAvatars = {};
 
-    socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
+    socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url });
 
     socket.on('online_update', (count) => { document.getElementById('online-count').innerText = count; });
-
-    socket.on('history_update', (history) => {
-        const list = document.getElementById('history-content');
-        list.innerHTML = '';
-        [...history].reverse().forEach(h => {
-            const netBank = h.bank - ((h.bank - h.bet) * 0.20);
-            const item = document.createElement('div');
-            item.className = 'history-item';
-            item.innerHTML = `<img src="${h.avatar || 'https://pixsafe.online/i/mglZT'}" class="p-ava"><div class="h-info"><b>@${h.username}</b><br><span>Ставка: ${h.bet.toFixed(1)} TON</span><br><span style="opacity:0.6; font-size:11px">Шанс: ${h.chance.toFixed(1)}% | x${(netBank / h.bet).toFixed(1)}</span></div><div class="h-res">+${netBank.toFixed(2)}</div>`;
-            list.appendChild(item);
-        });
-    });
 
     socket.on('update_data', (u) => {
         const me = u[userData.id];
         if(me) {
             document.getElementById('user-bal').innerText = me.balance.toFixed(2);
             document.getElementById('u-ava').src = me.avatar || 'https://pixsafe.online/i/mglZT';
-            document.getElementById('ref-count').innerText = me.refCount;
-            document.getElementById('ref-pending').innerText = me.refPending.toFixed(2);
-            document.getElementById('ref-total').innerText = me.refTotal.toFixed(2);
         }
     });
 
@@ -444,9 +390,6 @@
     }
 
     function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
-    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Ссылка скопирована!"); }
-    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`); }
-    function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
     function updatePlayersList(players) {
         const list = document.getElementById('players-list');
@@ -466,6 +409,14 @@
     const pinSpacing = 30; 
     const startY = 85;
 
+    // Столбики-разделители
+    const slotCount = 6;
+    const slotW = 400 / slotCount;
+    const dividers = [];
+    for(let i=1; i < slotCount; i++) {
+        dividers.push(i * slotW);
+    }
+
     const rowsConfig = [3, 4, 5, 6, 7, 8, 9, 10, 11, 11];
     rowsConfig.forEach((count, i) => {
         const rowWidth = (count - 1) * pinSpacing;
@@ -475,24 +426,31 @@
         }
     });
 
+    let plinkoLock = false;
+
     function playPlinko(amt) {
+        if(plinkoLock) return;
         const curBal = parseFloat(document.getElementById('user-bal').innerText);
         if(curBal < amt) { tg.showAlert("Недостаточно баланса!"); return; }
-        document.getElementById('user-bal').innerText = (curBal - amt).toFixed(2);
-        socket.emit('plinko_bet', { id: userData.id, amount: amt });
         
-        // Получаем текущее фото пользователя из DOM
+        plinkoLock = true;
+        document.querySelectorAll('.plinko-fire').forEach(b => b.disabled = true);
+        
+        document.getElementById('user-bal').innerText = (curBal - amt).toFixed(2);
+        
         const userPhoto = document.getElementById('u-ava').src;
-        const ballImgObj = new Image();
-        ballImgObj.src = userPhoto;
+        const bImg = new Image();
+        bImg.src = userPhoto;
 
         plinkoBalls.push({ 
-            x: 200 + (Math.random() * 4 - 2), 
-            y: 40, 
-            vx: (Math.random() - 0.5) * 1.5, 
+            x: 200 + (Math.random() * 6 - 3), 
+            y: 35, 
+            vx: (Math.random() - 0.5) * 1.2, 
             vy: 0, 
-            radius: 10,
-            img: ballImgObj 
+            radius: 7.5, // Шарики поменьше
+            img: bImg,
+            bet: amt,
+            landed: false
         });
     }
 
@@ -500,106 +458,130 @@
         pctx.fillStyle = "#23272a";
         pctx.fillRect(0, 0, 400, 440);
 
+        // Ворота
         pctx.strokeStyle = "white";
-        pctx.lineWidth = 4;
-        pctx.beginPath();
-        pctx.moveTo(175, 50); 
-        pctx.lineTo(175, 15); 
-        pctx.lineTo(225, 15); 
-        pctx.lineTo(225, 50); 
-        pctx.stroke();
+        pctx.lineWidth = 3;
+        pctx.strokeRect(175, 10, 50, 40);
 
-        const slotCount = 6;
-        const slotW = 400 / slotCount;
-        const slotH = 60;
-        const slotY = 440 - slotH;
         const multipliers = ['0x', '3x', '0.5x', '0.5x', '3x', '0x'];
+        const slotY = 380;
 
+        // Отрисовка ячеек
         for (let i = 0; i < slotCount; i++) {
             const xStart = i * slotW;
+            let grad = pctx.createLinearGradient(0, slotY, 0, 440);
+            if(i === 0 || i === 5) { grad.addColorStop(0, "rgba(255,0,0,0)"); grad.addColorStop(1, "rgba(255,0,0,0.4)"); }
+            else { grad.addColorStop(0, "rgba(0,255,100,0)"); grad.addColorStop(1, "rgba(0,255,100,0.3)"); }
             
-            let gradient = pctx.createLinearGradient(0, slotY, 0, 440);
-            if(i === 0 || i === slotCount - 1) {
-                gradient.addColorStop(0, "rgba(255, 0, 0, 0)");
-                gradient.addColorStop(1, "rgba(255, 0, 0, 0.5)");
-            } else {
-                gradient.addColorStop(0, "rgba(0, 255, 100, 0)");
-                gradient.addColorStop(1, "rgba(0, 255, 100, 0.4)");
-            }
-            pctx.fillStyle = gradient;
-            pctx.fillRect(xStart, slotY, slotW, slotH);
-
-            pctx.strokeStyle = "rgba(255,255,255,0.3)";
-            pctx.lineWidth = 2;
-            pctx.beginPath();
-            pctx.moveTo(xStart, slotY);
-            pctx.lineTo(xStart, 440);
-            pctx.stroke();
-
+            pctx.fillStyle = grad;
+            pctx.fillRect(xStart, slotY, slotW, 60);
+            
             pctx.fillStyle = "white";
             pctx.font = "bold 14px Sans-serif";
             pctx.textAlign = "center";
-            pctx.fillText(multipliers[i], xStart + slotW/2, 440 - 20);
+            pctx.fillText(multipliers[i], xStart + slotW/2, 425);
         }
 
-        pegs.forEach(p => {
-            pctx.shadowBlur = 4;
-            pctx.shadowColor = "#3da9ff";
-            pctx.fillStyle = "#3da9ff";
+        // Отрисовка физических столбиков
+        pctx.strokeStyle = "rgba(255,255,255,0.6)";
+        pctx.lineWidth = 4;
+        dividers.forEach(x => {
             pctx.beginPath();
-            pctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+            pctx.moveTo(x, slotY);
+            pctx.lineTo(x, 440);
+            pctx.stroke();
+            // Верхушка столбика (шарик может удариться)
+            pctx.fillStyle = "white";
+            pctx.beginPath();
+            pctx.arc(x, slotY, 3, 0, Math.PI*2);
             pctx.fill();
-            pctx.shadowBlur = 0;
+        });
+
+        // Пины
+        pegs.forEach(p => {
+            pctx.fillStyle = "#3da9ff";
+            pctx.beginPath(); pctx.arc(p.x, p.y, 4, 0, Math.PI * 2); pctx.fill();
         });
 
         plinkoBalls.forEach((b, idx) => {
-            b.vy += 0.25; 
-            b.x += b.vx;
-            b.y += b.vy;
+            if(!b.landed) {
+                b.vy += 0.22; 
+                b.x += b.vx;
+                b.y += b.vy;
 
-            // Физика столкновений: делаем отскок от краев чуть сильнее внутрь, чтобы 3х и 0х падали реже
-            if (b.x < 20) { b.vx = Math.abs(b.vx); b.x = 20; }
-            if (b.x > 380) { b.vx = -Math.abs(b.vx); b.x = 380; }
+                // Стенки
+                if (b.x < b.radius) { b.vx = Math.abs(b.vx)*0.6; b.x = b.radius; }
+                if (b.x > 400 - b.radius) { b.vx = -Math.abs(b.vx)*0.6; b.x = 400 - b.radius; }
 
-            pegs.forEach(p => {
-                const dx = b.x - p.x;
-                const dy = b.y - p.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < b.radius + 4.5) {
-                    const angle = Math.atan2(dy, dx);
-                    const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.6;
-                    b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 1.8;
-                    b.vy = Math.sin(angle) * speed;
-                    b.y = p.y + Math.sin(angle) * (b.radius + 4.6);
+                // Столкновение с пинами
+                pegs.forEach(p => {
+                    const dx = b.x - p.x; const dy = b.y - p.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < b.radius + 4) {
+                        const angle = Math.atan2(dy, dx);
+                        const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.6;
+                        b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 2;
+                        b.vy = Math.sin(angle) * speed;
+                        b.y = p.y + Math.sin(angle) * (b.radius + 4.1);
+                    }
+                });
+
+                // Столкновение со столбиками-разделителями
+                dividers.forEach(x => {
+                    if(b.y > slotY - 10 && Math.abs(b.x - x) < b.radius + 2) {
+                        b.vx *= -0.5;
+                        b.x = (b.x < x) ? x - (b.radius + 2.1) : x + (b.radius + 2.1);
+                    }
+                });
+
+                // Приземление в ячейку
+                if (b.y > 410) {
+                    b.landed = true;
+                    b.vy = 0; b.vx = 0; b.y = 410;
+                    
+                    const slotIdx = Math.floor(b.x / slotW);
+                    const mults = [0, 3, 0.5, 0.5, 3, 0];
+                    const resX = mults[slotIdx];
+                    const winAmt = b.bet * resX;
+                    
+                    showPlinkoResult(resX, winAmt, idx);
                 }
-            });
-
-            // Отрисовка шарика с аватаркой
-            pctx.save();
-            pctx.beginPath();
-            pctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-            pctx.closePath();
-            pctx.clip();
-            try {
-                pctx.drawImage(b.img, b.x - b.radius, b.y - b.radius, b.radius * 2, b.radius * 2);
-            } catch(e) {
-                pctx.fillStyle = "white";
-                pctx.fill();
             }
-            pctx.restore();
-            
-            // Ободок шарика
-            pctx.strokeStyle = "white";
-            pctx.lineWidth = 2;
-            pctx.beginPath();
-            pctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-            pctx.stroke();
 
-            if (b.y > 450) plinkoBalls.splice(idx, 1);
+            // Отрисовка шарика
+            pctx.save();
+            pctx.beginPath(); pctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); pctx.clip();
+            try { pctx.drawImage(b.img, b.x - b.radius, b.y - b.radius, b.radius*2, b.radius*2); }
+            catch(e) { pctx.fillStyle = "white"; pctx.fill(); }
+            pctx.restore();
+            pctx.strokeStyle = "white"; pctx.lineWidth = 2;
+            pctx.beginPath(); pctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); pctx.stroke();
         });
 
         requestAnimationFrame(updatePlinko);
     }
+
+    function showPlinkoResult(x, sum, ballIdx) {
+        const panel = document.getElementById('plinko-res-panel');
+        const tx = document.getElementById('plinko-res-x');
+        const ts = document.getElementById('plinko-res-sum');
+        
+        tx.innerText = `x${x}`;
+        tx.style.color = (x >= 1) ? "var(--neon)" : "red";
+        ts.innerText = (x >= 1) ? `+${sum.toFixed(2)} TON` : `${sum.toFixed(2)} TON`;
+        
+        panel.style.display = 'block';
+        
+        if(x > 0) socket.emit('plinko_win', { id: userData.id, amount: sum });
+
+        setTimeout(() => {
+            panel.style.display = 'none';
+            plinkoBalls.splice(ballIdx, 1); // Шарик исчезает
+            plinkoLock = false; // Можно снова ставить
+            document.querySelectorAll('.plinko-fire').forEach(b => b.disabled = false);
+        }, 2000);
+    }
+
     updatePlinko();
 
     // --- ARENA RENDER ---
@@ -644,8 +626,6 @@
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath(); ctx.arc(0, 0, 14.5, 0, Math.PI*2); ctx.fill();
                 ctx.globalCompositeOperation = 'source-over';
-                ctx.strokeStyle = 'white'; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.moveTo(-8,0); ctx.lineTo(8,0); ctx.moveTo(0,-8); ctx.lineTo(0,8); ctx.stroke();
                 ctx.restore();
             }
         }
