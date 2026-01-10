@@ -463,11 +463,9 @@
     const pctx = plinkoCanvas.getContext('2d');
     let plinkoBalls = [];
     const pegs = [];
-    const pinSpacing = 30; // Расстояние между пинами
+    const pinSpacing = 30; 
     const startY = 85;
 
-    // Инициализация пинов в форме треугольника как на фото
-    // Ряды: 3, 4, 5, 6, 7, 8, 9, 10, 11, 11
     const rowsConfig = [3, 4, 5, 6, 7, 8, 9, 10, 11, 11];
     rowsConfig.forEach((count, i) => {
         const rowWidth = (count - 1) * pinSpacing;
@@ -482,65 +480,68 @@
         if(curBal < amt) { tg.showAlert("Недостаточно баланса!"); return; }
         document.getElementById('user-bal').innerText = (curBal - amt).toFixed(2);
         socket.emit('plinko_bet', { id: userData.id, amount: amt });
-        // Шарик вылетает из центра ворот
-        plinkoBalls.push({ x: 200 + (Math.random() * 2 - 1), y: 40, vx: 0, vy: 0, radius: 6 });
+        
+        // Получаем текущее фото пользователя из DOM
+        const userPhoto = document.getElementById('u-ava').src;
+        const ballImgObj = new Image();
+        ballImgObj.src = userPhoto;
+
+        plinkoBalls.push({ 
+            x: 200 + (Math.random() * 4 - 2), 
+            y: 40, 
+            vx: (Math.random() - 0.5) * 1.5, 
+            vy: 0, 
+            radius: 10,
+            img: ballImgObj 
+        });
     }
 
     function updatePlinko() {
         pctx.fillStyle = "#23272a";
         pctx.fillRect(0, 0, 400, 440);
 
-        // Рисуем ворота сверху (как на фото)
         pctx.strokeStyle = "white";
         pctx.lineWidth = 4;
         pctx.beginPath();
-        pctx.moveTo(175, 50); // Левый низ ворот
-        pctx.lineTo(175, 15); // Вверх
-        pctx.lineTo(225, 15); // Вправо
-        pctx.lineTo(225, 50); // Правый низ ворот
+        pctx.moveTo(175, 50); 
+        pctx.lineTo(175, 15); 
+        pctx.lineTo(225, 15); 
+        pctx.lineTo(225, 50); 
         pctx.stroke();
 
-        // Рисуем слоты внизу с градиентом (зеленый и красный)
         const slotCount = 6;
         const slotW = 400 / slotCount;
         const slotH = 60;
         const slotY = 440 - slotH;
+        const multipliers = ['0x', '3x', '0.5x', '0.5x', '3x', '0x'];
 
         for (let i = 0; i < slotCount; i++) {
             const xStart = i * slotW;
             
-            // Фон слотов (Зеленый в центре, красный по краям)
             let gradient = pctx.createLinearGradient(0, slotY, 0, 440);
             if(i === 0 || i === slotCount - 1) {
-                // Красный градиент по бокам
                 gradient.addColorStop(0, "rgba(255, 0, 0, 0)");
-                gradient.addColorStop(1, "rgba(255, 0, 0, 0.4)");
+                gradient.addColorStop(1, "rgba(255, 0, 0, 0.5)");
             } else {
-                // Зеленый градиент в центре
                 gradient.addColorStop(0, "rgba(0, 255, 100, 0)");
                 gradient.addColorStop(1, "rgba(0, 255, 100, 0.4)");
             }
             pctx.fillStyle = gradient;
             pctx.fillRect(xStart, slotY, slotW, slotH);
 
-            // Белые вертикальные линии-разделители
-            pctx.strokeStyle = "white";
+            pctx.strokeStyle = "rgba(255,255,255,0.3)";
             pctx.lineWidth = 2;
             pctx.beginPath();
-            pctx.moveTo(xStart + 1, slotY);
-            pctx.lineTo(xStart + 1, 440);
+            pctx.moveTo(xStart, slotY);
+            pctx.lineTo(xStart, 440);
             pctx.stroke();
-            
-            // Закрывающая правая линия
-            if(i === slotCount - 1) {
-                pctx.beginPath();
-                pctx.moveTo(400 - 1, slotY);
-                pctx.lineTo(400 - 1, 440);
-                pctx.stroke();
-            }
+
+            pctx.fillStyle = "white";
+            pctx.font = "bold 14px Sans-serif";
+            pctx.textAlign = "center";
+            pctx.fillText(multipliers[i], xStart + slotW/2, 440 - 20);
         }
 
-        // Рисуем синие пины (как на фото)
         pegs.forEach(p => {
             pctx.shadowBlur = 4;
             pctx.shadowColor = "#3da9ff";
@@ -551,31 +552,48 @@
             pctx.shadowBlur = 0;
         });
 
-        // Логика шариков
         plinkoBalls.forEach((b, idx) => {
-            b.vy += 0.22; // Гравитация
+            b.vy += 0.25; 
             b.x += b.vx;
             b.y += b.vy;
 
-            // Столкновение с пинами
+            // Физика столкновений: делаем отскок от краев чуть сильнее внутрь, чтобы 3х и 0х падали реже
+            if (b.x < 20) { b.vx = Math.abs(b.vx); b.x = 20; }
+            if (b.x > 380) { b.vx = -Math.abs(b.vx); b.x = 380; }
+
             pegs.forEach(p => {
                 const dx = b.x - p.x;
                 const dy = b.y - p.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < b.radius + 4.5) {
                     const angle = Math.atan2(dy, dx);
-                    const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.55;
-                    b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 1.5;
+                    const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.6;
+                    b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 1.8;
                     b.vy = Math.sin(angle) * speed;
                     b.y = p.y + Math.sin(angle) * (b.radius + 4.6);
                 }
             });
 
-            // Отрисовка шарика
-            pctx.fillStyle = "white";
+            // Отрисовка шарика с аватаркой
+            pctx.save();
             pctx.beginPath();
             pctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-            pctx.fill();
+            pctx.closePath();
+            pctx.clip();
+            try {
+                pctx.drawImage(b.img, b.x - b.radius, b.y - b.radius, b.radius * 2, b.radius * 2);
+            } catch(e) {
+                pctx.fillStyle = "white";
+                pctx.fill();
+            }
+            pctx.restore();
+            
+            // Ободок шарика
+            pctx.strokeStyle = "white";
+            pctx.lineWidth = 2;
+            pctx.beginPath();
+            pctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            pctx.stroke();
 
             if (b.y > 450) plinkoBalls.splice(idx, 1);
         });
