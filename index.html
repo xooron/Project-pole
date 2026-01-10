@@ -43,13 +43,17 @@
         .history-btn:active { transform: scale(0.9); opacity: 1; }
         
         .balance-pill { background: #242424; padding: 8px 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
+        
+        /* ОБНОВЛЕННАЯ КНОПКА ПЛЮСИКА */
         .add-bal-btn { 
             background: #fff; color: #000; border: none; border-radius: 50%; 
             width: 32px; height: 32px; cursor: pointer; 
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 22px; padding: 0; 
-            line-height: 1; margin-left: 10px;
+            font-weight: 900; font-size: 24px; padding: 0; 
+            line-height: 0; margin-left: 10px;
+            padding-bottom: 4px; /* Приподнимаем плюсик */
             box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            transition: 0.1s;
         }
         .add-bal-btn:active { transform: scale(0.9); }
 
@@ -275,11 +279,11 @@
     const socket = io();
     tg.ready(); tg.expand();
 
-    // ЗАГРУЗКА МЯЧА (как на фото)
+    // ЗАГРУЗКА МЯЧА
     const ballImg = new Image();
     ballImg.crossOrigin = "anonymous";
-    // Используем качественное изображение классического футбольного мяча с тенями
-    ballImg.src = 'https://i.ibb.co/9H8vY3X/ball.png'; 
+    // Используем чистый футбольный мяч для основы
+    ballImg.src = 'https://cdn-icons-png.flaticon.com/512/33/33736.png'; 
 
     setTimeout(() => {
         const ls = document.getElementById('loading-screen');
@@ -329,8 +333,6 @@
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     
     let ball = { x: 150, y: 150, vx: 0, vy: 0, state: 'hidden', friction: 0.992, radius: 10 };
-    let arrow = { angle: 0, visible: false };
-    
     let arenaPlayers = [];
     let playerAvatars = {};
 
@@ -387,7 +389,6 @@
         ball.x = 150; ball.y = 150;
         ball.vx = data.vx; ball.vy = data.vy;
         ball.state = 'moving';
-        arrow.visible = false;
     });
 
     socket.on('announce_winner', (data) => {
@@ -443,79 +444,91 @@
             let startAngle = 0;
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * Math.PI * 2;
-                
                 ctx.beginPath();
                 ctx.moveTo(150, 150);
                 ctx.arc(150, 150, 250, startAngle, startAngle + sliceAngle);
                 ctx.fillStyle = p.color;
                 ctx.fill();
-                
                 if (arenaPlayers.length > 1) {
                     ctx.strokeStyle = 'black';
                     ctx.lineWidth = 2.5; 
                     ctx.stroke();
                 }
-
                 const midAngle = startAngle + sliceAngle / 2;
                 const dist = 70;
                 const ax = 150 + Math.cos(midAngle) * dist;
                 const ay = 150 + Math.sin(midAngle) * dist;
-
                 if (playerAvatars[p.id]) {
                     ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(ax, ay, 25, 0, Math.PI * 2);
-                    ctx.clip();
+                    ctx.beginPath(); ctx.arc(ax, ay, 25, 0, Math.PI * 2); ctx.clip();
                     ctx.drawImage(playerAvatars[p.id], ax - 25, ay - 25, 50, 50);
                     ctx.restore();
-                    ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
                 }
                 startAngle += sliceAngle;
             });
         } else {
             ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, 300, 300);
-
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.lineWidth = 2;
-
-            ctx.beginPath();
-            ctx.moveTo(0, 150);
-            ctx.lineTo(300, 150);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(150, 150, 45, 0, Math.PI * 2);
-            ctx.stroke();
-
+            ctx.beginPath(); ctx.moveTo(0, 150); ctx.lineTo(300, 150); ctx.stroke();
+            ctx.beginPath(); ctx.arc(150, 150, 45, 0, Math.PI * 2); ctx.stroke();
             ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI / 2); ctx.stroke();
             ctx.beginPath(); ctx.arc(300, 0, 35, Math.PI / 2, Math.PI); ctx.stroke();
             ctx.beginPath(); ctx.arc(0, 300, 35, 1.5 * Math.PI, 0); ctx.stroke();
             ctx.beginPath(); ctx.arc(300, 300, 35, Math.PI, 1.5 * Math.PI); ctx.stroke();
         }
 
+        // ОТРИСОВКА МЯЧА КАК НА ФОТО
         if (ball.state !== 'hidden') {
             if (ball.state === 'moving') {
                 ball.x += ball.vx; ball.y += ball.vy;
                 ball.vx *= ball.friction; ball.vy *= ball.friction;
-                
                 if (ball.x < 15 || ball.x > 285) ball.vx *= -1;
                 if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
             }
 
-            // ОТРИСОВКА КАРТИНКИ МЯЧА (как на фото)
-            const ballSize = 34; // Немного увеличим для красоты
+            const ballSize = 34;
             ctx.save();
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = 'rgba(0,0,0,0.6)';
+            ctx.translate(ball.x, ball.y);
+            
+            // 1. Рисуем белый круг-основу
+            ctx.beginPath();
+            ctx.arc(0, 0, ballSize/2, 0, Math.PI*2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+
+            // 2. Рисуем текстуру мяча (если загружена) или имитацию
             if(ballImg.complete) {
-                ctx.drawImage(ballImg, ball.x - ballSize/2, ball.y - ballSize/2, ballSize, ballSize);
-            } else {
-                ctx.fillStyle = "#fff";
-                ctx.beginPath(); ctx.arc(ball.x, ball.y, 12, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 0.8;
+                ctx.drawImage(ballImg, -ballSize/2, -ballSize/2, ballSize, ballSize);
+                ctx.globalAlpha = 1.0;
             }
+
+            // 3. Рисуем черный круг в центре
+            ctx.beginPath();
+            ctx.arc(0, 0, ballSize * 0.3, 0, Math.PI*2);
+            ctx.fillStyle = 'black';
+            ctx.fill();
+
+            // 4. Рисуем белый плюсик в центре мяча
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            // Горизонтальная палка
+            ctx.moveTo(-ballSize * 0.15, 0);
+            ctx.lineTo(ballSize * 0.15, 0);
+            // Вертикальная палка
+            ctx.moveTo(0, -ballSize * 0.15);
+            ctx.lineTo(0, ballSize * 0.15);
+            ctx.stroke();
+
+            // Обводка самого мяча для четкости
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(0,0, ballSize/2, 0, Math.PI*2); ctx.stroke();
+
             ctx.restore();
         }
         
