@@ -279,7 +279,8 @@
 
     const ballImg = new Image();
     ballImg.crossOrigin = "anonymous";
-    ballImg.src = 'https://i.ibb.co/9H8vY3X/ball.png'; 
+    // Обновленная ссылка на мяч как на фото
+    ballImg.src = 'https://i.ibb.co/3pS7fG7/ball-new.png'; 
 
     setTimeout(() => {
         const ls = document.getElementById('loading-screen');
@@ -354,7 +355,6 @@
         const list = document.getElementById('history-content');
         list.innerHTML = '';
         [...history].reverse().forEach(h => {
-            // ЛОГИКА КОМИССИИ В ИСТОРИИ: Берем 20% только с прибыли (банк минус ставка победителя)
             const profit = h.bank - h.bet;
             const netBank = h.bank - (profit * 0.20);
             
@@ -405,8 +405,6 @@
 
     socket.on('announce_winner', (data) => {
         const panel = document.getElementById('winner-panel');
-        
-        // ЛОГИКА КОМИССИИ: Вычитаем 20% из прибыли, но ставку победителя не трогаем
         const totalProfit = data.bank - data.winnerBet;
         const netWinAmount = data.bank - (totalProfit * 0.20);
         
@@ -520,26 +518,33 @@
             if (ball.x < 15 || ball.x > 285) ball.vx *= -1;
             if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
 
-            const ballSize = 36;
+            const ballSize = 38;
             ctx.save();
             ctx.translate(ball.x, ball.y);
             
             if(ballImg.complete) {
+                // Рисуем мяч
                 ctx.drawImage(ballImg, -ballSize/2, -ballSize/2, ballSize, ballSize);
+                
+                // ДЕЛАЕМ ЦЕНТР ПРОЗРАЧНЫМ (как на фото)
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(0, 0, ballSize * 0.25, 0, Math.PI * 2); 
+                // Радиус 0.38 идеально совпадает с черным кругом на фото
+                ctx.arc(0, 0, ballSize * 0.38, 0, Math.PI * 2); 
                 ctx.fill();
+                
+                // Возвращаем обычный режим
                 ctx.globalCompositeOperation = 'source-over';
             }
 
+            // Рисуем белый плюсик поверх прозрачного центра
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
             ctx.shadowBlur = 4;
             ctx.shadowColor = 'black';
             
             ctx.beginPath();
-            const plusSize = ballSize * 0.20;
+            const plusSize = ballSize * 0.22;
             ctx.moveTo(-plusSize, 0);
             ctx.lineTo(plusSize, 0);
             ctx.moveTo(0, -plusSize);
