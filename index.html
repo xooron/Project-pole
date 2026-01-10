@@ -279,6 +279,7 @@
 
     const ballImg = new Image();
     ballImg.crossOrigin = "anonymous";
+    // Используем классический футбольный мяч для основы
     ballImg.src = 'https://i.ibb.co/9H8vY3X/ball.png'; 
 
     setTimeout(() => {
@@ -316,12 +317,10 @@
     function openWithdraw() { document.getElementById('withdraw-panel').style.display = 'flex'; }
     function closeWithdraw() { document.getElementById('withdraw-panel').style.display = 'none'; }
     
-    // ОБНОВЛЕННАЯ ФУНКЦИЯ ВЫВОДА
     function processWithdraw() {
         const amt = parseFloat(document.getElementById('wit-amt').value);
         const addr = document.getElementById('wit-addr').value;
         if (amt >= 1 && addr.length > 10) {
-            // Отправляем запрос на сервер
             socket.emit('withdraw_ton', { 
                 id: userData.id, 
                 username: userData.username || userData.first_name, 
@@ -329,7 +328,6 @@
                 address: addr 
             });
             closeWithdraw();
-            // Выводим панель "Успешно"
             tg.showAlert("Успешно отправлена заявка на вывод!");
         } else {
             tg.showAlert("Минимум 1 TON и корректный адрес!");
@@ -343,8 +341,7 @@
 
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
     
-    // МЯЧ ТЕПЕРЬ ВСЕГДА ВИДЕН (изменен state по умолчанию)
-    let ball = { x: 150, y: 150, vx: 0, vy: 0, state: 'idle', friction: 0.992, radius: 10 };
+    let ball = { x: 150, y: 150, vx: 0, vy: 0, state: 'hidden', friction: 0.992, radius: 10 };
     let arenaPlayers = [];
     let playerAvatars = {};
 
@@ -413,7 +410,7 @@
         panel.style.display = 'block';
         setTimeout(() => { 
             panel.style.display = 'none';
-            ball.state = 'idle';
+            ball.state = 'hidden';
             ball.x = 150; ball.y = 150; ball.vx = 0; ball.vy = 0;
         }, 4000);
     });
@@ -462,11 +459,14 @@
                 ctx.arc(150, 150, 250, startAngle, startAngle + sliceAngle);
                 ctx.fillStyle = p.color;
                 ctx.fill();
+                
+                // Одинаковая черная обводка территорий
                 if (arenaPlayers.length > 1) {
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 2.5; 
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 2; 
                     ctx.stroke();
                 }
+
                 const midAngle = startAngle + sliceAngle / 2;
                 const dist = 70;
                 const ax = 150 + Math.cos(midAngle) * dist;
@@ -493,39 +493,38 @@
             ctx.beginPath(); ctx.arc(300, 300, 35, Math.PI, 1.5 * Math.PI); ctx.stroke();
         }
 
-        if (ball.state !== 'hidden') {
-            if (ball.state === 'moving') {
-                ball.x += ball.vx; ball.y += ball.vy;
-                ball.vx *= ball.friction; ball.vy *= ball.friction;
-                if (ball.x < 15 || ball.x > 285) ball.vx *= -1;
-                if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
-            }
+        if (ball.state === 'moving') {
+            ball.x += ball.vx; ball.y += ball.vy;
+            ball.vx *= ball.friction; ball.vy *= ball.friction;
+            if (ball.x < 15 || ball.x > 285) ball.vx *= -1;
+            if (ball.y < 15 || ball.y > 285) ball.vy *= -1;
 
             const ballSize = 36;
             ctx.save();
             ctx.translate(ball.x, ball.y);
             
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowOffsetY = 2;
-
+            // 1. Рисуем картинку мяча
             if(ballImg.complete) {
                 ctx.drawImage(ballImg, -ballSize/2, -ballSize/2, ballSize, ballSize);
-            } else {
-                ctx.fillStyle = "#fff";
-                ctx.beginPath(); ctx.arc(0, 0, ballSize/2, 0, Math.PI*2); ctx.fill();
+                
+                // 2. Делаем центр прозрачным через "вырезание"
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(0, 0, ballSize * 0.25, 0, Math.PI * 2); 
+                ctx.fill();
+                
+                // 3. Возвращаем обычный режим рисования для плюсика
+                ctx.globalCompositeOperation = 'source-over';
             }
-            
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
 
+            // 4. Рисуем белый плюсик в центре
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
             ctx.shadowBlur = 4;
             ctx.shadowColor = 'black';
             
             ctx.beginPath();
-            const plusSize = ballSize * 0.22;
+            const plusSize = ballSize * 0.20;
             ctx.moveTo(-plusSize, 0);
             ctx.lineTo(plusSize, 0);
             ctx.moveTo(0, -plusSize);
