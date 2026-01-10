@@ -279,7 +279,6 @@
 
     const ballImg = new Image();
     ballImg.crossOrigin = "anonymous";
-    // Используем классический футбольный мяч для основы
     ballImg.src = 'https://i.ibb.co/9H8vY3X/ball.png'; 
 
     setTimeout(() => {
@@ -452,22 +451,38 @@
 
         if (arenaPlayers.length > 0) {
             let startAngle = 0;
+            // Сначала закрашиваем все сектора
             arenaPlayers.forEach(p => {
                 const sliceAngle = (p.chance / 100) * Math.PI * 2;
                 ctx.beginPath();
                 ctx.moveTo(150, 150);
-                ctx.arc(150, 150, 250, startAngle, startAngle + sliceAngle);
+                ctx.arc(150, 150, 300, startAngle, startAngle + sliceAngle);
                 ctx.fillStyle = p.color;
                 ctx.fill();
-                
-                // Одинаковая черная обводка территорий
-                if (arenaPlayers.length > 1) {
-                    ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = 2; 
-                    ctx.stroke();
-                }
+                startAngle += sliceAngle;
+            });
 
-                const midAngle = startAngle + sliceAngle / 2;
+            // Затем рисуем обводку поверх всех секторов (одинаковую)
+            if (arenaPlayers.length > 1) {
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                let borderAngle = 0;
+                arenaPlayers.forEach(p => {
+                    const sliceAngle = (p.chance / 100) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.moveTo(150, 150);
+                    ctx.lineTo(150 + Math.cos(borderAngle) * 300, 150 + Math.sin(borderAngle) * 300);
+                    ctx.stroke();
+                    borderAngle += sliceAngle;
+                });
+            }
+
+            // Отрисовка аватарок
+            let avatarAngle = 0;
+            arenaPlayers.forEach(p => {
+                const sliceAngle = (p.chance / 100) * Math.PI * 2;
+                const midAngle = avatarAngle + sliceAngle / 2;
                 const dist = 70;
                 const ax = 150 + Math.cos(midAngle) * dist;
                 const ay = 150 + Math.sin(midAngle) * dist;
@@ -478,7 +493,7 @@
                     ctx.restore();
                     ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
                 }
-                startAngle += sliceAngle;
+                avatarAngle += sliceAngle;
             });
         } else {
             ctx.fillStyle = '#111';
@@ -503,21 +518,21 @@
             ctx.save();
             ctx.translate(ball.x, ball.y);
             
-            // 1. Рисуем картинку мяча
             if(ballImg.complete) {
+                // Рисуем картинку мяча
                 ctx.drawImage(ballImg, -ballSize/2, -ballSize/2, ballSize, ballSize);
                 
-                // 2. Делаем центр прозрачным через "вырезание"
+                // ВЫРЕЗАЕМ ПРОЗРАЧНЫЙ ЦЕНТР
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
                 ctx.arc(0, 0, ballSize * 0.25, 0, Math.PI * 2); 
                 ctx.fill();
                 
-                // 3. Возвращаем обычный режим рисования для плюсика
+                // ВОЗВРАЩАЕМ РЕЖИМ ДЛЯ ПЛЮСИКА
                 ctx.globalCompositeOperation = 'source-over';
             }
 
-            // 4. Рисуем белый плюсик в центре
+            // РИСУЕМ БЕЛЫЙ ПЛЮСИК
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
             ctx.shadowBlur = 4;
