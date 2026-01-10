@@ -2,10 +2,16 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const { Telegraf, Markup } = require('telegraf'); // Подключаем библиотеку для бота
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
+// --- НАСТРОЙКИ ТЕЛЕГРАМ БОТА ---
+const bot = new Telegraf('8337425077:AAHxIJaXkXLkR3M0qD9E5_QBhwKhhcqpzCU'); // Вставь сюда токен своего бота
+const ADMIN_CHAT_ID = '774146644'; // Вставь сюда свой ID (цифрами), чтобы бот писал тебе
+// -------------------------------
 
 app.use(cors());
 app.use(express.static(__dirname));
@@ -57,12 +63,29 @@ io.on('connection', (socket) => {
         if (u && data.amount >= 0.1) { u.balance += parseFloat(data.amount); io.emit('update_data', db.users); }
     });
 
+    // МОДИФИЦИРОВАННЫЙ ВЫВОД С УВЕДОМЛЕНИЕМ В ТГ
     socket.on('withdraw_ton', (data) => {
         const u = db.users[data.id];
         const amt = parseFloat(data.amount);
+        const address = data.address;
+
         if (u && amt >= 1 && u.balance >= amt) {
-            u.balance -= amt;
+            u.balance -= amt; // Списываем сразу, чтобы не было абуза
             io.emit('update_data', db.users);
+
+            // Отправляем уведомление админу в телеграм
+            bot.telegram.sendMessage(ADMIN_CHAT_ID, 
+                `🔔 *Заявка на вывод!*\n\n👤 От кого: @${u.username || u.name}\n💰 Сумма: ${amt} TON`, 
+                {
+                    parse_mode: 'Markdown',
+                    ...Markup.inlineKeyboard([
+                        [
+                            Markup.button.callback('✅ Принять', `w_acc_${data.id}_${amt}_${address}`),
+                            Markup.button.callback('❌ Отклонить', `w_rej_${data.id}_${amt}`)
+                        ]
+                    ])
+                }
+            ).catch(err => console.error('Ошибка бота:', err));
         }
     });
 
@@ -74,6 +97,32 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         io.emit('online_update', io.engine.clientsCount);
     });
+});
+
+// ОБРАБОТКА КНОПОК БОТА (ПРИНЯТЬ / ОТКЛОНИТЬ)
+bot.action(/w_acc_(.+)_(.+)_(.+)/, async (ctx) => {
+    const userId = ctx.match[1];
+    const amount = ctx.match[2];
+    const address = ctx.match[3];
+    const user = db.users[userId];
+
+    await ctx.editMessageText(
+        `✅ *Вывод одобрен*\n\n👤 Юзернейм: @${user ? user.username : 'ID ' + userId}\n👛 Адрес: \`${address}\`\n💰 Сумма: ${amount} TON`,
+        { parse_mode: 'Markdown' }
+    );
+});
+
+bot.action(/w_rej_(.+)_(.+)/, async (ctx) => {
+    const userId = ctx.match[1];
+    const amount = parseFloat(ctx.match[2]);
+
+    // Возвращаем баланс пользователю
+    if (db.users[userId]) {
+        db.users[userId].balance += amount;
+        io.emit('update_data', db.users);
+    }
+
+    await ctx.editMessageText(`❌ *Вывод был отменен*\nДеньги возвращены пользователю на баланс.`);
 });
 
 function updateChances() { 
@@ -139,5 +188,8 @@ function resetGame() {
     io.emit('update_arena', { players, totalBank }); 
     io.emit('game_status', { status: 'waiting' }); 
 }
+
+// ЗАПУСК БОТА
+bot.launch().then(() => console.log('Telegram Bot started'));
 
 server.listen(3000, () => console.log('Server running on port 3000'));
