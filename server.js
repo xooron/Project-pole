@@ -2,19 +2,31 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const { Telegraf, Markup } = require('telegraf'); // Подключаем библиотеку для бота
+const { Telegraf, Markup } = require('telegraf');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// --- НАСТРОЙКИ ТЕЛЕГРАМ БОТА ---
-const bot = new Telegraf('8337425077:AAHxIJaXkXLkR3M0qD9E5_QBhwKhhcqpzCU'); // Вставь сюда токен своего бота
-const ADMIN_CHAT_ID = '774146644'; // Вставь сюда свой ID (цифрами), чтобы бот писал тебе
-// -------------------------------
+// --- НАСТРОЙКИ ---
+// Используем порт от Render или 3000 по умолчанию
+const PORT = process.env.PORT || 3000;
+
+const bot = new Telegraf('8337425077:AAHxIJaXkXLkR3M0qD9E5_QBhwKhhcqpzCU');
+const ADMIN_CHAT_ID = '774146644';
 
 app.use(cors());
 app.use(express.static(__dirname));
+
+// Эндпоинт для Cron-job.org и Render (чтобы не засыпал)
+app.get('/', (req, res) => {
+    res.send('Бот и Сервер работают 24/7');
+});
+
+// Дополнительный путь для проверки (можно указать в cron-job)
+app.get('/healthcheck', (req, res) => {
+    res.status(200).send('OK');
+});
 
 let db = { users: {} };
 let players = [];
@@ -63,17 +75,15 @@ io.on('connection', (socket) => {
         if (u && data.amount >= 0.1) { u.balance += parseFloat(data.amount); io.emit('update_data', db.users); }
     });
 
-    // МОДИФИЦИРОВАННЫЙ ВЫВОД С УВЕДОМЛЕНИЕМ В ТГ
     socket.on('withdraw_ton', (data) => {
         const u = db.users[data.id];
         const amt = parseFloat(data.amount);
         const address = data.address;
 
         if (u && amt >= 1 && u.balance >= amt) {
-            u.balance -= amt; // Списываем сразу, чтобы не было абуза
+            u.balance -= amt;
             io.emit('update_data', db.users);
 
-            // Отправляем уведомление админу в телеграм
             bot.telegram.sendMessage(ADMIN_CHAT_ID, 
                 `🔔 *Заявка на вывод!*\n\n👤 От кого: @${u.username || u.name}\n💰 Сумма: ${amt} TON`, 
                 {
@@ -99,7 +109,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// ОБРАБОТКА КНОПОК БОТА (ПРИНЯТЬ / ОТКЛОНИТЬ)
 bot.action(/w_acc_(.+)_(.+)_(.+)/, async (ctx) => {
     const userId = ctx.match[1];
     const amount = ctx.match[2];
@@ -116,7 +125,6 @@ bot.action(/w_rej_(.+)_(.+)/, async (ctx) => {
     const userId = ctx.match[1];
     const amount = parseFloat(ctx.match[2]);
 
-    // Возвращаем баланс пользователю
     if (db.users[userId]) {
         db.users[userId].balance += amount;
         io.emit('update_data', db.users);
@@ -190,6 +198,15 @@ function resetGame() {
 }
 
 // ЗАПУСК БОТА
-bot.launch().then(() => console.log('Telegram Bot started'));
+bot.launch()
+  .then(() => console.log('Telegram Bot started'))
+  .catch((err) => console.error('Bot launch error:', err));
 
-server.listen(3000, () => console.log('Server running on port 3000'));
+// ЗАПУСК СЕРВЕРА НА НУЖНОМ ПОРТУ
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+// Обработка мягкого завершения
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
