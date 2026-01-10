@@ -12,8 +12,8 @@ const io = new Server(server);
 // Используем порт от Render или 3000 по умолчанию
 const PORT = process.env.PORT || 3000;
 
-const bot = new Telegraf('8337425077:AAHxIJaXkXLkR3M0qD9E5_QBhwKhhcqpzCU');
-const ADMIN_CHAT_ID = '774146644';
+const bot = new Telegraf('8464295922:AAHm4zu0SUOnGQsdtZPKt57kNgKdaBjKCd8');
+const ADMIN_CHAT_ID = '7603470949';
 
 app.use(cors());
 app.use(express.static(__dirname));
@@ -210,3 +210,4 @@ server.listen(PORT, () => {
 // Обработка мягкого завершения
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
