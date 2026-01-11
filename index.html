@@ -79,12 +79,12 @@
     .page.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Plinko Styles - ОБНОВЛЕННЫЙ ФОН */
+    /* Plinko Styles - ИСПРАВЛЕННЫЙ ФОН */
     .plinko-container {
         width: 100%; max-width: 380px; aspect-ratio: 1/1.1; 
         margin: 10px auto; border-radius: 40px; position: relative; overflow: hidden;
         border: 2px solid rgba(255,255,255,0.1);
-        background: #000;
+        background: none; /* Убираем черный фон */
     }
     .plinko-container::before {
         content: "";
@@ -93,9 +93,9 @@
         background-image: url('https://pixsafe.online/i/jF9S4');
         background-size: cover;
         background-position: center;
-        filter: blur(5px) brightness(0.8); /* Блюр и легкое затемнение */
-        z-index: 0;
-        transform: scale(1.1); /* Убираем пустые края от блюра */
+        filter: blur(4px) brightness(0.9); /* Блюр как просили */
+        z-index: -1;
+        transform: scale(1.1); /* Убираем белые края блюра */
     }
 
     #plinko-canvas { width: 100%; height: 100%; display: block; background: transparent; position: relative; z-index: 1; }
@@ -473,7 +473,6 @@
     const pinSpacing = 30; 
     const startY = 85;
     
-    // --- ИЗМЕНЕНИЯ: 7 ячеек ---
     const slotCount = 7; 
     const slotW = 400 / slotCount;
     const dividers = [];
@@ -513,7 +512,6 @@
         pctx.strokeStyle = "white"; pctx.lineWidth = 3;
         pctx.strokeRect(175, 10, 50, 40);
 
-        // Множители для 7 ячеек: 0x, 3x, 0.5x, 0.5x, 0.5x, 3x, 0x
         const multipliers = ['0x', '3x', '0.5x', '0.5x', '0.5x', '3x', '0x'];
         const slotY = 380;
 
