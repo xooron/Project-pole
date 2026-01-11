@@ -82,13 +82,23 @@
     /* Plinko Styles */
     .plinko-container {
         width: 100%; max-width: 380px; aspect-ratio: 1/1.1; 
-        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg'); /* Твое фото */
-        background-size: cover;
-        background-position: center;
         margin: 10px auto; border-radius: 40px; position: relative; overflow: hidden;
         border: 2px solid rgba(255,255,255,0.1);
+        background: #000;
     }
-    #plinko-canvas { width: 100%; height: 100%; display: block; background: rgba(0,0,0,0.2); }
+    .plinko-container::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg');
+        background-size: cover;
+        background-position: center;
+        filter: blur(5px);
+        opacity: 0.6;
+        z-index: 0;
+        transform: scale(1.1); /* Чтобы убрать белые края после блюра */
+    }
+    #plinko-canvas { width: 100%; height: 100%; display: block; background: rgba(0,0,0,0.2); position: relative; z-index: 1; }
     
     #plinko-res-panel {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
