@@ -7,10 +7,8 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <style>
     :root { 
         --neon: #00ff66; 
@@ -84,11 +82,13 @@
     /* Plinko Styles */
     .plinko-container {
         width: 100%; max-width: 380px; aspect-ratio: 1/1.1; 
-        background: url('https://i.ibb.co/6ndVz9M/soccer-field.jpg') center/cover no-repeat;
+        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg'); /* Твое фото */
+        background-size: cover;
+        background-position: center;
         margin: 10px auto; border-radius: 40px; position: relative; overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.1);
     }
-    #plinko-canvas { width: 100%; height: 100%; display: block; }
+    #plinko-canvas { width: 100%; height: 100%; display: block; background: rgba(0,0,0,0.2); }
     
     #plinko-res-panel {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -132,12 +132,26 @@
     .stat-box .val { font-size: 16px; font-weight: 800; margin-top: 5px; }
     .btn-claim-ton { width: 100%; height: 60px; background: #fff; color: #000; border-radius: 20px; border: none; font-weight: 800; font-size: 20px; cursor: pointer; }
 
-    .arena-info { text-align: center; margin-bottom: 20px; }
+    /* PvP Background with Blur */
+    #arena-page { position: relative; overflow: hidden; border-radius: 30px; }
+    #arena-page::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg'); /* Твое фото */
+        background-size: cover;
+        background-position: center;
+        filter: blur(10px);
+        opacity: 0.5;
+        z-index: -1;
+    }
+
+    .arena-info { text-align: center; margin-bottom: 20px; position: relative; }
     .arena-bank { font-size: 34px; font-weight: 900; }
-    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.4); box-shadow: 0 0 30px rgba(0,0,0,0.5); }
     #arena-canvas { width: 100%; height: 100%; display: block; }
     
-    .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+    .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; position: relative; }
     .b-btn { 
         background: #0d120f; border: 2px solid #0084ff; padding: 14px 5px; 
         border-radius: 100px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; 
@@ -153,7 +167,7 @@
     .nav-btn.active-plinko { color: var(--plinko-blue); }
 
     #winner-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); border: 2px solid var(--blue); color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); }
-    .player-row { background: #242424; padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+    .player-row { background: rgba(36, 36, 36, 0.8); padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); backdrop-filter: blur(5px); }
     .p-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
     .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
 </style>
@@ -190,7 +204,6 @@
             <button class="add-bal-btn" onclick="openDeposit()">+</button>
         </div>
     </header>
-
 <main class="main-scroll">
     <section id="arena-page" class="page active">
         <div class="arena-info">
@@ -218,59 +231,58 @@
         <div class="players-list" id="players-list"></div>
     </section>
 
-    <section id="plinko-page" class="page">
-        <div class="plinko-container">
-            <canvas id="plinko-canvas" width="400" height="440"></canvas>
-            <div id="plinko-res-panel">
-                <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
-                <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
-            </div>
+<section id="plinko-page" class="page">
+    <div class="plinko-container">
+        <canvas id="plinko-canvas" width="400" height="440"></canvas>
+        <div id="plinko-res-panel">
+            <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
+            <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
         </div>
-        <div class="bet-grid-plinko">
-            <button class="b-btn p-bet-btn" onclick="playPlinko(0.5)">0.5</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(1)">1</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(3)">3</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(5)">5</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(10)">10</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(30)">30</button>
-        </div>
-    </section>
+    </div>
+    <div class="bet-grid-plinko">
+        <button class="b-btn p-bet-btn" onclick="playPlinko(0.5)">0.5</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(1)">1</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(3)">3</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(5)">5</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(10)">10</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(30)">30</button>
+    </div>
+</section>
 
-    <section id="profile-page" class="page">
-        <div class="profile-card">
-            <div class="avatar-wrap">
-                <img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'">
-            </div>
-            <div id="ton-connect-btn"></div>
-            <button class="btn-withdraw-new" onclick="openWithdraw()">Вывод средств</button>
-            <h2 id="u-nick" style="margin-top: 15px; display: none;">Игрок</h2>
+<section id="profile-page" class="page">
+    <div class="profile-card">
+        <div class="avatar-wrap">
+            <img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'">
         </div>
-        <div class="ref-card">
-            <p class="ref-title">Приглашайте рефералов и получайте 10% от их игровой комиссии</p>
-            <div class="ref-actions">
-                <button class="btn-copy" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
-                <button class="btn-invite-new" onclick="invite()">Приглашить друзей</button>
-            </div>
-            <p class="ref-stat-label">Твои рефералы</p>
-            <div class="ref-count-box">
-                <i class="fa-solid fa-user-group" style="color: var(--blue);"></i>
-                <span id="ref-count">0</span>
-            </div>
-            <div class="stats-row">
-                <div class="stat-box">
-                    <p class="ref-stat-label">Доступно к зачислению</p>
-                    <div class="val"><span id="ref-pending">0.00</span> TON</div>
-                </div>
-                <div class="stat-box">
-                    <p class="ref-stat-label">Всего зачислено</p>
-                    <div class="val"><span id="ref-total">0.00</span> TON</div>
-                </div>
-            </div>
-            <button class="btn-claim-ton" onclick="claim()">Зачислить TON</button>
+        <div id="ton-connect-btn"></div>
+        <button class="btn-withdraw-new" onclick="openWithdraw()">Вывод средств</button>
+        <h2 id="u-nick" style="margin-top: 15px; display: none;">Игрок</h2>
+    </div>
+    <div class="ref-card">
+        <p class="ref-title">Приглашайте рефералов и получайте 10% от их игровой комиссии</p>
+        <div class="ref-actions">
+            <button class="btn-copy" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
+            <button class="btn-invite-new" onclick="invite()">Приглашить друзей</button>
         </div>
-    </section>
+        <p class="ref-stat-label">Твои рефералы</p>
+        <div class="ref-count-box">
+            <i class="fa-solid fa-user-group" style="color: var(--blue);"></i>
+            <span id="ref-count">0</span>
+        </div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <p class="ref-stat-label">Доступно к зачислению</p>
+                <div class="val"><span id="ref-pending">0.00</span> TON</div>
+            </div>
+            <div class="stat-box">
+                <p class="ref-stat-label">Всего зачислено</p>
+                <div class="val"><span id="ref-total">0.00</span> TON</div>
+            </div>
+        </div>
+        <button class="btn-claim-ton" onclick="claim()">Зачислить TON</button>
+    </div>
+</section>
 </main>
-
 <nav class="nav-bar">
     <button class="nav-btn active" onclick="showTab('arena', this)">
         <i class="fa-solid fa-trophy"></i>
@@ -286,7 +298,6 @@
     </button>
 </nav>
 </div>
-
 <div id="deposit-panel">
     <div class="dep-box">
         <h2>ПОПОЛНЕНИЕ</h2>
@@ -304,7 +315,6 @@
         <button class="btn-withdraw-new" style="background:none;" onclick="closeWithdraw()">ОТМЕНА</button>
     </div>
 </div>
-
 <script>
     const tg = window.Telegram.WebApp;
     const socket = io();
@@ -500,7 +510,6 @@
         for (let i = 0; i < slotCount; i++) {
             const xStart = i * slotW;
             let grad = pctx.createLinearGradient(0, slotY, 0, 440);
-            // Края (первая и последняя) красные
             if(i === 0 || i === slotCount - 1) { 
                 grad.addColorStop(0, "rgba(255,0,0,0)"); grad.addColorStop(1, "rgba(255,0,0,0.5)"); 
             } else { 
