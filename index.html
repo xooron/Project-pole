@@ -83,7 +83,8 @@
 
     /* Plinko Styles */
     .plinko-container {
-        width: 100%; max-width: 380px; aspect-ratio: 1/1.1; background: #23272a;
+        width: 100%; max-width: 380px; aspect-ratio: 1/1.1; 
+        background: url('https://i.ibb.co/6ndVz9M/soccer-field.jpg') center/cover no-repeat;
         margin: 10px auto; border-radius: 40px; position: relative; overflow: hidden;
         border: 1px solid rgba(255,255,255,0.05);
     }
@@ -487,8 +488,7 @@
     }
 
     function updatePlinko() {
-        pctx.fillStyle = "#23272a";
-        pctx.fillRect(0, 0, 400, 440);
+        pctx.clearRect(0, 0, 400, 440);
 
         pctx.strokeStyle = "white"; pctx.lineWidth = 3;
         pctx.strokeRect(175, 10, 50, 40);
