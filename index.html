@@ -18,7 +18,7 @@
         --blue: #0098ea; 
         --orange: #f48208; 
         --text-gray: #8e8e8e;
-        --plinko-blue: #00a2ff;
+        --plinko-blue: #00e5ff;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
@@ -79,32 +79,33 @@
     .page.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Plinko Styles - ИСПРАВЛЕННЫЙ ФОН */
+    /* Plinko Styles - С КВАДРАТНЫМ ДИЗАЙНОМ ПО ФОТО */
     .plinko-container {
-        width: 100%; max-width: 380px; aspect-ratio: 1/1.1; 
-        margin: 10px auto; border-radius: 40px; position: relative; overflow: hidden;
+        width: 100%; max-width: 400px; aspect-ratio: 1/1; 
+        margin: 10px auto; border-radius: 30px; position: relative; overflow: hidden;
         border: 2px solid rgba(255,255,255,0.1);
-        background: none; /* Убираем черный фон */
+        background: #4a7c44; /* Запасной цвет */
     }
-    .plinko-container::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://pixsafe.online/i/jF9S4');
-        background-size: cover;
-        background-position: center;
-        filter: blur(4px) brightness(0.9); /* Блюр как просили */
-        z-index: -1;
-        transform: scale(1.1); /* Убираем белые края блюра */
+    .plinko-bg-image {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg');
+        background-size: cover; background-position: center;
+        filter: blur(2px) brightness(0.85); z-index: 0;
+    }
+    /* Полукруг как на фото сверху */
+    .plinko-arc {
+        position: absolute; top: -45px; left: 50%; transform: translateX(-50%);
+        width: 120px; height: 120px; border: 3px solid rgba(255,255,255,0.8);
+        border-radius: 50%; z-index: 1;
     }
 
-    #plinko-canvas { width: 100%; height: 100%; display: block; background: transparent; position: relative; z-index: 1; }
+    #plinko-canvas { width: 100%; height: 100%; display: block; position: relative; z-index: 2; background: transparent; }
     
     #plinko-res-panel {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.95); border: 2px solid var(--plinko-blue);
+        background: rgba(0,0,0,0.9); border: 2px solid var(--plinko-blue);
         padding: 20px; border-radius: 25px; text-align: center; display: none; z-index: 100;
-        min-width: 200px; box-shadow: 0 0 30px rgba(0, 162, 255, 0.4);
+        min-width: 200px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
     }
 
     .bet-grid-plinko { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
@@ -149,11 +150,8 @@
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
         background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg');
-        background-size: cover;
-        background-position: center;
-        filter: blur(10px);
-        opacity: 0.5;
-        z-index: -1;
+        background-size: cover; background-position: center;
+        filter: blur(10px); opacity: 0.5; z-index: -1;
     }
 
     .arena-info { text-align: center; margin-bottom: 20px; position: relative; }
@@ -243,7 +241,9 @@
 
 <section id="plinko-page" class="page">
     <div class="plinko-container">
-        <canvas id="plinko-canvas" width="400" height="440"></canvas>
+        <div class="plinko-bg-image"></div>
+        <div class="plinko-arc"></div>
+        <canvas id="plinko-canvas" width="400" height="400"></canvas>
         <div id="plinko-res-panel">
             <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
             <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
@@ -465,26 +465,28 @@
         });
     }
 
-    // --- PLINKO ENGINE ---
+    // --- PLINKO ENGINE NEW DESIGN ---
     const plinkoCanvas = document.getElementById('plinko-canvas');
     const pctx = plinkoCanvas.getContext('2d');
     let plinkoBalls = [];
     const pegs = [];
-    const pinSpacing = 30; 
-    const startY = 85;
     
-    const slotCount = 7; 
-    const slotW = 400 / slotCount;
-    const dividers = [];
-    for(let i=1; i < slotCount; i++) dividers.push(i * slotW);
+    // Пирамида как на фото
+    const rowCounts = [3, 4, 5, 6, 7, 8, 9, 10, 11]; 
+    const spacingX = 28;
+    const spacingY = 28;
+    const startY = 85;
 
-    const rowsConfig = [3, 4, 5, 6, 7, 8, 9, 10, 11, 11];
-    rowsConfig.forEach((count, i) => {
-        const rowWidth = (count - 1) * pinSpacing;
+    rowCounts.forEach((count, i) => {
+        const rowWidth = (count - 1) * spacingX;
         const startX = (400 - rowWidth) / 2;
-        for (let j = 0; j < count; j++) pegs.push({ x: startX + j * pinSpacing, y: startY + i * pinSpacing });
+        for (let j = 0; j < count; j++) {
+            pegs.push({ x: startX + j * spacingX, y: startY + i * spacingY });
+        }
     });
 
+    const slotCount = 7;
+    const slotW = 400 / slotCount;
     let plinkoLock = false;
 
     function playPlinko(amt) {
@@ -496,92 +498,95 @@
         document.querySelectorAll('.p-bet-btn').forEach(b => b.disabled = true);
         document.getElementById('user-bal').innerText = (curBal - amt).toFixed(2);
         
-        const bImg = new Image();
-        bImg.src = document.getElementById('u-ava').src;
-
         plinkoBalls.push({ 
-            x: 200 + (Math.random() * 6 - 3), y: 35, 
-            vx: (Math.random() - 0.5) * 1.5, vy: 0, 
-            radius: 7, img: bImg, landed: false, bet: amt
+            x: 200 + (Math.random() * 4 - 2), y: 40, 
+            vx: (Math.random() - 0.5) * 1.2, vy: 0, 
+            radius: 8, landed: false, bet: amt
         });
     }
 
     function updatePlinko() {
-        pctx.clearRect(0, 0, 400, 440);
+        pctx.clearRect(0, 0, 400, 400);
 
-        pctx.strokeStyle = "white"; pctx.lineWidth = 3;
-        pctx.strokeRect(175, 10, 50, 40);
-
-        const multipliers = ['0x', '3x', '0.5x', '0.5x', '0.5x', '3x', '0x'];
-        const slotY = 380;
+        // Ячейки внизу (как на фото)
+        const slotY = 345;
+        const multipliers = [0, 2.5, 0.7, 0.5, 0.7, 2.5, 0];
+        const labels = ["LOSE", "GOAL", "0.7x", "0.5x", "0.7x", "GOAL", "LOSE"];
 
         for (let i = 0; i < slotCount; i++) {
-            const xStart = i * slotW;
-            let grad = pctx.createLinearGradient(0, slotY, 0, 440);
-            if(i === 0 || i === slotCount - 1) { 
-                grad.addColorStop(0, "rgba(255,0,0,0)"); grad.addColorStop(1, "rgba(255,0,0,0.5)"); 
-            } else { 
-                grad.addColorStop(0, "rgba(0,255,100,0)"); grad.addColorStop(1, "rgba(0,255,100,0.4)"); 
+            const x = i * slotW;
+            // Фон ячеек
+            let color = "rgba(0, 255, 100, 0.3)";
+            if(i === 0 || i === 6) color = "rgba(255, 50, 0, 0.4)"; // Красные края
+            
+            pctx.fillStyle = color;
+            pctx.fillRect(x, slotY, slotW, 55);
+            
+            // Линии разделители
+            pctx.strokeStyle = "rgba(255,255,255,0.4)";
+            pctx.lineWidth = 1;
+            pctx.beginPath(); pctx.moveTo(x, slotY); pctx.lineTo(x, 400); pctx.stroke();
+
+            // Текст
+            pctx.fillStyle = (i===0 || i===6) ? "#ff4d4d" : "#00ff66";
+            pctx.font = "bold 11px Sans-serif";
+            pctx.textAlign = "center";
+            pctx.fillText(labels[i], x + slotW/2, 375);
+            if(i > 0 && i < 6 && i !== 1 && i !== 5) {
+                pctx.fillText("GOAL", x + slotW/2, 388);
             }
-            pctx.fillStyle = grad; pctx.fillRect(xStart, slotY, slotW, 60);
-            pctx.fillStyle = "white"; pctx.font = "bold 14px Sans-serif"; pctx.textAlign = "center";
-            pctx.fillText(multipliers[i], xStart + slotW/2, 425);
         }
 
-        pctx.strokeStyle = "rgba(255,255,255,0.6)"; pctx.lineWidth = 4;
-        dividers.forEach(x => {
-            pctx.beginPath(); pctx.moveTo(x, slotY); pctx.lineTo(x, 440); pctx.stroke();
-            pctx.fillStyle = "white"; pctx.beginPath(); pctx.arc(x, slotY, 3, 0, Math.PI*2); pctx.fill();
-        });
-
+        // Рисуем пегги (точки) - Голубые как на фото
         pegs.forEach(p => {
-            pctx.fillStyle = "#3da9ff"; pctx.beginPath(); pctx.arc(p.x, p.y, 4, 0, Math.PI * 2); pctx.fill();
+            pctx.fillStyle = "#00e5ff";
+            pctx.beginPath(); pctx.arc(p.x, p.y, 4, 0, Math.PI * 2); pctx.fill();
+            // Свечение
+            pctx.shadowBlur = 4; pctx.shadowColor = "#00e5ff";
+            pctx.stroke(); pctx.shadowBlur = 0;
         });
 
         plinkoBalls.forEach((b, idx) => {
             if(!b.landed) {
                 b.vy += 0.22; b.x += b.vx; b.y += b.vy;
-                if (b.x < b.radius) { b.vx = Math.abs(b.vx)*0.6; b.x = b.radius; }
-                if (b.x > 400 - b.radius) { b.vx = -Math.abs(b.vx)*0.6; b.x = 400 - b.radius; }
+                
+                // Стенки
+                if (b.x < b.radius) { b.vx = Math.abs(b.vx)*0.5; b.x = b.radius; }
+                if (b.x > 400 - b.radius) { b.vx = -Math.abs(b.vx)*0.5; b.x = 400 - b.radius; }
 
+                // Столкновения с точками
                 pegs.forEach(p => {
                     const dx = b.x - p.x; const dy = b.y - p.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
                     if (dist < b.radius + 4) {
                         const angle = Math.atan2(dy, dx);
-                        const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.6;
-                        b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 2;
+                        const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.65;
+                        b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 1.5;
                         b.vy = Math.sin(angle) * speed;
                         b.y = p.y + Math.sin(angle) * (b.radius + 4.1);
                     }
                 });
 
-                dividers.forEach(x => {
-                    if(b.y > slotY - 10 && Math.abs(b.x - x) < b.radius + 2) {
-                        b.vx *= -0.5; b.x = (b.x < x) ? x - (b.radius + 2.1) : x + (b.radius + 2.1);
-                    }
-                });
-
-                if (b.y > 410) {
-                    b.landed = true; b.vy = 0; b.vx = 0; b.y = 410;
+                // Приземление
+                if (b.y > 365) {
+                    b.landed = true;
                     const slotIdx = Math.floor(b.x / slotW);
-                    const mults = [0, 3, 0.5, 0.5, 0.5, 3, 0];
-                    showPlinkoResult(mults[slotIdx], b.bet * mults[slotIdx], idx);
+                    showPlinkoResult(multipliers[slotIdx], b.bet * multipliers[slotIdx], idx);
                 }
             }
-            pctx.save(); pctx.beginPath(); pctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); pctx.clip();
-            try { pctx.drawImage(b.img, b.x - b.radius, b.y - b.radius, b.radius*2, b.radius*2); } catch(e) { pctx.fillStyle = "white"; pctx.fill(); }
-            pctx.restore(); pctx.strokeStyle = "white"; pctx.lineWidth = 2;
-            pctx.beginPath(); pctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); pctx.stroke();
+            // Мяч/Шар
+            pctx.fillStyle = "white";
+            pctx.beginPath(); pctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); pctx.fill();
+            pctx.strokeStyle = "#00e5ff"; pctx.lineWidth = 2; pctx.stroke();
         });
         requestAnimationFrame(updatePlinko);
     }
 
     function showPlinkoResult(x, sum, ballIdx) {
         const panel = document.getElementById('plinko-res-panel');
-        document.getElementById('plinko-res-x').innerText = `x${x}`;
-        document.getElementById('plinko-res-x').style.color = (x >= 1) ? "var(--neon)" : "red";
-        document.getElementById('plinko-res-sum').innerText = (x >= 1) ? `+${sum.toFixed(2)} TON` : `${sum.toFixed(2)} TON`;
+        document.getElementById('plinko-res-x').innerText = (x === 0) ? "LOSE" : `x${x}`;
+        document.getElementById('plinko-res-x').style.color = (x >= 1) ? "var(--neon)" : (x > 0 ? "orange" : "red");
+        document.getElementById('plinko-res-sum').innerText = (x >= 1) ? `+${sum.toFixed(2)} TON` : (x === 0 ? "0.00 TON" : `+${sum.toFixed(2)} TON`);
         panel.style.display = 'block';
         if(x > 0) socket.emit('plinko_win', { id: userData.id, amount: sum });
         setTimeout(() => {
