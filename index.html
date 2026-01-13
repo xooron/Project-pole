@@ -21,7 +21,7 @@
         --plinko-blue: #00e5ff;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
+    body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
 
     #loading-screen {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -35,6 +35,7 @@
 
     .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
     
+    /* Header */
     .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
     .online-pill { background: #242424; padding: 8px 16px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-weight: 800; color: #00ff66; font-size: 18px; }
     .history-btn { color: #fff; font-size: 22px; margin-left: 15px; opacity: 0.8; cursor: pointer; transition: 0.2s; }
@@ -48,6 +49,7 @@
         padding-bottom: 5px;
     }
 
+    /* History Panel */
     #history-panel { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; 
@@ -55,22 +57,42 @@
     }
     .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
     .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .history-item { 
+        background: #2a2a2a; border-radius: 20px; padding: 15px; 
+        display: flex; align-items: center; gap: 15px; border: 1px solid var(--border);
+    }
 
+    /* Deposit & Withdraw */
     #deposit-panel, #withdraw-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
     .dep-box { width: 85%; padding: 30px; text-align: center; background: #111; border-radius: 30px; border: 1px solid var(--border); }
     .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 16px; font-weight: 800; text-align: center; margin: 10px 0; outline: none; }
 
+    /* Main Scrolling Content */
     .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
     .page { display: none; }
     .page.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Plinko Container & Background Fix */
+    /* PvP Section */
+    #arena-page { background: var(--bg); position: relative; border-radius: 30px; }
+    .arena-info { text-align: center; margin-bottom: 20px; }
+    .arena-bank { font-size: 34px; font-weight: 900; }
+    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.4); }
+    #arena-canvas { width: 100%; height: 100%; display: block; }
+    
+    #winner-panel { 
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+        background: rgba(0,0,0,0.95); border: 2px solid var(--blue); color: #fff; 
+        padding: 25px; border-radius: 30px; text-align: center; z-index: 100; 
+        display: none; width: 85%; box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); 
+    }
+
+    /* Plinko Section */
     .plinko-container {
         width: 100%; max-width: 400px; aspect-ratio: 1/1; 
         margin: 10px auto; border-radius: 30px; position: relative; overflow: hidden;
         border: 2px solid rgba(255,255,255,0.1);
-        background: #2c4c28; /* Темно-зеленый основной */
+        background: #2c4c28; 
     }
     .plinko-field-lines {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -93,23 +115,28 @@
         cursor: pointer; margin-top: 10px;
     }
 
-    .bet-grid-plinko { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-
-    /* PvP Section (Reverted to Original Style - Wheel) */
-    #arena-page { background: var(--bg); position: relative; } /* NO GREEN BG */
-    .arena-info { text-align: center; margin-bottom: 20px; }
-    .arena-bank { font-size: 34px; font-weight: 900; }
-    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.4); box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-    #arena-canvas { width: 100%; height: 100%; display: block; border-radius: 50%; }
+    /* Profile & Referral */
+    .profile-card { background: #2b2b2b; border-radius: 35px; padding: 30px 20px; margin-bottom: 15px; text-align: center; }
+    .avatar-wrap { width: 100px; height: 100px; margin: 0 auto 25px; border-radius: 50%; border: 2px solid var(--blue); overflow: hidden; }
+    .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
     
-    #winner-panel { 
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-        background: rgba(0,0,0,0.95); border: 2px solid var(--blue); color: #fff; 
-        padding: 25px; border-radius: 30px; text-align: center; z-index: 100; 
-        display: none; width: 85%; box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); 
-    }
+    #ton-connect-btn { display: flex; justify-content: center; width: 100%; margin-bottom: 15px; }
+    .btn-withdraw-new { width: 100%; height: 55px; background: var(--orange); color: #fff; border: none; border-radius: 18px; font-weight: 700; font-size: 18px; cursor: pointer; }
 
-    .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+    .ref-card { background: #242424; border-radius: 35px; padding: 25px; margin-bottom: 15px; }
+    .ref-title { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 20px; }
+    .ref-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+    .btn-copy { width: 55px; height: 55px; background: var(--blue); border-radius: 15px; border: none; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+    .btn-invite-new { flex: 1; height: 55px; background: transparent; border: 2px solid var(--blue); border-radius: 15px; color: #fff; font-weight: 700; font-size: 16px; }
+
+    .ref-count-box { border: 2px solid var(--blue); border-radius: 15px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; width: fit-content; margin-bottom: 20px; font-size: 18px; font-weight: 800; }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-box { border: 2px solid var(--blue); border-radius: 15px; padding: 15px 10px; text-align: center; }
+    .stat-box .val { font-size: 16px; font-weight: 800; margin-top: 5px; }
+    .btn-claim-ton { width: 100%; height: 60px; background: #fff; color: #000; border-radius: 20px; border: none; font-weight: 800; font-size: 20px; cursor: pointer; }
+
+    /* Controls */
+    .bet-grid, .bet-grid-plinko { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
     .b-btn { 
         background: #0d120f; border: 2px solid #0084ff; padding: 14px 5px; 
         border-radius: 100px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; 
@@ -117,22 +144,18 @@
     }
     .b-btn:active { transform: scale(0.95); }
 
-    .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #242424; border-radius: 40px; display: flex; align-items: center; padding: 0 20px; z-index: 500; }
-    .nav-btn { flex: 1; text-align: center; color: #555; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 700; font-size: 11px; }
-    .nav-btn i { font-size: 22px; }
-    .nav-btn.active { color: var(--blue); }
-    .nav-btn.active-plinko { color: var(--plinko-blue); }
-
-    /* Players list under PvP wheel */
+    /* Players list */
+    .players-list { margin-top: 15px; }
     .player-row { background: rgba(36, 36, 36, 0.8); padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
     .p-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
 
-    /* Profile Section */
-    .profile-card { background: #2b2b2b; border-radius: 35px; padding: 30px 20px; margin-bottom: 15px; text-align: center; }
-    .avatar-wrap { width: 100px; height: 100px; margin: 0 auto 25px; border-radius: 50%; border: 2px solid var(--blue); overflow: hidden; }
-    .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .btn-withdraw-new { width: 100%; height: 55px; background: var(--orange); color: #fff; border: none; border-radius: 18px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 12px; }
+    /* Nav Bar */
+    .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #242424; border-radius: 40px; display: flex; align-items: center; padding: 0 20px; z-index: 500; }
+    .nav-btn { flex: 1; text-align: center; color: #555; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 700; font-size: 11px; cursor: pointer; }
+    .nav-btn i { font-size: 22px; }
+    .nav-btn.active { color: var(--blue); }
+    .nav-btn.active-plinko { color: var(--plinko-blue); }
 </style>
 </head>
 <body onclick="handleFirstInteraction()">
@@ -145,7 +168,7 @@
 <div id="history-panel">
     <div class="history-header">
         <h2 style="font-weight: 800;">ИСТОРИЯ PvP</h2>
-        <i class="fa-solid fa-xmark" onclick="toggleHistory()" style="font-size:26px;"></i>
+        <i class="fa-solid fa-xmark" onclick="toggleHistory()" style="font-size:28px;"></i>
     </div>
     <div class="history-list" id="history-content"></div>
 </div>
@@ -167,7 +190,7 @@
     </header>
 
 <main class="main-scroll">
-    <!-- PvP Page (Reverted Wheel View) -->
+    <!-- PvP Page -->
     <section id="arena-page" class="page active">
         <div class="arena-info">
             <span id="timer-text" style="color: var(--text-gray); font-weight: 800;">ОЖИДАНИЕ...</span>
@@ -189,10 +212,10 @@
             <button class="b-btn" onclick="makeBet(50)">50</button>
             <button class="b-btn" onclick="makeBet('max')">MAX</button>
         </div>
-        <div id="players-list"></div>
+        <div id="players-list" class="players-list"></div>
     </section>
 
-    <!-- Plinko Page (Fix Background & Cells) -->
+    <!-- Plinko Page -->
     <section id="plinko-page" class="page">
         <div class="plinko-container">
             <div class="plinko-field-lines"></div>
@@ -201,7 +224,6 @@
                 <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
                 <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
             </div>
-            <!-- Gift Window -->
             <div id="gift-popup">
                 <h2 style="color: #ffaa00; font-weight: 800; margin-bottom: 10px;">WOW! GIFT</h2>
                 <img src="https://data.chpic.su/stickers/l/LolPop2_by_EmojiRu_Bot/LolPop2_by_EmojiRu_Bot_009.webp" class="gift-img-large">
@@ -223,8 +245,31 @@
     <section id="profile-page" class="page">
         <div class="profile-card">
             <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
-            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
+            <div id="ton-connect-btn"></div>
             <button class="btn-withdraw-new" onclick="openWithdraw()">Вывод средств</button>
+        </div>
+        <div class="ref-card">
+            <p class="ref-title">Приглашайте друзей и получайте 10% от их игровой комиссии</p>
+            <div class="ref-actions">
+                <button class="btn-copy" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
+                <button class="btn-invite-new" onclick="invite()">Пригласить друзей</button>
+            </div>
+            <p style="font-size: 12px; color: var(--text-gray); margin-bottom: 8px;">Твои рефералы</p>
+            <div class="ref-count-box">
+                <i class="fa-solid fa-user-group" style="color: var(--blue);"></i>
+                <span id="ref-count">0</span>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <p style="font-size: 12px; color: var(--text-gray);">Доступно TON</p>
+                    <div class="val"><span id="ref-pending">0.00</span></div>
+                </div>
+                <div class="stat-box">
+                    <p style="font-size: 12px; color: var(--text-gray);">Всего зачислено</p>
+                    <div class="val"><span id="ref-total">0.00</span></div>
+                </div>
+            </div>
+            <button class="btn-claim-ton" onclick="claimRef()">Зачислить TON</button>
         </div>
     </section>
 </main>
@@ -245,8 +290,10 @@
     const socket = io();
     tg.ready(); tg.expand();
 
+    // Загрузка мяча
     const ballImg = new Image(); 
-    ballImg.src = 'https://i.ibb.co/3pS7fG7/ball-new.png';
+    ballImg.crossOrigin = "anonymous";
+    ballImg.src = 'https://cdn-icons-png.flaticon.com/512/53/53283.png'; // Надежная ссылка на мяч
 
     setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 2000);
 
@@ -266,11 +313,12 @@
 
     const adminAddress = "UQDbVd0KQ8OCNzApbDN1zCZqH_PBT2T6wPkArzU4U11MFcLj"; 
 
+    // Wallet
     function openDeposit() { document.getElementById('deposit-panel').style.display = 'flex'; }
     function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
     async function processDeposit() {
         const amt = parseFloat(document.getElementById('dep-amt').value);
-        if (!amt || !tonConnectUI.connected) return;
+        if (!amt || !tonConnectUI.connected) { tg.showAlert("Подключите кошелек!"); return; }
         const tx = { validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: adminAddress, amount: (amt * 1000000000).toString() }] };
         closeDeposit(); await tonConnectUI.sendTransaction(tx);
         socket.emit('deposit_ton', { id: userData.id, amount: amt });
@@ -287,22 +335,36 @@
         }
     }
 
+    // Tabs
+    function showTab(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id + '-page').classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active', 'active-plinko'));
+        el.classList.add(id === 'plinko' ? 'active-plinko' : 'active');
+    }
+
     function toggleHistory() {
         const hp = document.getElementById('history-panel');
         hp.style.display = (hp.style.display === 'flex') ? 'none' : 'flex';
     }
 
+    // User & Socket
     const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "user" };
-    socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url });
+    socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
     socket.on('online_update', (c) => { document.getElementById('online-count').innerText = c; });
     socket.on('update_data', (u) => {
         const me = u[userData.id];
-        if(me) document.getElementById('user-bal').innerText = me.balance.toFixed(2);
-        if(me) document.getElementById('u-ava').src = me.avatar || 'https://pixsafe.online/i/mglZT';
+        if(me) {
+            document.getElementById('user-bal').innerText = me.balance.toFixed(2);
+            document.getElementById('u-ava').src = me.avatar || 'https://pixsafe.online/i/mglZT';
+            document.getElementById('ref-count').innerText = me.refCount || 0;
+            document.getElementById('ref-pending').innerText = (me.refPending || 0).toFixed(2);
+            document.getElementById('ref-total').innerText = (me.refTotal || 0).toFixed(2);
+        }
     });
 
-    // PvP Wheel Logic
+    // PvP
     let arenaPlayers = [];
     let playerAvatars = {};
     socket.on('update_arena', (data) => {
@@ -321,14 +383,10 @@
         setTimeout(() => { panel.style.display = 'none'; }, 4000);
     });
 
-    function showTab(id, el) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id + '-page').classList.add('active');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active', 'active-plinko'));
-        el.classList.add(id === 'plinko' ? 'active-plinko' : 'active');
-    }
-
     function makeBet(amt) { socket.emit('place_bet', { id: userData.id, amount: amt }); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Ссылка скопирована!"); }
+    function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`); }
+    function claimRef() { socket.emit('claim_ref', { id: userData.id }); }
 
     function updatePlayersList(players) {
         const list = document.getElementById('players-list');
@@ -340,7 +398,7 @@
         });
     }
 
-    // --- PLINKO ENGINE ---
+    // --- PLINKO ---
     const plinkoCanvas = document.getElementById('plinko-canvas');
     const pctx = plinkoCanvas.getContext('2d');
     let plinkoBalls = [];
@@ -356,7 +414,6 @@
 
     const slotCount = 9;
     const slotW = 400 / slotCount;
-    // 💀 1x 🎁 0.7x 0.5x 0.7x 🎁 1x 💀
     const multipliers = [0, 1, 'GIFT', 0.7, 0.5, 0.7, 'GIFT', 1, 0];
     let plinkoLock = false;
 
@@ -381,7 +438,8 @@
 
             pctx.fillStyle = color;
             pctx.beginPath();
-            pctx.roundRect(x + 5, slotY, slotW - 10, 50, 12);
+            if(pctx.roundRect) pctx.roundRect(x + 5, slotY, slotW - 10, 50, 12);
+            else pctx.rect(x+5, slotY, slotW-10, 50);
             pctx.fill();
             pctx.strokeStyle = "rgba(255,255,255,0.2)";
             pctx.stroke();
@@ -424,8 +482,11 @@
             }
             pctx.save();
             pctx.translate(b.x, b.y);
-            if(ballImg.complete) pctx.drawImage(ballImg, -b.radius, -b.radius, b.radius*2, b.radius*2);
-            else { pctx.fillStyle = "#fff"; pctx.beginPath(); pctx.arc(0,0,b.radius,0,Math.PI*2); pctx.fill(); }
+            if(ballImg.complete) {
+                pctx.drawImage(ballImg, -b.radius, -b.radius, b.radius*2, b.radius*2);
+            } else {
+                pctx.fillStyle = "#fff"; pctx.beginPath(); pctx.arc(0,0,b.radius,0,Math.PI*2); pctx.fill();
+            }
             pctx.restore();
         });
         requestAnimationFrame(updatePlinko);
