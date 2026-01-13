@@ -38,51 +38,80 @@
     .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
     .online-pill { background: #242424; padding: 8px 16px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-weight: 800; color: #00ff66; font-size: 18px; }
     .history-btn { color: #fff; font-size: 22px; margin-left: 15px; opacity: 0.8; cursor: pointer; transition: 0.2s; }
+    .history-btn:active { transform: scale(0.9); opacity: 1; }
     
     .balance-pill { background: #242424; padding: 8px 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
-    .add-bal-btn { background: #fff; color: #000; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: 900; font-size: 26px; display: flex; align-items: center; justify-content: center; margin-left: 10px; cursor: pointer; }
+    
+    .add-bal-btn { 
+        background: #fff; color: #000; border: none; border-radius: 50%; 
+        width: 32px; height: 32px; cursor: pointer; 
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 26px; padding: 0; 
+        line-height: 0; margin-left: 10px;
+        padding-bottom: 5px;
+        box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+    .add-bal-btn:active { transform: scale(0.9); }
 
-    #history-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; padding: 20px; backdrop-filter: blur(15px); }
-    .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-    .history-item { background: #2a2a2a; border-radius: 20px; padding: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); }
+    #history-panel { 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; 
+        padding: 20px; backdrop-filter: blur(15px);
+    }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 5px; }
+    .history-item { 
+        background: #2a2a2a; border-radius: 20px; padding: 15px; 
+        display: flex; align-items: center; gap: 15px; border: 1px solid var(--border);
+        animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .h-info { flex: 1; font-size: 14px; line-height: 1.4; }
+    .h-info b { color: var(--blue); }
+    .h-res { text-align: right; font-weight: 800; color: var(--neon); }
 
     #deposit-panel, #withdraw-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
     .dep-box { width: 85%; padding: 30px; text-align: center; background: #111; border-radius: 30px; border: 1px solid var(--border); }
-    .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 16px; margin: 10px 0; outline: none; text-align: center; }
+    .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 16px; font-weight: 800; text-align: center; margin: 10px 0; outline: none; }
 
     .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
     .page { display: none; }
     .page.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* PLINKO PHOTO STYLE */
-    .plinko-wrapper {
-        width: 100%;
-        max-width: 400px;
-        margin: 10px auto;
-        padding: 10px;
-        background: #000;
-        border-radius: 55px;
+    /* ПРАВКА ФОНА ПОЛЯ: CSS ВМЕСТО КАРТИНКИ */
+    .field-css-bg {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #4a7c44;
+        background-image: repeating-linear-gradient(to bottom, transparent, transparent 40px, rgba(0,0,0,0.05) 40px, rgba(0,0,0,0.05) 80px);
+        z-index: 0;
     }
+    .field-lines {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        border: 2px solid rgba(255,255,255,0.3);
+        pointer-events: none; z-index: 1;
+    }
+    .field-center-circle {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 100px; height: 100px; border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+    }
+    .field-center-line {
+        position: absolute; top: 50%; left: 0; width: 100%; height: 2px;
+        background: rgba(255,255,255,0.3);
+    }
+
     .plinko-container {
-        width: 100%;
-        aspect-ratio: 1/1; 
-        border-radius: 45px; 
-        position: relative; 
-        overflow: hidden;
-        border: 2px solid rgba(255,255,255,0.05);
-        background-color: #4c8a32;
+        width: 100%; max-width: 400px; aspect-ratio: 1/1; 
+        margin: 10px auto; border-radius: 30px; position: relative; overflow: hidden;
+        border: 2px solid rgba(255,255,255,0.1);
     }
-    .plinko-bg-image {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg');
-        background-size: cover; background-position: center;
-        filter: brightness(0.9); z-index: 0;
+    .plinko-arc {
+        position: absolute; top: -45px; left: 50%; transform: translateX(-50%);
+        width: 120px; height: 120px; border: 3px solid rgba(255,255,255,0.8);
+        border-radius: 50%; z-index: 3;
     }
-    .plinko-overlay-field {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 1; pointer-events: none;
-    }
+
     #plinko-canvas { width: 100%; height: 100%; display: block; position: relative; z-index: 5; background: transparent; }
     
     #plinko-res-panel {
@@ -94,34 +123,70 @@
 
     .bet-grid-plinko { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
 
-    /* PvP & Common */
     .profile-card { background: #2b2b2b; border-radius: 35px; padding: 30px 20px; margin-bottom: 15px; text-align: center; }
-    .avatar-wrap { width: 100px; height: 100px; margin: 0 auto 25px; border-radius: 50%; border: 2px solid var(--blue); overflow: hidden; }
+    .avatar-wrap { 
+        width: 100px; height: 100px; margin: 0 auto 25px; border-radius: 50%; 
+        border: 2px solid var(--blue); overflow: hidden;
+        box-shadow: 0 0 25px rgba(0, 152, 234, 0.5);
+    }
     .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
     
     #ton-connect-btn { display: flex; justify-content: center; width: 100%; }
-    .btn-withdraw-new { width: 100%; height: 55px; background: var(--orange); color: #fff; border: none; border-radius: 18px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 12px; }
+    #ton-connect-btn div, #ton-connect-btn button {
+        width: 100% !important; height: 55px !important; border-radius: 18px !important;
+        background-color: var(--blue) !important; color: white !important;
+        font-weight: 700 !important; font-size: 18px !important; border: none !important;
+        display: flex !important; align-items: center !important; justify-content: center !important;
+    }
+    .btn-withdraw-new { 
+        width: 100%; height: 55px; background: var(--orange); color: #fff; border: none; 
+        border-radius: 18px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 12px; 
+    }
 
     .ref-card { background: #242424; border-radius: 35px; padding: 25px; margin-bottom: 15px; }
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+    .ref-title { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 20px; }
+    .ref-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+    .btn-copy { width: 55px; height: 55px; background: var(--blue); border-radius: 15px; border: none; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+    .btn-invite-new { flex: 1; height: 55px; background: transparent; border: 2px solid var(--blue); border-radius: 15px; color: #fff; font-weight: 700; font-size: 16px; }
+
+    .ref-stat-label { color: var(--text-gray); font-size: 12px; margin-bottom: 8px; }
+    .ref-count-box { border: 2px solid var(--blue); border-radius: 15px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; width: fit-content; margin-bottom: 20px; font-size: 18px; font-weight: 800; }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .stat-box { border: 2px solid var(--blue); border-radius: 15px; padding: 15px 10px; text-align: center; }
+    .stat-box .val { font-size: 16px; font-weight: 800; margin-top: 5px; }
+    .btn-claim-ton { width: 100%; height: 60px; background: #fff; color: #000; border-radius: 20px; border: none; font-weight: 800; font-size: 20px; cursor: pointer; }
 
-    .arena-info { text-align: center; margin-bottom: 20px; }
+    /* PvP Background */
+    #arena-page { position: relative; overflow: hidden; border-radius: 30px; }
+    .arena-bg {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1; filter: blur(10px); opacity: 0.5;
+    }
+
+    .arena-info { text-align: center; margin-bottom: 20px; position: relative; }
     .arena-bank { font-size: 34px; font-weight: 900; }
-    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 20px; background: rgba(0,0,0,0.4); overflow: hidden; }
-    #arena-canvas { width: 100%; height: 100%; }
-
-    .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
-    .b-btn { background: #0d120f; border: 2px solid #0084ff; padding: 14px 5px; border-radius: 100px; color: #fff; font-weight: 800; cursor: pointer; }
-    .b-btn:active { transform: scale(0.95); }
+    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.4); box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+    #arena-canvas { width: 100%; height: 100%; display: block; }
+    
+    .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; position: relative; }
+    .b-btn { 
+        background: #0d120f; border: 2px solid #0084ff; padding: 14px 5px; 
+        border-radius: 100px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; 
+        text-transform: uppercase; transition: 0.1s;
+    }
+    .b-btn:active { transform: scale(0.95); background: #0084ff; }
+    .b-btn:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 
     .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #242424; border-radius: 40px; display: flex; align-items: center; padding: 0 20px; z-index: 500; }
     .nav-btn { flex: 1; text-align: center; color: #555; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 700; font-size: 11px; }
+    .nav-btn i { font-size: 22px; }
     .nav-btn.active { color: var(--blue); }
     .nav-btn.active-plinko { color: var(--plinko-blue); }
 
-    .player-row { background: rgba(36, 36, 36, 0.8); padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
-    .p-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    #winner-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); border: 2px solid var(--blue); color: #fff; padding: 25px; border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); }
+    .player-row { background: rgba(36, 36, 36, 0.8); padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); backdrop-filter: blur(5px); }
+    .p-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+    .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
 </style>
 </head>
 <body onclick="handleFirstInteraction()">
@@ -130,42 +195,47 @@
     <div class="loader-bar"><div class="loader-progress"></div></div>
 </div>
 <div id="history-panel">
-    <div class="history-header" style="display:flex; justify-content:space-between; margin-bottom:20px;">
-        <h2>ИСТОРИЯ</h2>
-        <i class="fa-solid fa-xmark" onclick="toggleHistory()" style="font-size:24px;"></i>
+    <div class="history-header">
+        <h2 style="font-weight: 800; font-size: 24px; letter-spacing: 1px;">ИСТОРИЯ ИГР PvP</h2>
+        <i class="fa-solid fa-xmark" style="font-size: 28px; opacity: 0.6;" onclick="toggleHistory()"></i>
     </div>
     <div class="history-list" id="history-content"></div>
 </div>
-
 <audio id="stadium-bg" loop preload="auto">
     <source src="https://assets.mixkit.co/sfx/preview/mixkit-stadium-crowd-ambience-455.mp3" type="audio/mpeg">
 </audio>
-
 <div class="app-container">
     <header class="header">
         <div style="display: flex; align-items: center;">
-            <div class="online-pill"><i class="fa-solid fa-user-group"></i> <span id="online-count">1</span></div>
+            <div class="online-pill">
+                <i class="fa-solid fa-user-group"></i>
+                <span id="online-count">1</span>
+            </div>
             <i class="fa-solid fa-clock-rotate-left history-btn" onclick="toggleHistory()"></i>
         </div>
         <div style="display: flex; align-items: center;">
-            <div class="balance-pill"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="22"> <span id="user-bal">0.00</span></div>
+            <div class="balance-pill">
+                <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="22"> 
+                <span id="user-bal">0.00</span>
+            </div>
             <button class="add-bal-btn" onclick="openDeposit()">+</button>
         </div>
     </header>
-
 <main class="main-scroll">
-    <!-- PvP Page -->
     <section id="arena-page" class="page active">
+        <div class="arena-bg field-css-bg"></div>
         <div class="arena-info">
-            <span id="timer-text" style="color: var(--text-gray); font-weight: 800;">ОЖИДАНИЕ...</span>
+            <span id="timer-text" style="color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: 800;">ОЖИДАНИЕ...</span>
             <div class="arena-bank"><span id="total-bank">0.00</span> TON</div>
         </div>
         <div class="canvas-box">
             <canvas id="arena-canvas" width="300" height="300"></canvas>
-            <div id="winner-panel" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:none; text-align:center; background:rgba(0,0,0,0.9); padding:20px; border-radius:20px; border:2px solid var(--blue); width:80%;">
-                <img id="win-ava" src="" style="width:60px; height:60px; border-radius:50%; margin-bottom:10px;">
-                <h3 id="win-name">@User</h3>
-                <p id="win-sum" style="color:var(--neon); font-size:20px; font-weight:800;">0.00 TON</p>
+            <div id="winner-panel">
+                <img id="win-ava" src="" style="width:70px; height:70px; border-radius:50%; border: 3px solid var(--blue); margin-bottom: 10px; object-fit: cover;">
+                <h2 id="win-title" style="color: var(--blue); font-size: 22px; margin-bottom: 5px;">ПОБЕДИТЕЛЬ!</h2>
+                <div id="win-name" style="font-size: 18px; font-weight: 800; margin-bottom: 5px;">@username</div>
+                <div id="win-x" style="background: var(--blue); display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 14px; margin-bottom: 10px;">x0.0</div>
+                <p id="win-sum" style="font-size: 24px; font-weight: 900; color: var(--neon);">0.00 TON</p>
             </div>
         </div>
         <div class="bet-grid">
@@ -176,84 +246,106 @@
             <button class="b-btn" onclick="makeBet(50)">50</button>
             <button class="b-btn" onclick="makeBet('max')">MAX</button>
         </div>
-        <div id="players-list"></div>
+        <div class="players-list" id="players-list"></div>
     </section>
 
-    <!-- Plinko Page (NEW PHOTO DESIGN) -->
-    <section id="plinko-page" class="page">
-        <div class="plinko-wrapper">
-            <div class="plinko-container">
-                <div class="plinko-bg-image"></div>
-                <canvas id="plinko-canvas" width="400" height="400"></canvas>
-                <div id="plinko-res-panel">
-                    <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
-                    <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
-                </div>
-            </div>
+<section id="plinko-page" class="page">
+    <div class="plinko-container">
+        <div class="field-css-bg"></div>
+        <div class="field-lines"></div>
+        <div class="field-center-circle"></div>
+        <div class="field-center-line"></div>
+        <div class="plinko-arc"></div>
+        <canvas id="plinko-canvas" width="400" height="400"></canvas>
+        <div id="plinko-res-panel">
+            <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
+            <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
         </div>
-        <div class="bet-grid-plinko">
-            <button class="b-btn p-bet-btn" onclick="playPlinko(0.5)">0.5</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(1)">1</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(3)">3</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(5)">5</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(10)">10</button>
-            <button class="b-btn p-bet-btn" onclick="playPlinko(30)">30</button>
-        </div>
-    </section>
+    </div>
+    <div class="bet-grid-plinko">
+        <button class="b-btn p-bet-btn" onclick="playPlinko(0.5)">0.5</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(1)">1</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(3)">3</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(5)">5</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(10)">10</button>
+        <button class="b-btn p-bet-btn" onclick="playPlinko(30)">30</button>
+    </div>
+</section>
 
-    <!-- Profile Page -->
-    <section id="profile-page" class="page">
-        <div class="profile-card">
-            <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
-            <div id="ton-connect-btn"></div>
-            <button class="btn-withdraw-new" onclick="openWithdraw()">Вывод средств</button>
+<section id="profile-page" class="page">
+    <div class="profile-card">
+        <div class="avatar-wrap">
+            <img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'">
         </div>
-        <div class="ref-card">
-            <p>Приглашайте друзей и получайте 10%</p>
-            <div style="display:flex; gap:10px; margin:15px 0;">
-                <button class="b-btn" style="flex:1;" onclick="copyRef()">Копировать ссылку</button>
-                <button class="b-btn" style="flex:1;" onclick="invite()">Пригласить</button>
-            </div>
-            <div class="stats-row">
-                <div class="stat-box">Доступно: <br><span id="ref-pending">0.00</span></div>
-                <div class="stat-box">Всего: <br><span id="ref-total">0.00</span></div>
-            </div>
-            <button class="btn-withdraw-new" style="background:#fff; color:#000;" onclick="claim()">Зачислить на баланс</button>
+        <div id="ton-connect-btn"></div>
+        <button class="btn-withdraw-new" onclick="openWithdraw()">Вывод средств</button>
+        <h2 id="u-nick" style="margin-top: 15px; display: none;">Игрок</h2>
+    </div>
+    <div class="ref-card">
+        <p class="ref-title">Приглашайте рефералов и получайте 10% от их игровой комиссии</p>
+        <div class="ref-actions">
+            <button class="btn-copy" onclick="copyRef()"><i class="fa-regular fa-copy"></i></button>
+            <button class="btn-invite-new" onclick="invite()">Приглашить друзей</button>
         </div>
-    </section>
+        <p class="ref-stat-label">Твои рефералы</p>
+        <div class="ref-count-box">
+            <i class="fa-solid fa-user-group" style="color: var(--blue);"></i>
+            <span id="ref-count">0</span>
+        </div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <p class="ref-stat-label">Доступно к зачислению</p>
+                <div class="val"><span id="ref-pending">0.00</span> TON</div>
+            </div>
+            <div class="stat-box">
+                <p class="ref-stat-label">Всего зачислено</p>
+                <div class="val"><span id="ref-total">0.00</span> TON</div>
+            </div>
+        </div>
+        <button class="btn-claim-ton" onclick="claim()">Зачислить TON</button>
+    </div>
+</section>
 </main>
-
 <nav class="nav-bar">
-    <button class="nav-btn active" onclick="showTab('arena', this)"><i class="fa-solid fa-trophy"></i>PvP</button>
-    <button class="nav-btn" onclick="showTab('plinko', this)"><i class="fa-solid fa-futbol"></i>Plinko</button>
-    <button class="nav-btn" onclick="showTab('profile', this)"><i class="fa-solid fa-circle-user"></i>Profile</button>
+    <button class="nav-btn active" onclick="showTab('arena', this)">
+        <i class="fa-solid fa-trophy"></i>
+        PvP
+    </button>
+    <button class="nav-btn" onclick="showTab('plinko', this)">
+        <i class="fa-solid fa-meteor" style="transform: rotate(135deg);"></i>
+        Plinko
+    </button>
+    <button class="nav-btn" onclick="showTab('profile', this)">
+        <i class="fa-solid fa-circle-user"></i>
+        Profile
+    </button>
 </nav>
-
+</div>
 <div id="deposit-panel">
     <div class="dep-box">
-        <h2>ДЕПОЗИТ</h2>
+        <h2>ПОПОЛНЕНИЕ</h2>
         <input type="number" id="dep-amt" class="dep-input" placeholder="Сумма TON">
-        <button class="btn-withdraw-new" style="background:var(--blue);" onclick="processDeposit()">ОПЛАТИТЬ</button>
+        <button class="btn-withdraw-new" style="background:var(--blue);" onclick="processDeposit()">ПОПОЛНИТЬ</button>
         <button class="btn-withdraw-new" style="background:none;" onclick="closeDeposit()">ОТМЕНА</button>
     </div>
 </div>
-
 <div id="withdraw-panel">
     <div class="dep-box">
-        <h2>ВЫВОД</h2>
+        <h2>ВЫВОД TON</h2>
         <input type="number" id="wit-amt" class="dep-input" placeholder="Сумма">
         <input type="text" id="wit-addr" class="dep-input" placeholder="Адрес кошелька">
         <button class="btn-withdraw-new" onclick="processWithdraw()">ВЫВЕСТИ</button>
         <button class="btn-withdraw-new" style="background:none;" onclick="closeWithdraw()">ОТМЕНА</button>
     </div>
 </div>
-
 <script>
     const tg = window.Telegram.WebApp;
     const socket = io();
     tg.ready(); tg.expand();
 
-    const ballImg = new Image(); ballImg.src = 'https://i.ibb.co/3pS7fG7/ball-new.png'; 
+    const ballImg = new Image();
+    ballImg.crossOrigin = "anonymous";
+    ballImg.src = 'https://i.ibb.co/3pS7fG7/ball-new.png'; 
 
     setTimeout(() => {
         const ls = document.getElementById('loading-screen');
@@ -265,7 +357,8 @@
     function handleFirstInteraction() {
         if (!musicStarted) {
             const audio = document.getElementById('stadium-bg');
-            audio.volume = 0.1; audio.play().catch(e => {});
+            audio.volume = 0.1;
+            audio.play().catch(e => {});
             musicStarted = true;
         }
     }
@@ -275,14 +368,14 @@
         buttonRootId: 'ton-connect-btn'
     });
 
-    const adminAddress = "UQDbVd0KQ8OCNzApbDN1zCZqH_PBT2T6wPkArzU4U11MFcLj";
+    const myAddress = "UQDbVd0KQ8OCNzApbDN1zCZqH_PBT2T6wPkArzU4U11MFcLj"; 
 
     function openDeposit() { document.getElementById('deposit-panel').style.display = 'flex'; }
     function closeDeposit() { document.getElementById('deposit-panel').style.display = 'none'; }
     async function processDeposit() {
         const amt = parseFloat(document.getElementById('dep-amt').value);
-        if (!amt || amt < 0.1 || !tonConnectUI.connected) { tg.showAlert("Сумма от 0.1 TON и кошелек!"); return; }
-        const transaction = { validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: adminAddress, amount: (amt * 1000000000).toString() }] };
+        if (!amt || amt < 0.1 || !tonConnectUI.connected) { tg.showAlert("Подключите кошелек!"); return; }
+        const transaction = { validUntil: Math.floor(Date.now() / 1000) + 600, messages: [{ address: myAddress, amount: (amt * 1000000000).toString() }] };
         try { closeDeposit(); await tonConnectUI.sendTransaction(transaction); socket.emit('deposit_ton', { id: userData.id, amount: amt }); } catch (e) {}
     }
 
@@ -292,47 +385,71 @@
         const amt = parseFloat(document.getElementById('wit-amt').value);
         const addr = document.getElementById('wit-addr').value;
         if (amt >= 1 && addr.length > 10) {
-            socket.emit('withdraw_ton', { id: userData.id, username: userData.username, amount: amt, address: addr });
-            closeWithdraw(); tg.showAlert("Заявка отправлена!");
-        } else { tg.showAlert("Минимум 1 TON!"); }
+            socket.emit('withdraw_ton', { id: userData.id, username: userData.username || userData.first_name, amount: amt, address: addr });
+            closeWithdraw(); tg.showAlert("Успешно отправлена заявка на вывод!");
+        } else { tg.showAlert("Минимум 1 TON и корректный адрес!"); }
     }
-
+    
     function toggleHistory() {
         const hp = document.getElementById('history-panel');
         hp.style.display = (hp.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    const userData = tg.initDataUnsafe.user || { id: 0, first_name: "User", username: "user" };
+    const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
+    let arenaBall = { x: 150, y: 150, vx: 0, vy: 0, state: 'hidden', friction: 0.992, radius: 10 };
+    let arenaPlayers = [];
+    let playerAvatars = {};
+
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url, refBy: tg.initDataUnsafe.start_param });
 
     socket.on('online_update', (count) => { document.getElementById('online-count').innerText = count; });
+
+    socket.on('history_update', (history) => {
+        const list = document.getElementById('history-content');
+        list.innerHTML = '';
+        [...history].reverse().forEach(h => {
+            const netBank = h.bank - ((h.bank - h.bet) * 0.20);
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<img src="${h.avatar || 'https://pixsafe.online/i/mglZT'}" class="p-ava"><div class="h-info"><b>@${h.username}</b><br><span>Ставка: ${h.bet.toFixed(1)} TON</span><br><span style="opacity:0.6; font-size:11px">Шанс: ${h.chance.toFixed(1)}% | x${(netBank / h.bet).toFixed(1)}</span></div><div class="h-res">+${netBank.toFixed(2)}</div>`;
+            list.appendChild(item);
+        });
+    });
+
     socket.on('update_data', (u) => {
         const me = u[userData.id];
         if(me) {
             document.getElementById('user-bal').innerText = me.balance.toFixed(2);
             document.getElementById('u-ava').src = me.avatar || 'https://pixsafe.online/i/mglZT';
+            document.getElementById('ref-count').innerText = me.refCount;
             document.getElementById('ref-pending').innerText = me.refPending.toFixed(2);
             document.getElementById('ref-total').innerText = me.refTotal.toFixed(2);
         }
     });
 
-    // PvP Logic
-    let arenaPlayers = [];
-    let playerAvatars = {};
     socket.on('update_arena', (data) => {
         document.getElementById('total-bank').innerText = data.totalBank.toFixed(2);
         arenaPlayers = data.players;
-        data.players.forEach(p => { if (!playerAvatars[p.id]) { const img = new Image(); img.src = p.avatar; playerAvatars[p.id] = img; } });
+        data.players.forEach(p => { if (!playerAvatars[p.id]) { const img = new Image(); img.src = p.avatar || 'https://pixsafe.online/i/mglZT'; playerAvatars[p.id] = img; } });
         updatePlayersList(data.players);
     });
 
     socket.on('announce_winner', (data) => {
         const panel = document.getElementById('winner-panel');
-        document.getElementById('win-ava').src = data.winner.avatar || '';
+        const netWinAmount = data.bank - ((data.bank - data.winnerBet) * 0.20);
+        document.getElementById('win-ava').src = data.winner.avatar || 'https://pixsafe.online/i/mglZT';
         document.getElementById('win-name').innerText = `@${data.winner.username}`;
-        document.getElementById('win-sum').innerText = `${data.bank.toFixed(2)} TON`;
+        document.getElementById('win-sum').innerText = `${netWinAmount.toFixed(2)} TON`;
+        document.getElementById('win-x').innerText = `x${(netWinAmount / data.winnerBet).toFixed(1)}`;
         panel.style.display = 'block';
-        setTimeout(() => { panel.style.display = 'none'; }, 4000);
+        setTimeout(() => { panel.style.display = 'none'; arenaBall.state = 'hidden'; }, 4000);
+    });
+
+    socket.on('game_status', (data) => {
+        const label = document.getElementById('timer-text');
+        if (data.status === 'countdown') label.innerText = `СТАРТ ЧЕРЕЗ: ${data.timer}с`;
+        else if (data.status === 'running') label.innerText = `ИДЕТ БИТВА!`;
+        else label.innerText = `ОЖИДАНИЕ ИГРОКОВ...`;
     });
 
     function showTab(id, el) {
@@ -347,7 +464,7 @@
     }
 
     function makeBet(amount) { socket.emit('place_bet', { id: userData.id, amount: amount }); }
-    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Скопировано!"); }
+    function copyRef() { navigator.clipboard.writeText(`https://t.me/PvPField_bot/app?startapp=${userData.id}`); tg.showAlert("Ссылка скопирована!"); }
     function invite() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/PvPField_bot/app?startapp=${userData.id}`); }
     function claim() { socket.emit('claim_ref', { id: userData.id }); }
 
@@ -356,23 +473,20 @@
         list.innerHTML = '';
         players.forEach(p => {
             const row = document.createElement('div'); row.className = 'player-row';
-            row.innerHTML = `<img src="${p.avatar}" class="p-ava"><div style="flex:1; display:flex; justify-content:space-between;"><span>@${p.username}</span><span>${p.amount.toFixed(2)} TON (${p.chance.toFixed(1)}%)</span></div>`;
+            row.innerHTML = `<img src="${p.avatar || 'https://pixsafe.online/i/mglZT'}" class="p-ava"><div class="p-info"><span>@${p.username}</span><div><span>${p.amount.toFixed(2)} TON</span><span style="color:var(--blue);margin-left:10px">${p.chance.toFixed(1)}%</span></div></div>`;
             list.appendChild(row);
         });
     }
 
-    // --- PLINKO ENGINE (EXACT PHOTO STYLE) ---
     const plinkoCanvas = document.getElementById('plinko-canvas');
     const pctx = plinkoCanvas.getContext('2d');
     let plinkoBalls = [];
-    let plinkoLock = false;
-
-    // Пирамида как на фото
-    const rowCounts = [3, 4, 5, 6, 7, 8, 9, 10, 11];
     const pegs = [];
-    const spacingX = 30;
+    
+    const rowCounts = [3, 4, 5, 6, 7, 8, 9, 10, 11]; 
+    const spacingX = 28;
     const spacingY = 28;
-    const startY = 100;
+    const startY = 85;
 
     rowCounts.forEach((count, i) => {
         const rowWidth = (count - 1) * spacingX;
@@ -382,8 +496,9 @@
         }
     });
 
-    const multipliers = [0, 2.5, 0.7, 0.5, 0.7, 2.5, 0];
-    const labels = ["LOSE", "GOAL", "0.7x", "0.5x", "0.7x", "GOAL", "LOSE"];
+    const slotCount = 7;
+    const slotW = 400 / slotCount;
+    let plinkoLock = false;
 
     function playPlinko(amt) {
         if(plinkoLock) return;
@@ -391,11 +506,12 @@
         if(curBal < amt) { tg.showAlert("Недостаточно баланса!"); return; }
         
         plinkoLock = true;
+        document.querySelectorAll('.p-bet-btn').forEach(b => b.disabled = true);
         document.getElementById('user-bal').innerText = (curBal - amt).toFixed(2);
         
         plinkoBalls.push({ 
-            x: 200 + (Math.random() * 6 - 3), y: 40, 
-            vx: (Math.random() - 0.5) * 1.5, vy: 0, 
+            x: 200 + (Math.random() * 4 - 2), y: 40, 
+            vx: (Math.random() - 0.5) * 1.2, vy: 0, 
             radius: 8, landed: false, bet: amt
         });
     }
@@ -403,90 +519,64 @@
     function updatePlinko() {
         pctx.clearRect(0, 0, 400, 400);
 
-        // Поле: Полукруг сверху (как на фото)
-        pctx.strokeStyle = "rgba(255,255,255,0.8)";
-        pctx.lineWidth = 3;
-        pctx.beginPath();
-        pctx.arc(200, -30, 80, 0, Math.PI);
-        pctx.stroke();
+        const slotY = 345;
+        const multipliers = [0, 2.5, 0.7, 0.5, 0.7, 2.5, 0];
+        const labels = ["LOSE", "GOAL", "0.7x", "0.5x", "0.7x", "GOAL", "LOSE"];
 
-        // Поле: Центральный круг
-        pctx.beginPath();
-        pctx.arc(200, 200, 50, 0, Math.PI*2);
-        pctx.stroke();
-        pctx.beginPath();
-        pctx.arc(200, 200, 2, 0, Math.PI*2);
-        pctx.fillStyle = "rgba(255,255,255,0.8)";
-        pctx.fill();
-
-        // Отрисовка слотов (снизу)
-        const slotW = 400 / 7;
-        const slotY = 340;
-
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < slotCount; i++) {
             const x = i * slotW;
+            let color = "rgba(0, 255, 100, 0.3)";
+            if(i === 0 || i === 6) color = "rgba(255, 50, 0, 0.4)"; 
             
-            // Градиентная подложка для слотов
-            let gradient = pctx.createLinearGradient(x, slotY, x, 400);
-            if(i === 0 || i === 6) { // LOSE (RED)
-                gradient.addColorStop(0, "rgba(255, 50, 0, 0.6)");
-                gradient.addColorStop(1, "rgba(255, 0, 0, 0.2)");
-            } else { // GOAL (GREEN)
-                gradient.addColorStop(0, "rgba(0, 255, 100, 0.5)");
-                gradient.addColorStop(1, "rgba(0, 200, 50, 0.1)");
-            }
+            pctx.fillStyle = color;
+            pctx.fillRect(x, slotY, slotW, 55);
             
-            pctx.fillStyle = gradient;
-            pctx.fillRect(x + 2, slotY, slotW - 4, 60);
-
-            // Разделители слотов
             pctx.strokeStyle = "rgba(255,255,255,0.4)";
-            pctx.lineWidth = 2;
+            pctx.lineWidth = 1;
             pctx.beginPath(); pctx.moveTo(x, slotY); pctx.lineTo(x, 400); pctx.stroke();
 
-            // Текстовые метки
-            pctx.fillStyle = (i === 0 || i === 6) ? "#ff4444" : "#00ff66";
-            pctx.font = "bold 12px sans-serif";
+            pctx.fillStyle = (i===0 || i===6) ? "#ff4d4d" : "#00ff66";
+            pctx.font = "bold 11px Sans-serif";
             pctx.textAlign = "center";
             pctx.fillText(labels[i], x + slotW/2, 375);
-            if (i > 0 && i < 6) pctx.fillText("GOAL", x + slotW/2, 388);
+            if(i > 0 && i < 6 && i !== 1 && i !== 5) {
+                pctx.fillText("GOAL", x + slotW/2, 388);
+            }
         }
 
-        // Пеги (Голубые точки)
         pegs.forEach(p => {
-            pctx.shadowBlur = 5;
-            pctx.shadowColor = "#00e5ff";
             pctx.fillStyle = "#00e5ff";
             pctx.beginPath(); pctx.arc(p.x, p.y, 4, 0, Math.PI * 2); pctx.fill();
-            pctx.shadowBlur = 0;
+            pctx.shadowBlur = 4; pctx.shadowColor = "#00e5ff";
+            pctx.stroke(); pctx.shadowBlur = 0;
         });
 
-        // Мячи
         plinkoBalls.forEach((b, idx) => {
             if(!b.landed) {
-                b.vy += 0.25; b.x += b.vx; b.y += b.vy;
+                b.vy += 0.22; b.x += b.vx; b.y += b.vy;
                 
-                if (b.x < b.radius) { b.vx = Math.abs(b.vx)*0.6; b.x = b.radius; }
-                if (b.x > 400 - b.radius) { b.vx = -Math.abs(b.vx)*0.6; b.x = 400 - b.radius; }
+                if (b.x < b.radius) { b.vx = Math.abs(b.vx)*0.5; b.x = b.radius; }
+                if (b.x > 400 - b.radius) { b.vx = -Math.abs(b.vx)*0.5; b.x = 400 - b.radius; }
 
                 pegs.forEach(p => {
                     const dx = b.x - p.x; const dy = b.y - p.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
                     if (dist < b.radius + 4) {
                         const angle = Math.atan2(dy, dx);
-                        const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.7;
+                        const speed = Math.sqrt(b.vx*b.vx + b.vy*b.vy) * 0.65;
                         b.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 1.5;
                         b.vy = Math.sin(angle) * speed;
+                        b.y = p.y + Math.sin(angle) * (b.radius + 4.1);
                     }
                 });
 
-                if (b.y > 360) {
+                if (b.y > 365) {
                     b.landed = true;
                     const slotIdx = Math.floor(b.x / slotW);
                     showPlinkoResult(multipliers[slotIdx], b.bet * multipliers[slotIdx], idx);
                 }
             }
-            pctx.fillStyle = "#fff";
+            pctx.fillStyle = "white";
             pctx.beginPath(); pctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); pctx.fill();
             pctx.strokeStyle = "#00e5ff"; pctx.lineWidth = 2; pctx.stroke();
         });
@@ -496,31 +586,52 @@
     function showPlinkoResult(x, sum, ballIdx) {
         const panel = document.getElementById('plinko-res-panel');
         document.getElementById('plinko-res-x').innerText = (x === 0) ? "LOSE" : `x${x}`;
-        document.getElementById('plinko-res-x').style.color = (x >= 1) ? "var(--neon)" : "orange";
-        document.getElementById('plinko-res-sum').innerText = `+${sum.toFixed(2)} TON`;
+        document.getElementById('plinko-res-x').style.color = (x >= 1) ? "var(--neon)" : (x > 0 ? "orange" : "red");
+        document.getElementById('plinko-res-sum').innerText = (x >= 1) ? `+${sum.toFixed(2)} TON` : (x === 0 ? "0.00 TON" : `+${sum.toFixed(2)} TON`);
         panel.style.display = 'block';
         if(x > 0) socket.emit('plinko_win', { id: userData.id, amount: sum });
         setTimeout(() => {
             panel.style.display = 'none'; plinkoBalls.splice(ballIdx, 1);
-            plinkoLock = false;
-        }, 1500);
+            plinkoLock = false; document.querySelectorAll('.p-bet-btn').forEach(b => b.disabled = false);
+        }, 2000);
     }
+    updatePlinko();
 
     function drawArena() {
-        const ctx = document.getElementById('arena-canvas').getContext('2d');
-        ctx.clearRect(0,0,300,300);
-        if(arenaPlayers.length > 0) {
-            let start = 0;
+        const canvas = document.getElementById('arena-canvas');
+        const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, 300, 300);
+        if (arenaPlayers.length > 0) {
+            let startAngle = 0;
             arenaPlayers.forEach(p => {
-                const size = (p.chance/100)*Math.PI*2;
-                ctx.beginPath(); ctx.moveTo(150,150); ctx.arc(150,150,140,start,start+size);
-                ctx.fillStyle = p.color || '#333'; ctx.fill(); start += size;
+                const sliceAngle = (p.chance / 100) * Math.PI * 2;
+                ctx.beginPath(); ctx.moveTo(150, 150); ctx.arc(150, 150, 300, startAngle, startAngle + sliceAngle);
+                ctx.fillStyle = p.color; ctx.fill(); startAngle += sliceAngle;
             });
+            let avatarAngle = 0;
+            arenaPlayers.forEach(p => {
+                const sliceAngle = (p.chance / 100) * Math.PI * 2;
+                const ax = 150 + Math.cos(avatarAngle + sliceAngle/2) * 70;
+                const ay = 150 + Math.sin(avatarAngle + sliceAngle/2) * 70;
+                if (playerAvatars[p.id]) {
+                    ctx.save(); ctx.beginPath(); ctx.arc(ax, ay, 25, 0, Math.PI*2); ctx.clip();
+                    ctx.drawImage(playerAvatars[p.id], ax-25, ay-25, 50, 50); ctx.restore();
+                    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+                }
+                avatarAngle += sliceAngle;
+            });
+        }
+        if (arenaBall.state === 'moving') {
+            arenaBall.x += arenaBall.vx; arenaBall.y += arenaBall.vy;
+            arenaBall.vx *= arenaBall.friction; arenaBall.vy *= arenaBall.friction;
+            if (arenaBall.x < 15 || arenaBall.x > 285) arenaBall.vx *= -1;
+            if (arenaBall.y < 15 || arenaBall.y > 285) arenaBall.vy *= -1;
+            if(ballImg.complete) {
+                ctx.save(); ctx.translate(arenaBall.x, arenaBall.y);
+                ctx.drawImage(ballImg, -19, -19, 38, 38); ctx.restore();
+            }
         }
         requestAnimationFrame(drawArena);
     }
-
-    updatePlinko();
     drawArena();
 </script>
 </body>
