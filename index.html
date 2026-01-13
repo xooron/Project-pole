@@ -20,9 +20,7 @@
         --text-gray: #8e8e8e;
         --plinko-blue: #00e5ff;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-    
     body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
 
     #loading-screen {
@@ -37,7 +35,7 @@
 
     .app-container { width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
     
-    .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+    .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
     .online-pill { background: #242424; padding: 8px 16px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-weight: 800; color: #00ff66; font-size: 18px; }
     .history-btn { color: #fff; font-size: 22px; margin-left: 15px; opacity: 0.8; cursor: pointer; transition: 0.2s; }
     
@@ -47,6 +45,7 @@
         width: 32px; height: 32px; cursor: pointer; 
         display: flex; align-items: center; justify-content: center;
         font-weight: 900; font-size: 26px; padding: 0; line-height: 0; margin-left: 10px;
+        padding-bottom: 5px;
     }
 
     #history-panel { 
@@ -59,73 +58,58 @@
 
     #deposit-panel, #withdraw-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
     .dep-box { width: 85%; padding: 30px; text-align: center; background: #111; border-radius: 30px; border: 1px solid var(--border); }
+    .dep-input { width: 100%; background: #1a1f1c; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; font-size: 16px; font-weight: 800; text-align: center; margin: 10px 0; outline: none; }
 
     .main-scroll { flex: 1; overflow-y: auto; padding: 0 15px 120px; }
     .page { display: none; }
     .page.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* PvP Background Blur */
-    #arena-page { position: relative; overflow: hidden; border-radius: 30px; }
-    #arena-page::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg');
-        background-size: cover; background-position: center;
-        filter: blur(10px); opacity: 0.4; z-index: -1;
-    }
-
-    .arena-info { text-align: center; margin-bottom: 20px; }
-    .arena-bank { font-size: 34px; font-weight: 900; }
-    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.5); }
-    #arena-canvas { width: 100%; height: 100%; display: block; }
-    
-    #winner-panel { 
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-        background: rgba(0,0,0,0.95); border: 2px solid var(--blue); padding: 25px; 
-        border-radius: 30px; text-align: center; z-index: 100; display: none; width: 85%; 
-    }
-
-    /* Plinko Section */
+    /* Plinko Container & Background Fix */
     .plinko-container {
         width: 100%; max-width: 400px; aspect-ratio: 1/1; 
         margin: 10px auto; border-radius: 30px; position: relative; overflow: hidden;
         border: 2px solid rgba(255,255,255,0.1);
+        background: #2c4c28; /* Темно-зеленый основной */
     }
-    .plinko-bg-img {
+    .plinko-field-lines {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://i.ibb.co/Lhb851L/football-field.jpg');
-        background-size: cover; background-position: center;
-        filter: brightness(0.7); z-index: 0;
+        background-image: repeating-linear-gradient(to bottom, transparent, transparent 38px, rgba(0,0,0,0.08) 38px, rgba(0,0,0,0.08) 76px);
+        z-index: 0; pointer-events: none;
     }
     #plinko-canvas { width: 100%; height: 100%; display: block; position: relative; z-index: 5; background: transparent; }
     
-    /* Красивое окно подарка */
-    #gift-popup {
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
-        background: rgba(20, 20, 20, 0.95); border: 2px solid #ffaa00;
-        padding: 30px; border-radius: 40px; text-align: center; display: none; z-index: 1000;
-        min-width: 290px; backdrop-filter: blur(20px);
-        box-shadow: 0 0 50px rgba(255, 170, 0, 0.4);
-        animation: giftPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    @keyframes giftPop { to { transform: translate(-50%, -50%) scale(1); } }
-    .gift-img-anim { width: 140px; height: 140px; object-fit: contain; margin-bottom: 20px; filter: drop-shadow(0 0 10px #ffaa00); }
-    .sell-gift-btn { 
-        width: 100%; background: linear-gradient(90deg, #ffaa00, #f48208); color: #fff; border: none; 
-        padding: 18px; border-radius: 20px; font-weight: 800; font-size: 18px; 
-        margin-top: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(244, 130, 8, 0.4);
-    }
-
-    #plinko-res-panel {
+    #plinko-res-panel, #gift-popup {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.9); border: 2px solid var(--plinko-blue);
-        padding: 20px; border-radius: 25px; text-align: center; display: none; z-index: 100;
-        min-width: 200px;
+        background: rgba(10,10,10,0.96); border: 2px solid #ffaa00;
+        padding: 25px; border-radius: 35px; text-align: center; display: none; z-index: 1000;
+        min-width: 280px; box-shadow: 0 0 50px rgba(255, 170, 0, 0.5);
+        backdrop-filter: blur(10px);
+    }
+    .gift-img-large { width: 130px; height: 130px; object-fit: contain; margin-bottom: 15px; filter: drop-shadow(0 0 10px #ffaa00); }
+    .btn-gift-sell { 
+        width: 100%; padding: 18px; background: linear-gradient(90deg, #ffaa00, #f48208); color: #fff; 
+        border: none; border-radius: 20px; font-weight: 800; font-size: 18px; 
+        cursor: pointer; margin-top: 10px;
     }
 
-    .bet-grid, .bet-grid-plinko { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+    .bet-grid-plinko { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+
+    /* PvP Section (Reverted to Original Style - Wheel) */
+    #arena-page { background: var(--bg); position: relative; } /* NO GREEN BG */
+    .arena-info { text-align: center; margin-bottom: 20px; }
+    .arena-bank { font-size: 34px; font-weight: 900; }
+    .canvas-box { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; border: 4px solid var(--border); border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.4); box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+    #arena-canvas { width: 100%; height: 100%; display: block; border-radius: 50%; }
+    
+    #winner-panel { 
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+        background: rgba(0,0,0,0.95); border: 2px solid var(--blue); color: #fff; 
+        padding: 25px; border-radius: 30px; text-align: center; z-index: 100; 
+        display: none; width: 85%; box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); 
+    }
+
+    .bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
     .b-btn { 
         background: #0d120f; border: 2px solid #0084ff; padding: 14px 5px; 
         border-radius: 100px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; 
@@ -135,17 +119,20 @@
 
     .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: #242424; border-radius: 40px; display: flex; align-items: center; padding: 0 20px; z-index: 500; }
     .nav-btn { flex: 1; text-align: center; color: #555; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 700; font-size: 11px; }
+    .nav-btn i { font-size: 22px; }
     .nav-btn.active { color: var(--blue); }
     .nav-btn.active-plinko { color: var(--plinko-blue); }
+
+    /* Players list under PvP wheel */
+    .player-row { background: rgba(36, 36, 36, 0.8); padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+    .p-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .p-info { flex: 1; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
 
     /* Profile Section */
     .profile-card { background: #2b2b2b; border-radius: 35px; padding: 30px 20px; margin-bottom: 15px; text-align: center; }
     .avatar-wrap { width: 100px; height: 100px; margin: 0 auto 25px; border-radius: 50%; border: 2px solid var(--blue); overflow: hidden; }
     .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
     .btn-withdraw-new { width: 100%; height: 55px; background: var(--orange); color: #fff; border: none; border-radius: 18px; font-weight: 700; font-size: 18px; cursor: pointer; margin-top: 12px; }
-    
-    .player-row { background: rgba(36, 36, 36, 0.8); padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
-    .p-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 </style>
 </head>
 <body onclick="handleFirstInteraction()">
@@ -158,7 +145,7 @@
 <div id="history-panel">
     <div class="history-header">
         <h2 style="font-weight: 800;">ИСТОРИЯ PvP</h2>
-        <i class="fa-solid fa-xmark" style="font-size: 28px;" onclick="toggleHistory()"></i>
+        <i class="fa-solid fa-xmark" onclick="toggleHistory()" style="font-size:26px;"></i>
     </div>
     <div class="history-list" id="history-content"></div>
 </div>
@@ -180,16 +167,16 @@
     </header>
 
 <main class="main-scroll">
-    <!-- PvP Section -->
+    <!-- PvP Page (Reverted Wheel View) -->
     <section id="arena-page" class="page active">
         <div class="arena-info">
-            <span id="timer-text" style="color: #fff; font-weight: 800;">ОЖИДАНИЕ...</span>
+            <span id="timer-text" style="color: var(--text-gray); font-weight: 800;">ОЖИДАНИЕ...</span>
             <div class="arena-bank"><span id="total-bank">0.00</span> TON</div>
         </div>
         <div class="canvas-box">
             <canvas id="arena-canvas" width="300" height="300"></canvas>
             <div id="winner-panel">
-                <img id="win-ava" src="" style="width:70px; height:70px; border-radius:50%; margin-bottom: 10px;">
+                <img id="win-ava" src="" style="width:70px; height:70px; border-radius:50%; border: 3px solid var(--blue); margin-bottom: 10px; object-fit: cover;">
                 <h2 id="win-name" style="font-size: 18px; font-weight: 800; margin-bottom: 5px;">@username</h2>
                 <p id="win-sum" style="font-size: 24px; font-weight: 900; color: var(--neon);">0.00 TON</p>
             </div>
@@ -205,23 +192,21 @@
         <div id="players-list"></div>
     </section>
 
-    <!-- Plinko Section -->
+    <!-- Plinko Page (Fix Background & Cells) -->
     <section id="plinko-page" class="page">
         <div class="plinko-container">
-            <div class="plinko-bg-img"></div>
+            <div class="plinko-field-lines"></div>
             <canvas id="plinko-canvas" width="400" height="400"></canvas>
-            
             <div id="plinko-res-panel">
                 <h3 id="plinko-res-x" style="font-size: 32px; color: var(--plinko-blue);">x0.5</h3>
                 <p id="plinko-res-sum" style="font-size: 18px; font-weight: 800; color: #fff;">+0.00 TON</p>
             </div>
-
+            <!-- Gift Window -->
             <div id="gift-popup">
-                <h2 style="color: #ffaa00; margin-bottom: 10px; font-weight: 800;">WOW! GIFT</h2>
-                <img src="https://data.chpic.su/stickers/l/LolPop2_by_EmojiRu_Bot/LolPop2_by_EmojiRu_Bot_009.webp" class="gift-img-anim">
-                <p style="color: #fff; font-size: 18px; font-weight: 700;">LolPop Sticker</p>
-                <p style="color: rgba(255,255,255,0.6); font-size: 13px;">Редкий предмет найден!</p>
-                <button class="sell-gift-btn" id="btn-sell-gift-act">ПРОДАТЬ ЗА 2.8 TON</button>
+                <h2 style="color: #ffaa00; font-weight: 800; margin-bottom: 10px;">WOW! GIFT</h2>
+                <img src="https://data.chpic.su/stickers/l/LolPop2_by_EmojiRu_Bot/LolPop2_by_EmojiRu_Bot_009.webp" class="gift-img-large">
+                <p style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 5px;">Gift LolPop</p>
+                <button class="btn-gift-sell" id="btn-sell-action">ПРОДАТЬ ЗА 2.8 TON</button>
             </div>
         </div>
         <div class="bet-grid-plinko">
@@ -234,7 +219,7 @@
         </div>
     </section>
 
-    <!-- Profile Section -->
+    <!-- Profile Page -->
     <section id="profile-page" class="page">
         <div class="profile-card">
             <div class="avatar-wrap"><img src="" id="u-ava" onerror="this.src='https://pixsafe.online/i/mglZT'"></div>
@@ -251,35 +236,19 @@
 </nav>
 </div>
 
-<div id="deposit-panel">
-    <div class="dep-box">
-        <h2>ДЕПОЗИТ</h2>
-        <input type="number" id="dep-amt" class="dep-input" placeholder="Сумма TON">
-        <button class="btn-withdraw-new" style="background:var(--blue);" onclick="processDeposit()">ОПЛАТИТЬ</button>
-        <button class="btn-withdraw-new" style="background:none;" onclick="closeDeposit()">ОТМЕНА</button>
-    </div>
-</div>
-
-<div id="withdraw-panel">
-    <div class="dep-box">
-        <h2>ВЫВОД</h2>
-        <input type="number" id="wit-amt" class="dep-input" placeholder="Сумма">
-        <input type="text" id="wit-addr" class="dep-input" placeholder="Адрес кошелька">
-        <button class="btn-withdraw-new" onclick="processWithdraw()">ВЫВЕСТИ</button>
-        <button class="btn-withdraw-new" style="background:none;" onclick="closeWithdraw()">ОТМЕНА</button>
-    </div>
-</div>
+<!-- Panels -->
+<div id="deposit-panel"><div class="dep-box"><h2>ДЕПОЗИТ</h2><input type="number" id="dep-amt" class="dep-input" placeholder="Сумма TON"><button class="btn-withdraw-new" style="background:var(--blue);" onclick="processDeposit()">ОПЛАТИТЬ</button><button class="btn-withdraw-new" style="background:none;" onclick="closeDeposit()">ОТМЕНА</button></div></div>
+<div id="withdraw-panel"><div class="dep-box"><h2>ВЫВОД</h2><input type="number" id="wit-amt" class="dep-input" placeholder="Сумма"><input type="text" id="wit-addr" class="dep-input" placeholder="Адрес TON"><button class="btn-withdraw-new" onclick="processWithdraw()">ВЫВЕСТИ</button><button class="btn-withdraw-new" style="background:none;" onclick="closeWithdraw()">ОТМЕНА</button></div></div>
 
 <script>
     const tg = window.Telegram.WebApp;
     const socket = io();
     tg.ready(); tg.expand();
 
-    const ballImg = new Image();
+    const ballImg = new Image(); 
     ballImg.src = 'https://i.ibb.co/3pS7fG7/ball-new.png';
 
-    // Скрытие загрузки
-    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 2500);
+    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 2000);
 
     let musicStarted = false;
     function handleFirstInteraction() {
@@ -323,7 +292,7 @@
         hp.style.display = (hp.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "username" };
+    const userData = tg.initDataUnsafe.user || { id: 0, first_name: "Игрок", username: "user" };
     socket.emit('user_joined', { id: userData.id, name: userData.first_name, username: userData.username, avatar: userData.photo_url });
 
     socket.on('online_update', (c) => { document.getElementById('online-count').innerText = c; });
@@ -333,7 +302,7 @@
         if(me) document.getElementById('u-ava').src = me.avatar || 'https://pixsafe.online/i/mglZT';
     });
 
-    // PvP
+    // PvP Wheel Logic
     let arenaPlayers = [];
     let playerAvatars = {};
     socket.on('update_arena', (data) => {
@@ -371,7 +340,7 @@
         });
     }
 
-    // --- PLINKO ---
+    // --- PLINKO ENGINE ---
     const plinkoCanvas = document.getElementById('plinko-canvas');
     const pctx = plinkoCanvas.getContext('2d');
     let plinkoBalls = [];
@@ -387,6 +356,7 @@
 
     const slotCount = 9;
     const slotW = 400 / slotCount;
+    // 💀 1x 🎁 0.7x 0.5x 0.7x 🎁 1x 💀
     const multipliers = [0, 1, 'GIFT', 0.7, 0.5, 0.7, 'GIFT', 1, 0];
     let plinkoLock = false;
 
@@ -403,35 +373,29 @@
         pctx.clearRect(0, 0, 400, 400);
         const slotY = 345;
 
-        // Отрисовка ячеек
         for (let i = 0; i < slotCount; i++) {
             const x = i * slotW;
-            
-            // Красивый градиент для ячеек
-            let grad = pctx.createLinearGradient(x, slotY, x, 400);
-            if(i === 0 || i === 8) { grad.addColorStop(0, "rgba(255, 0, 0, 0.4)"); grad.addColorStop(1, "rgba(50, 0, 0, 0.2)"); }
-            else if(multipliers[i] === 'GIFT') { grad.addColorStop(0, "rgba(255, 170, 0, 0.5)"); grad.addColorStop(1, "rgba(100, 50, 0, 0.2)"); }
-            else { grad.addColorStop(0, "rgba(0, 229, 255, 0.3)"); grad.addColorStop(1, "rgba(0, 50, 80, 0.1)"); }
+            let color = "rgba(0, 229, 255, 0.25)";
+            if(i === 0 || i === 8) color = "rgba(255, 0, 0, 0.3)";
+            else if(multipliers[i] === 'GIFT') color = "rgba(255, 170, 0, 0.4)";
 
-            pctx.fillStyle = grad;
-            pctx.roundRect(x + 4, slotY, slotW - 8, 50, 10);
+            pctx.fillStyle = color;
+            pctx.beginPath();
+            pctx.roundRect(x + 5, slotY, slotW - 10, 50, 12);
             pctx.fill();
-            
             pctx.strokeStyle = "rgba(255,255,255,0.2)";
-            pctx.lineWidth = 2;
             pctx.stroke();
 
             pctx.fillStyle = "#fff";
             pctx.font = "bold 13px Sans-serif";
             pctx.textAlign = "center";
-            let txt = multipliers[i];
-            if(txt === 0) txt = "💀";
-            else if(txt === 'GIFT') txt = "🎁";
-            else txt = txt + "x";
-            pctx.fillText(txt, x + slotW/2, slotY + 32);
+            let val = multipliers[i];
+            if(val === 0) val = "💀";
+            else if(val === 'GIFT') val = "🎁";
+            else val = val + "x";
+            pctx.fillText(val, x + slotW/2, slotY + 32);
         }
 
-        // Пеги
         pegs.forEach(p => {
             pctx.fillStyle = "#fff";
             pctx.beginPath(); pctx.arc(p.x, p.y, 4, 0, Math.PI * 2); pctx.fill();
@@ -439,7 +403,6 @@
             pctx.stroke(); pctx.shadowBlur = 0;
         });
 
-        // Мячи (вместо кружков)
         plinkoBalls.forEach((b, idx) => {
             if(!b.landed) {
                 b.vy += 0.22; b.x += b.vx; b.y += b.vy;
@@ -459,15 +422,10 @@
                     showPlinkoResult(multipliers[sIdx], b.bet, idx);
                 }
             }
-            // РИСУЕМ МЯЧ
             pctx.save();
             pctx.translate(b.x, b.y);
-            // Если картинка мяча загружена - рисуем её, иначе белый круг
-            if(ballImg.complete) {
-                pctx.drawImage(ballImg, -b.radius, -b.radius, b.radius*2, b.radius*2);
-            } else {
-                pctx.fillStyle = "white"; pctx.beginPath(); pctx.arc(0,0,b.radius,0,Math.PI*2); pctx.fill();
-            }
+            if(ballImg.complete) pctx.drawImage(ballImg, -b.radius, -b.radius, b.radius*2, b.radius*2);
+            else { pctx.fillStyle = "#fff"; pctx.beginPath(); pctx.arc(0,0,b.radius,0,Math.PI*2); pctx.fill(); }
             pctx.restore();
         });
         requestAnimationFrame(updatePlinko);
@@ -477,7 +435,7 @@
         if (res === 'GIFT') {
             const popup = document.getElementById('gift-popup');
             popup.style.display = 'block';
-            document.getElementById('btn-sell-gift-act').onclick = () => {
+            document.getElementById('btn-sell-action').onclick = () => {
                 socket.emit('plinko_win', { id: userData.id, amount: 2.8 });
                 popup.style.display = 'none';
                 plinkoLock = false;
@@ -496,35 +454,21 @@
 
     updatePlinko();
 
-    // Canvas PvP Loop
+    // Reverted PvP Wheel Animation
     function drawArena() {
         const ctx = document.getElementById('arena-canvas').getContext('2d');
         ctx.clearRect(0, 0, 300, 300);
         if (arenaPlayers.length > 0) {
-            let s = 0;
+            let start = 0;
             arenaPlayers.forEach(p => {
                 const sl = (p.chance / 100) * Math.PI * 2;
-                ctx.beginPath(); ctx.moveTo(150, 150); ctx.arc(150, 150, 145, s, s + sl);
-                ctx.fillStyle = p.color; ctx.fill(); s += sl;
+                ctx.beginPath(); ctx.moveTo(150, 150); ctx.arc(150, 150, 145, start, start + sl);
+                ctx.fillStyle = p.color || '#333'; ctx.fill(); start += sl;
             });
         }
         requestAnimationFrame(drawArena);
     }
     drawArena();
-
-    // Вспомогательная функция для скругления прямоугольников на Canvas
-    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
-      if (w < 2 * r) r = w / 2;
-      if (h < 2 * r) r = h / 2;
-      this.beginPath();
-      this.moveTo(x + r, y);
-      this.arcTo(x + w, y, x + w, y + h, r);
-      this.arcTo(x + w, y + h, x, y + h, r);
-      this.arcTo(x, y + h, x, y, r);
-      this.arcTo(x, y, x + w, y, r);
-      this.closePath();
-      return this;
-    }
 </script>
 </body>
 </html>
